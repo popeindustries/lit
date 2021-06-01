@@ -1,0 +1,9 @@
+.dvlp
+.npm
+node_modules
+.DS_Store
+/index.d.ts
+/index.js
+/browser.js
+/shared.js
+/directives/

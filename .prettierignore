@@ -1,0 +1,4 @@
+package.json
+*.min.js
+test/fixtures/
+test/assets/

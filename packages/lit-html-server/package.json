@@ -1,0 +1,57 @@
+{
+  "name": "@popeindustries/lit-html-server",
+  "version": "4.0.0-beta.1",
+  "description": "Render lit-html templates on the server",
+  "author": "Alexander Pope <alex@pope-industries.com>",
+  "keywords": [
+    "html template",
+    "lit-html",
+    "ssr",
+    "stream",
+    "streaming",
+    "tagged template literal",
+    "template",
+    "template render"
+  ],
+  "browser": "./browser.js",
+  "main": "index.js",
+  "type": "module",
+  "types": "index.d.ts",
+  "repository": "https://github.com/popeindustries/lit.git",
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.2.0"
+  },
+  "dependencies": {
+    "lit-html": "2.0.0-rc.3"
+  },
+  "devDependencies": {
+    "autocannon": "^7.3.0",
+    "puppeteer": "^9.1.1",
+    "send": "^0.17.1"
+  },
+  "scripts": {
+    "build": "node ./scripts/build.js",
+    "clean": "git clean -x -f",
+    "perf": "node test/perf.js",
+    "test": "npm run build && npm run lint && npm run test:unit && npm run test:browser",
+    "test:unit": "NODE_ENV=test mocha \"test/*-test.js\" --reporter spec --bail --timeout 2000",
+    "test:browser": "node ./test/browser/cli.js"
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "htmlWhitespaceSensitivity": "ignore",
+    "printWidth": 120,
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "eslint"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
+  }
+}
