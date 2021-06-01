@@ -1,4 +1,5 @@
 // Disable Prettier
+// @ts-nocheck
 import { expect } from 'chai';
 import { html as h } from '../src/index.js';
 

@@ -1,20 +1,21 @@
 // @ts-nocheck
-import { directive, html as h, renderToString as render } from '../src/index.js';
-import { asyncAppend } from '../src/directives/async-append.js';
-import { asyncReplace } from '../src/directives/async-replace.js';
-import { cache } from '../src/directives/cache.js';
-import { classMap } from '../src/directives/class-map.js';
+import { directive, Directive } from 'lit-html/directive.js';
+import { html as h, renderToString as render } from '../src/index.js';
+import { asyncAppend } from 'lit-html/directives/async-append.js';
+import { asyncReplace } from 'lit-html/directives/async-replace.js';
+import { cache } from 'lit-html/directives/cache.js';
+import { classMap } from 'lit-html/directives/class-map.js';
 import { createAsyncIterable } from './utils.js';
 import { expect } from 'chai';
-import { guard } from '../src/directives/guard.js';
-import { ifDefined } from '../src/directives/if-defined.js';
-import { repeat } from '../src/directives/repeat.js';
-import { styleMap } from '../src/directives/style-map.js';
-import { unsafeHTML } from '../src/directives/unsafe-html.js';
-import { until } from '../src/directives/until.js';
+import { guard } from 'lit-html/directives/guard.js';
+import { ifDefined } from 'lit-html/directives/if-defined.js';
+import { repeat } from 'lit-html/directives/repeat.js';
+import { styleMap } from 'lit-html/directives/style-map.js';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+import { until } from 'lit-html/directives/until.js';
 
-describe.skip('directives', () => {
-  describe('asyncAppend', () => {
+describe('directives', () => {
+  describe.skip('asyncAppend', () => {
     it('should render an AsyncIterable value', async () => {
       const result = h`some ${asyncAppend(createAsyncIterable(['async', ' text']))}`;
       expect(await render(result)).to.equal('some async text');
@@ -27,7 +28,7 @@ describe.skip('directives', () => {
     });
   });
 
-  describe('asyncReplace', () => {
+  describe.skip('asyncReplace', () => {
     it('should render an AsyncIterable value', async () => {
       const result = h`some ${asyncReplace(createAsyncIterable(['async', ' text']))}`;
       expect(await render(result)).to.equal('some async');
@@ -145,7 +146,7 @@ describe.skip('directives', () => {
         color: 'red',
         border: '1px solid black',
       })}"></div>`;
-      expect(await render(result)).to.equal('<div style="color: red; border: 1px solid black"></div>');
+      expect(await render(result)).to.equal('<div style="color:red;border:1px solid black;"></div>');
     });
   });
 
@@ -156,7 +157,7 @@ describe.skip('directives', () => {
     });
   });
 
-  describe('until', () => {
+  describe.skip('until', () => {
     it('should render a pending value', async () => {
       const result = h`<p>${until(Promise.resolve('hi'), h`<span>Loading...</span>`)}</p>`;
       expect(await render(result)).to.equal('<p><span>Loading...</span></p>');
@@ -169,52 +170,80 @@ describe.skip('directives', () => {
 
   describe('custom', () => {
     it('should allow writing custom directives', async () => {
-      const custom = directive(() => (part) => {
-        part.setValue("custom's");
-      });
+      const custom = directive(
+        class extends Directive {
+          render() {
+            return "custom's";
+          }
+        },
+      );
       const result = h`<p>${custom()}</p>`;
       expect(await render(result)).to.equal('<p>custom&#x27;s</p>');
     });
     it('should give correct tagName', async () => {
       let actualTagName = 'not-set';
-      const custom = directive(() => (part) => {
-        const { tagName } = part;
-        actualTagName = tagName;
-        part.setValue(tagName);
-      });
+      const custom = directive(
+        class extends Directive {
+          constructor(partInfo) {
+            super(partInfo);
+            actualTagName = partInfo.tagName;
+          }
+          render() {
+            return actualTagName;
+          }
+        },
+      );
       const result = h`<my-static-element>${custom()}</my-static-element>`;
       await render(result);
       expect(actualTagName).to.equal('my-static-element');
     });
     it('should give correct tagName when tag has space', async () => {
       let actualTagName = 'not-set';
-      const custom = directive(() => (part) => {
-        const { tagName } = part;
-        actualTagName = tagName;
-        part.setValue(tagName);
-      });
-      const result = h`<my-static-element >${custom()}</my-static-element>`;
+      const custom = directive(
+        class extends Directive {
+          constructor(partInfo) {
+            super(partInfo);
+            actualTagName = partInfo.tagName;
+          }
+          render() {
+            return actualTagName;
+          }
+        },
+      );
+      const result = h`<my-static-element >${custom()}</my-static-element >`;
       await render(result);
       expect(actualTagName).to.equal('my-static-element');
     });
     it('should give correct tagName when tag has attribute', async () => {
       let actualTagName = 'not-set';
-      const custom = directive(() => (part) => {
-        const { tagName } = part;
-        actualTagName = tagName;
-        part.setValue(tagName);
-      });
+      const custom = directive(
+        class extends Directive {
+          constructor(partInfo) {
+            super(partInfo);
+            actualTagName = partInfo.tagName;
+          }
+          render() {
+            return actualTagName;
+          }
+        },
+      );
       const result = h`<my-static-element class="something">${custom()}</my-static-element>`;
       await render(result);
       expect(actualTagName).to.equal('my-static-element');
     });
     it('should give correct tagName with dynamic attribute value', async () => {
       let actualTagName = 'not-set';
-      const custom = directive(() => (part) => {
-        const { tagName } = part;
-        actualTagName = tagName;
-        part.setValue(tagName);
-      });
+      const custom = directive(
+        class extends Directive {
+          constructor(partInfo) {
+            super(partInfo);
+            actualTagName = partInfo.tagName;
+          }
+          render() {
+            return actualTagName;
+          }
+        },
+      );
       const myClass = 'something';
       const result = h`<my-static-element class="${myClass}">${custom()}</my-static-element>`;
       await render(result);

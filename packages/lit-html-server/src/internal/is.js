@@ -1,4 +1,6 @@
+import './dom-shim.js';
 import { Buffer } from 'buffer';
+import { PartType } from 'lit-html/directive.js';
 
 export { isDirectiveResult as isDirective } from 'lit-html/directive-helpers.js';
 
@@ -9,8 +11,7 @@ export { isDirectiveResult as isDirective } from 'lit-html/directive-helpers.js'
  * @returns { part is AttributePart }
  */
 export function isAttributePart(part) {
-  // @ts-ignore
-  return part !== undefined && part.getValue !== undefined && 'name' in part;
+  return part != null && /** @type { Part } */ (part).type !== PartType.CHILD;
 }
 
 /**

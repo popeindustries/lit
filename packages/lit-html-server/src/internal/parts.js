@@ -1,15 +1,22 @@
+import './dom-shim.js';
 import { isArray, isAsyncIterator, isBuffer, isObject, isPrimitive, isPromise, isSyncIterator } from './is.js';
 import { isDirective, isTemplateResult } from './is.js';
+import { noChange, nothing } from 'lit-html';
 import { Buffer } from 'buffer';
 import { escape } from './escape.js';
-import { nothing } from 'lit-html';
+import { PartType } from 'lit-html/directive.js';
 
 const EMPTY_STRING_BUFFER = Buffer.from('');
 
 /**
- * Base class interface for Node/Attribute parts
+ * A prefix value for strings that should not be escaped
  */
-export class Part {
+const unsafePrefixString = '__unsafe-lit-html-server-string__';
+
+/**
+ * A dynamic template part for text nodes
+ */
+export class ChildPart {
   /**
    * Constructor
    *
@@ -17,41 +24,9 @@ export class Part {
    */
   constructor(tagName) {
     this.tagName = tagName;
-    this._value;
+    this.type = PartType.CHILD;
   }
 
-  /**
-   * Store the current value.
-   * Used by directives to temporarily transfer value
-   * (value will be deleted after reading).
-   *
-   * @param { any } value
-   */
-  setValue(value) {
-    this._value = value;
-  }
-
-  /**
-   * Retrieve resolved string from passed "value"
-   *
-   * @param { any } value
-   * @param { RenderOptions } [options]
-   * @returns { any }
-   */
-  getValue(value, options) {
-    return value;
-  }
-
-  /**
-   * No-op
-   */
-  commit() {}
-}
-
-/**
- * A dynamic template part for text nodes
- */
-export class ChildPart extends Part {
   /**
    * Retrieve resolved value given passed "value"
    *
@@ -59,7 +34,7 @@ export class ChildPart extends Part {
    * @param { RenderOptions } [options]
    * @returns { any }
    */
-  getValue(value, options) {
+  resolveValue(value, options) {
     return resolveNodeValue(value, this);
   }
 }
@@ -68,18 +43,20 @@ export class ChildPart extends Part {
  * A dynamic template part for attributes.
  * Unlike text nodes, attributes may contain multiple strings and parts.
  */
-export class AttributePart extends Part {
+export class AttributePart {
   /**
    * Constructor
    *
    * @param { string } name
    * @param { Array<Buffer> } strings
    * @param { string } tagName
+   * @param { PartType } [type]
    */
-  constructor(name, strings, tagName) {
-    super(tagName);
+  constructor(name, strings, tagName, type = PartType.ATTRIBUTE) {
     this.name = name;
     this.strings = strings;
+    this.tagName = tagName;
+    this.type = type;
     this.length = strings.length - 1;
     this.prefix = Buffer.from(`${this.name}="`);
     this.suffix = Buffer.from(`${this.strings[this.length]}"`);
@@ -94,7 +71,7 @@ export class AttributePart extends Part {
    * @param { RenderOptions } [options]
    * @returns { Buffer | Promise<Buffer> }
    */
-  getValue(values, options) {
+  resolveValue(values, options) {
     let chunks = [this.prefix];
     let chunkLength = this.prefix.length;
     let pendingChunks;
@@ -167,7 +144,7 @@ export class BooleanAttributePart extends AttributePart {
    * @throws error when multiple expressions
    */
   constructor(name, strings, tagName) {
-    super(name, strings, tagName);
+    super(name, strings, tagName, PartType.BOOLEAN_ATTRIBUTE);
 
     this.nameAsBuffer = Buffer.from(this.name);
 
@@ -183,7 +160,7 @@ export class BooleanAttributePart extends AttributePart {
    * @param { RenderOptions } [options]
    * @returns { Buffer | Promise<Buffer> }
    */
-  getValue(values, options) {
+  resolveValue(values, options) {
     let value = values[0];
 
     if (isDirective(value)) {
@@ -204,6 +181,17 @@ export class BooleanAttributePart extends AttributePart {
  */
 export class PropertyPart extends AttributePart {
   /**
+   * Constructor
+   *
+   * @param { string } name
+   * @param { Array<Buffer> } strings
+   * @param { string } tagName
+   */
+  constructor(name, strings, tagName) {
+    super(name, strings, tagName, PartType.PROPERTY);
+  }
+
+  /**
    * Retrieve resolved string Buffer from passed "values".
    * Returns an empty string unless "options.serializePropertyAttributes=true"
    *
@@ -211,9 +199,9 @@ export class PropertyPart extends AttributePart {
    * @param { RenderOptions } [options]
    * @returns { Buffer | Promise<Buffer> }
    */
-  getValue(values, options) {
+  resolveValue(values, options) {
     if (options !== undefined && options.serializePropertyAttributes) {
-      const value = super.getValue(values, options);
+      const value = super.resolveValue(values, options);
       const prefix = Buffer.from('.');
 
       return value instanceof Promise
@@ -231,6 +219,17 @@ export class PropertyPart extends AttributePart {
  */
 export class EventPart extends AttributePart {
   /**
+   * Constructor
+   *
+   * @param { string } name
+   * @param { Array<Buffer> } strings
+   * @param { string } tagName
+   */
+  constructor(name, strings, tagName) {
+    super(name, strings, tagName, PartType.EVENT);
+  }
+
+  /**
    * Retrieve resolved string Buffer from passed "values".
    * Event bindings have no server-side representation,
    * so always returns an empty string.
@@ -239,7 +238,7 @@ export class EventPart extends AttributePart {
    * @param { RenderOptions } [options]
    * @returns { Buffer }
    */
-  getValue(values, options) {
+  resolveValue(values, options) {
     return EMPTY_STRING_BUFFER;
   }
 }
@@ -247,7 +246,31 @@ export class EventPart extends AttributePart {
 /**
  * A dynamic template part for accessing element instances.
  */
-export class ElementPart extends EventPart {}
+export class ElementPart extends AttributePart {
+  /**
+   * Constructor
+   *
+   * @param { string } name
+   * @param { Array<Buffer> } strings
+   * @param { string } tagName
+   */
+  constructor(name, strings, tagName) {
+    super(name, strings, tagName, PartType.ELEMENT);
+  }
+
+  /**
+   * Retrieve resolved string Buffer from passed "values".
+   * Event bindings have no server-side representation,
+   * so always returns an empty string.
+   *
+   * @param { Array<unknown> } values
+   * @param { RenderOptions } [options]
+   * @returns { Buffer }
+   */
+  resolveValue(values, options) {
+    return EMPTY_STRING_BUFFER;
+  }
+}
 
 /**
  * Resolve "value" to string if possible
@@ -268,7 +291,8 @@ function resolveAttributeValue(value, part, serialiseObjectsAndArrays = false) {
 
   if (isPrimitive(value)) {
     const string = typeof value !== 'string' ? String(value) : value;
-    return Buffer.from(escape(string, 'attribute'));
+    // Escape if not prefixed with unsafePrefixString, otherwise strip prefix
+    return Buffer.from(string.indexOf(unsafePrefixString) === 0 ? string.slice(33) : escape(string, 'attribute'));
   } else if (isBuffer(value)) {
     return value;
   } else if (serialiseObjectsAndArrays && (isObject(value) || isArray(value))) {
@@ -314,7 +338,12 @@ function resolveNodeValue(value, part) {
 
   if (isPrimitive(value)) {
     const string = typeof value !== 'string' ? String(value) : value;
-    return Buffer.from(escape(string, part.tagName === 'script' || part.tagName === 'style' ? part.tagName : 'text'));
+    // Escape if not prefixed with unsafePrefixString, otherwise strip prefix
+    return Buffer.from(
+      string.indexOf(unsafePrefixString) === 0
+        ? string.slice(33)
+        : escape(string, part.tagName === 'script' || part.tagName === 'style' ? part.tagName : 'text'),
+    );
   } else if (isTemplateResult(value) || isBuffer(value)) {
     return value;
   } else if (isPromise(value)) {
@@ -356,15 +385,31 @@ async function* resolveAsyncIteratorValue(iterator, part) {
 /**
  * Resolve value of "directive"
  *
- * @param { import('lit-html/directive').DirectiveResult } directive
- * @param { Part } part
+ * @param { import('lit-html/directive').DirectiveResult } directiveResult
+ * @param { { name?: string, tagName: string, type: PartType, strings?: Array<Buffer>, length?: number } } part
  * @returns { unknown }
  */
-function resolveDirectiveValue(directive, part) {
-  return '-----directive------';
-  // Directives are synchronous, so it's safe to read and delete value
-  // directive(part);
-  // const value = part._value;
-  // part._value = undefined;
-  // return value;
+function resolveDirectiveValue(directiveResult, part) {
+  const partInfo = {
+    name: part.name,
+    tagName: part.tagName,
+    type: part.type,
+  };
+  if (part.strings !== undefined && part.length !== undefined && part.length > 1) {
+    // @ts-ignore
+    partInfo.strings = part.strings.map((string) => string.toString());
+  }
+  // @ts-ignore
+  const directive = new directiveResult._$litDirective$(partInfo);
+  const result = directive.render(...directiveResult.values);
+
+  if (result === noChange) {
+    return EMPTY_STRING_BUFFER;
+    // Handle fake TemplateResult from unsafeHTML/unsafeSVG
+  } else if (isObject(result) && 'strings' in result) {
+    // @ts-ignore
+    return unsafePrefixString + result.strings[0];
+  } else {
+    return result;
+  }
 }

@@ -1,4 +1,5 @@
-import { html, renderToStream } from '../index.js';
+// @ts-nocheck
+import { html, renderToStream } from '../src/index.js';
 import http from 'http';
 
 http

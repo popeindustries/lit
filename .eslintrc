@@ -5,6 +5,9 @@
     "node": true
   },
   "extends": ["eslint:recommended", "prettier"],
+  "globals": {
+    "globalThis": true
+  },
   "parser": "@babel/eslint-parser",
   "parserOptions": {
     "ecmaVersion": 2020,

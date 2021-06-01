@@ -55,6 +55,7 @@ export class TemplateResult {
 
   /**
    * Consume template result content one chunk at a time.
+   *
    * @param { RenderOptions } [options]
    * @returns { unknown }
    */
@@ -82,13 +83,13 @@ export class TemplateResult {
       // AttributeParts can have multiple values, so slice based on length
       // (strings in-between values are already handled by the instance)
       if (part.length > 1) {
-        value = part.getValue(this.values.slice(index, index + part.length), options);
+        value = part.resolveValue(this.values.slice(index, index + part.length), options);
         this.index += part.length;
       } else {
-        value = part.getValue([this.values[index]], options);
+        value = part.resolveValue([this.values[index]], options);
       }
     } else {
-      value = part && part.getValue(this.values[index], options);
+      value = part && part.resolveValue(this.values[index], options);
     }
 
     return value;

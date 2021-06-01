@@ -1,5 +1,7 @@
-import { AttributePart, ChildPart, Template } from '../src/index.js';
+// @ts-nocheck
+import { AttributePart, ChildPart } from '../src/internal/parts.js';
 import { expect } from 'chai';
+import { Template } from '../src/internal/template.js';
 
 describe('Template', () => {
   it('should prepare a plain text template', () => {

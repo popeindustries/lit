@@ -9,6 +9,7 @@ const TAG_OPEN = 1;
 const TAG_CLOSED = 0;
 const TAG_NONE = -1;
 
+// Copied from lit-html@1.x.x
 const lastAttributeNameRegex =
   /([ \x09\x0a\x0c\x0d])([^\0-\x1F\x7F-\x9F "'>=/]+)([ \x09\x0a\x0c\x0d]*=[ \x09\x0a\x0c\x0d]*(?:[^ \x09\x0a\x0c\x0d"'`<>=]*|"[^"]*|'[^']*))$/;
 
