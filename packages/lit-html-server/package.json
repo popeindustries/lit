@@ -13,10 +13,24 @@
     "template",
     "template render"
   ],
-  "browser": "./browser.js",
-  "main": "index.js",
   "type": "module",
   "types": "index.d.ts",
+  "main": "index.js",
+  "browser": "./browser.js",
+  "exports": {
+    ".": {
+      "browser": "./browser.js",
+      "import": "./index.js"
+    },
+    "./directives/*": "./directives/*"
+  },
+  "files": [
+    "directives",
+    "*.d.ts",
+    "*.js",
+    "README.MD"
+
+  ],
   "repository": "https://github.com/popeindustries/lit.git",
   "license": "MIT",
   "engines": {

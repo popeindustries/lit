@@ -99,7 +99,12 @@ class ElementPart extends AttributePart {
   resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer;
 }
 declare type Part = ChildPart | AttributePart | PropertyPart | BooleanAttributePart | ElementPart | EventPart;
-/* export type { ChildPart, AttributePart, PropertyPart, BooleanAttributePart, EventPart, ElementPart }; */
+declare type ChildPart = typeof ChildPart;
+declare type AttributePart = typeof AttributePart;
+declare type PropertyPart = typeof PropertyPart;
+declare type BooleanAttributePart = typeof BooleanAttributePart;
+declare type EventPart = typeof EventPart;
+declare type ElementPart = typeof ElementPart;
 
 /**
  * Options supported by template render functions
