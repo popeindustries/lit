@@ -1,4 +1,4 @@
-import './internal/dom-shim.js';
+import './dom-shim.js'; // Needs to be bundled as "external" in order to shim before lit-html imports
 import { isTemplateResult } from './internal/is.js';
 import { promiseTemplateRenderer } from './internal/promise-template-renderer.js';
 import { streamTemplateRenderer } from './internal/node-stream-template-renderer.js';

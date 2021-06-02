@@ -1,4 +1,3 @@
-import './dom-shim.js';
 import { isArray, isAsyncIterator, isBuffer, isObject, isPrimitive, isPromise, isSyncIterator } from './is.js';
 import { isDirective, isTemplateResult } from './is.js';
 import { noChange, nothing } from 'lit-html';

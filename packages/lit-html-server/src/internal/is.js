@@ -1,4 +1,3 @@
-import './dom-shim.js';
 import { Buffer } from 'buffer';
 import { PartType } from 'lit-html/directive.js';
 
