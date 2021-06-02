@@ -11,8 +11,10 @@ const data = {
 
 if (process.argv[2] === 'ssr') {
   renderToString(render(everything(litHtml, data))).then((str) =>
-    console.log(str.replaceAll('&lt;', '<').replaceAll('&gt;', '>')),
+    console.log(
+      str.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;quot;', '"').replaceAll('&quot;', '"'),
+    ),
   );
 } else {
-  renderToString(everything(html, data)).then(console.log);
+  renderToString(everything(html, data), { includeRehydrationMetadata: true }).then(console.log);
 }

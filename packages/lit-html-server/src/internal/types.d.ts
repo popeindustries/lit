@@ -4,6 +4,7 @@
 declare type TemplateResult = {
   template: Template;
   values: Array<unknown>;
+  readonly index: number;
   read(options?: RenderOptions): unknown;
   readChunk(options?: RenderOptions): unknown;
 };
@@ -15,6 +16,7 @@ declare type TemplateResult = {
 declare class Template {
   strings: Array<Buffer | null>;
   parts: Array<Part | null>;
+  digest: string;
   constructor(strings: TemplateStringsArray, processor: TemplateProcessor);
   protected _prepare(strings: TemplateStringsArray, processor: TemplateProcessor): void;
 }
@@ -111,7 +113,11 @@ declare type ElementPart = typeof ElementPart;
  */
 declare type RenderOptions = {
   /**
+   * Include inline metadata for rehydration in the browser (default `false`)
+   */
+  includeRehydrationMetadata?: boolean;
+  /**
    * JSON serialize property attributes (default `false`)
    */
-  serializePropertyAttributes: boolean;
+  serializePropertyAttributes?: boolean;
 };
