@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { directive, Directive } from 'lit-html/directive.js';
 import { html as h, renderToString as render } from '../src/index.js';
-import { asyncAppend } from 'lit-html/directives/async-append.js';
-import { asyncReplace } from 'lit-html/directives/async-replace.js';
+import { asyncAppend } from '../src/directives/async-append.js';
+import { asyncReplace } from '../src/directives/async-replace.js';
 import { cache } from 'lit-html/directives/cache.js';
 import { classMap } from 'lit-html/directives/class-map.js';
 import { createAsyncIterable } from './utils.js';
@@ -12,10 +12,10 @@ import { ifDefined } from 'lit-html/directives/if-defined.js';
 import { repeat } from 'lit-html/directives/repeat.js';
 import { styleMap } from 'lit-html/directives/style-map.js';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-import { until } from 'lit-html/directives/until.js';
+import { until } from '../src/directives/until.js';
 
 describe('directives', () => {
-  describe.skip('asyncAppend', () => {
+  describe('asyncAppend', () => {
     it('should render an AsyncIterable value', async () => {
       const result = h`some ${asyncAppend(createAsyncIterable(['async', ' text']))}`;
       expect(await render(result)).to.equal('some async text');
@@ -28,10 +28,14 @@ describe('directives', () => {
     });
   });
 
-  describe.skip('asyncReplace', () => {
-    it('should render an AsyncIterable value', async () => {
+  describe('asyncReplace', () => {
+    it('should render an AsyncIterable node value', async () => {
       const result = h`some ${asyncReplace(createAsyncIterable(['async', ' text']))}`;
       expect(await render(result)).to.equal('some async');
+    });
+    it('should render an AsyncIterable attribute value', async () => {
+      const result = h`<div a="${asyncReplace(createAsyncIterable(['async', ' text']))}"></div>`;
+      expect(await render(result)).to.equal('<div a="async"></div>');
     });
     it('should render a mapped AsyncIterable value', async () => {
       const result = h`some ${asyncReplace(createAsyncIterable(['async', 'text']), (v, index) => {
@@ -157,7 +161,7 @@ describe('directives', () => {
     });
   });
 
-  describe.skip('until', () => {
+  describe('until', () => {
     it('should render a pending value', async () => {
       const result = h`<p>${until(Promise.resolve('hi'), h`<span>Loading...</span>`)}</p>`;
       expect(await render(result)).to.equal('<p><span>Loading...</span></p>');
