@@ -8,6 +8,7 @@ import { ref } from 'lit-html/directives/ref.js';
 export default function everything(html, data) {
   return html`
     <body>
+      <!-- comment -->
       <header><h1 class="${classMap({ negative: data.isTrue })}" ?negative="${data.isTrue}">${data.title}</h1></header>
       <main>
         <ol>
@@ -39,8 +40,9 @@ export default function everything(html, data) {
           lobortis. Sed lobortis lorem eu metus auctor tempus. Sed faucibus sit amet urna vel accumsan. Cras luctus in
           lorem ac tempor. Sed ullamcorper consectetur ligula sed malesuada.
         </p>
-        <p .prop="${data.title}" ?visible="${data.isTrue}">${nestedTemplate(html, data)}</p>
-        <button ${ref((el) => console.log(el))} @click=${() => console.log('click')}>click me!</button>
+        <p .prop="${data.title}" ?visible="${data.isTrue}">Lorem ipsum dolor sit amet,${nestedTemplate(html, data)}</p>
+        <button ${ref((el) => console.log(el))} @click=${() => console.log('click')}>Lorem ipsum!</button>
+        <div .prop=${data.isTrue}><span>Lorem ipsum</span></div>
       </main>
     </body>
   `;
@@ -52,7 +54,7 @@ export default function everything(html, data) {
  */
 function nestedTemplate(html, data) {
   return html`
-    <p>
+    <p .num=${data.number}>
       Lorem ipsum ${data.number} sit amet, consectetur adipiscing elit. Nunc molestie lacus eget ipsum pellentesque,
       quis ullamcorper enim semper.
     </p>

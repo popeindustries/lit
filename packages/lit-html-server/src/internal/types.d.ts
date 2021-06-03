@@ -4,8 +4,6 @@
 declare type TemplateResult = {
   template: Template;
   values: Array<unknown>;
-  readonly index: number;
-  read(options?: RenderOptions): unknown;
   readChunk(options?: RenderOptions): unknown;
 };
 

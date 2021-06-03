@@ -1,12 +1,9 @@
-import { isArray, isAsyncIterator, isAttributePart, isBuffer, isPromise, isTemplateResult } from './is.js';
-import { Buffer } from 'buffer';
-
-const EMPTY_STRING_BUFFER = Buffer.from('');
+import { isAttributePart, isTemplateResult } from './is.js';
 
 let id = 0;
 
 /**
- * A class for consuming the combined static and dynamic parts of a lit-html Template.
+ * A class for consuming the combined static and dynamic parts of a Template.
  */
 export class TemplateResult {
   /**
@@ -23,37 +20,6 @@ export class TemplateResult {
   }
 
   /**
-   * Consume template result content.
-   *
-   * @param { RenderOptions } [options]
-   * @returns { unknown }
-   */
-  read(options) {
-    let buffer = EMPTY_STRING_BUFFER;
-    let chunk;
-    /** @type { Array<Buffer> | undefined } */
-    let chunks;
-
-    while ((chunk = this.readChunk(options)) !== null) {
-      if (isBuffer(chunk)) {
-        buffer = Buffer.concat([buffer, chunk], buffer.length + chunk.length);
-      } else {
-        if (chunks === undefined) {
-          chunks = [];
-        }
-        buffer = reduce(buffer, chunks, chunk) || EMPTY_STRING_BUFFER;
-      }
-    }
-
-    if (chunks !== undefined) {
-      chunks.push(buffer);
-      return chunks.length > 1 ? chunks : chunks[0];
-    }
-
-    return buffer;
-  }
-
-  /**
    * Consume template result content one chunk at a time.
    *
    * @param { RenderOptions } [options]
@@ -62,6 +28,7 @@ export class TemplateResult {
   readChunk(options) {
     const isString = this.index % 2 === 0;
     const index = (this.index / 2) | 0;
+    const addMetadata = options !== undefined && options.includeRehydrationMetadata;
 
     // Finished
     if (!isString && index >= this.template.strings.length - 1) {
@@ -73,7 +40,17 @@ export class TemplateResult {
     this.index++;
 
     if (isString) {
-      return this.template.strings[index];
+      const string = this.template.strings[index];
+
+      if (addMetadata) {
+        if (index === 0) {
+          return [Buffer.from(`<!--lit-part ${this.template.digest}-->`), string];
+        } else if (index === this.template.strings.length - 1) {
+          return [string, Buffer.from('<!--/lit-part-->')];
+        }
+      }
+
+      return string;
     }
 
     const part = this.template.parts[index];
@@ -90,32 +67,12 @@ export class TemplateResult {
       }
     } else {
       value = part && part.resolveValue(this.values[index], options);
+
+      if (addMetadata && !isTemplateResult(value)) {
+        value = [Buffer.from('<!--lit-part-->'), value, Buffer.from('<!--/lit-part-->')];
+      }
     }
 
     return value;
-  }
-}
-
-/**
- * Commit "chunk" to string "buffer".
- * Returns new "buffer" value.
- *
- * @param { Buffer } buffer
- * @param { Array<unknown> } chunks
- * @param { unknown } chunk
- * @returns { Buffer | undefined }
- */
-function reduce(buffer, chunks, chunk) {
-  if (isBuffer(chunk)) {
-    return Buffer.concat([buffer, chunk], buffer.length + chunk.length);
-  } else if (isTemplateResult(chunk)) {
-    chunks.push(buffer, chunk);
-    return EMPTY_STRING_BUFFER;
-  } else if (isArray(chunk)) {
-    // @ts-ignore
-    return chunk.reduce((buffer, chunk) => reduce(buffer, chunks, chunk), buffer);
-  } else if (isPromise(chunk) || isAsyncIterator(chunk)) {
-    chunks.push(buffer, chunk);
-    return EMPTY_STRING_BUFFER;
   }
 }

@@ -11,7 +11,7 @@ import { Buffer } from 'buffer';
  * @param { RenderOptions } [options]
  * @returns { () => void }
  */
-export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
+export function getProcessor(renderer, stack, highWaterMark = 0, options) {
   /** @type { Array<Buffer> } */
   const buffer = [];
   let bufferLength = 0;
@@ -43,18 +43,13 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
         return renderer.push(null);
       }
 
-      // Stalled until TemplateResult is finished
       if (isTemplateResult(chunk)) {
         popStack = false;
         chunk = getTemplateResultChunk(chunk, stack, options);
       }
 
-      // Finished reading TemplateResult
-      if (chunk === null) {
-        if (options.includeRehydrationMetadata) {
-          buffer.push(Buffer.from('<!--/lit-part-->'));
-        }
-      } else {
+      // Skip if finished reading TemplateResult (null)
+      if (chunk !== null) {
         if (isBuffer(chunk)) {
           buffer.push(chunk);
           bufferLength += chunk.length;
@@ -133,13 +128,9 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
  *
  * @param { TemplateResult } result
  * @param { Array<unknown> } stack
- * @param { RenderOptions } options
+ * @param { RenderOptions } [options]
  */
 function getTemplateResultChunk(result, stack, options) {
-  if (options.includeRehydrationMetadata && result.index === 0) {
-    return Buffer.from(`<!--lit-part ${result.template.digest}-->`);
-  }
-
   let chunk = result.readChunk(options);
 
   // Skip empty strings

@@ -1,4 +1,4 @@
-import { html, renderToString } from '../../index.js';
+import { html, renderToString } from '../../src/index.js';
 import everything from './the-everything-bagel-template.js';
 import { html as litHtml } from 'lit-html';
 import { render } from '@lit-labs/ssr';

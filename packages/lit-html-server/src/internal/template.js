@@ -29,8 +29,9 @@ export class Template {
     /** @type { Array<Part | null> } */
     this.parts = [];
     this.digest = digestForTemplateStrings(strings);
-
+    console.log('<----------');
     this._prepare(strings);
+    console.log('---------->');
   }
 
   /**
@@ -68,7 +69,7 @@ export class Template {
         if (matchName) {
           let [, prefix, name, suffix] = matchName;
 
-          // Since attributes are conditional, remove "name" and "suffix" from static string
+          // Since attributes are sometimes conditional, remove "name" and "suffix" from static string
           string = string.slice(0, matchName.index + prefix.length);
 
           const matchQuote = RE_QUOTE.exec(suffix);
@@ -103,6 +104,7 @@ export class Template {
             part = handleAttributeExpressions(name, [EMPTY_STRING_BUFFER, EMPTY_STRING_BUFFER], tagName);
           }
         } else {
+          // ElementPart - handle like EventPart
           part = handleAttributeExpressions('@', [EMPTY_STRING_BUFFER, EMPTY_STRING_BUFFER], tagName);
         }
       } else {
