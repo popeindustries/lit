@@ -1,76 +1,156 @@
 // @ts-nocheck
-import { AttributePart, ChildPart } from '../src/internal/parts.js';
+import { AttributePart, ChildPart, partType } from '../src/internal/parts.js';
 import { expect } from 'chai';
 import { Template } from '../src/internal/template.js';
 
-describe('Template', () => {
+/**
+ * @param { Template } template
+ */
+function templateToStrings(template) {
+  const { _strings, _parts } = template;
+  let result = '';
+  let i = 0;
+  for (; i < _strings.length - 1; i++) {
+    result += _strings[i].toString();
+    result += partTypeToName(_parts[i]);
+  }
+  result += _strings[i].toString();
+  return result;
+}
+
+/**
+ * @param { Part } part
+ */
+function partTypeToName(part) {
+  switch (part.type) {
+    case partType.CHILD:
+      return '[CHILD]';
+    case partType.ATTRIBUTE:
+      return '[ATTR]';
+    case partType.BOOLEAN_ATTRIBUTE:
+      return '[BOOL]';
+    case partType.ELEMENT:
+      return '[ELEMENT]';
+    case partType.EVENT:
+      return '[EVENT]';
+    case partType.METADATA:
+      return part.value.toString();
+    case partType.PROPERTY:
+      return '[PROPERTY]';
+    default:
+      return '[PART]';
+  }
+}
+
+describe('Template class', () => {
   it('should prepare a plain text template', () => {
+    // html`text`
     const template = new Template(['text']);
-    expect(template.strings.map((s) => s.toString())).to.deep.equal(['text']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<!--lit-part iW9ZALRtWQA=-->text<!--/lit-part-->');
   });
-  it('should prepare a template with value', () => {
-    const template = new Template(['', '']);
-    expect(template.strings).to.have.length(2);
-    expect(template.strings[0].toString()).to.equal('');
-    expect(template.strings[1].toString()).to.equal('');
-    expect(template.parts[0]).to.be.an.instanceOf(ChildPart);
+  it('should prepare a static template with attributes', () => {
+    // html`<div a="a"></div>`
+    const template = new Template(['<div a="a"></div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<!--lit-part qo8N/bhSWzI=--><div a="a"></div><!--/lit-part-->');
   });
-  it('should prepare a template with quoted attribute', () => {
-    const template = new Template(['<div a="', '"></div>']);
-    expect(template.strings[0].toString()).to.equal('<div ');
-    expect(template.strings[1].toString()).to.equal('></div>');
-    expect(template.parts[0]).to.be.an.instanceOf(AttributePart);
+  it('should prepare a template with child value', () => {
+    // html`<div>${var}</div>`
+    const template = new Template(['<div>', '</div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal(
+      '<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part-->[CHILD]<!--/lit-part--></div><!--/lit-part-->',
+    );
+  });
+  it.only('should prepare a template with quoted attribute', () => {
+    // html`<div a="${var}">some text</div>`
+    const template = new Template(['<div a="', '">some text</div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal(
+      '<!--lit-part mNXjfEJ0Ra4=--><div a="[ATTR]"><!--lit-node 0-->some text</div><!--/lit-part-->',
+    );
+  });
+  it('should prepare a template with quoted attribute and child value', () => {
+    // html`<div a="${var1}">some text ${var2}</div>`
+    const template = new Template(['<div a="', '">some text ', '</div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal(
+      '<!--lit-part mNXjfEJ0Ra4=--><div a="[ATTR]"><!--lit-node 0-->some text <!--lit-part-->[CHILD]<!--/lit-part--></div><!--/lit-part-->',
+    );
   });
   it('should prepare a template with quoted attribute and extra whitespace', () => {
-    const template = new Template(['<div a = " ', ' "></div>']);
-    expect(template.strings[0].toString()).to.equal('<div ');
-    expect(template.strings[1].toString()).to.equal('></div>');
-    expect(template.parts[0]).to.be.an.instanceOf(AttributePart);
-    expect(template.parts[0].strings.map((s) => s.toString())).to.deep.equal([' ', ' ']);
+    // html`<div a = " ${var} " ></div>`
+    const template = new Template(['<div a = " ', ' " ></div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div a = " [ATTR] " ></div>');
   });
   it('should prepare a template with quoted attribute and extra strings', () => {
+    // html`<div a="some ${var} here"></div>`
     const template = new Template(['<div a="some ', ' here"></div>']);
-    expect(template.strings[0].toString()).to.equal('<div ');
-    expect(template.strings[1].toString()).to.equal('></div>');
-    expect(template.parts[0]).to.be.an.instanceOf(AttributePart);
-    expect(template.parts[0].strings.map((s) => s.toString())).to.deep.equal(['some ', ' here']);
-    expect(template.parts[0]).to.have.length(1);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div a="some [ATTR] here"></div>');
   });
   it('should prepare a template with quoted attribute and multiple strings/values', () => {
+    // html`<div a="${var1} in ${var2}"></div>`
     const template = new Template(['<div a="', ' in ', '">', '</div>']);
-    expect(template.strings[0].toString()).to.equal('<div ');
-    expect(template.strings[1]).to.equal(null);
-    expect(template.strings[2].toString()).to.equal('>');
-    expect(template.strings[3].toString()).to.equal('</div>');
-    expect(template.parts[0]).to.be.an.instanceOf(AttributePart);
-    expect(template.parts[0].strings.map((s) => s.toString())).to.deep.equal(['', ' in ', '']);
-    expect(template.parts[0]).to.have.length(2);
-    expect(template.parts[1]).to.equal(null);
-    expect(template.parts[2]).to.be.an.instanceOf(ChildPart);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div a="[ATTR] in [ATTR]">[CHILD]</div>');
+    expect(template._parts[1]).to.have.property('tagName', 'div');
+    expect(template._parts[1]).to.have.property('name', 'a');
   });
-  it('should prepare a template with boolean attribute', () => {
+  it('should prepare a template with unquoted attribute', () => {
+    // html`<div a=${var}></div>`
+    const template = new Template(['<div a=', '></div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div a=[ATTR]></div>');
+  });
+  it('should prepare a template with quoted property attribute', () => {
+    // html`<div .a="${var}""></div>`
+    const template = new Template(['<div .a="', '"></div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div .a="[PROPERTY]"></div>');
+  });
+  it('should prepare a template with unquoted property attribute', () => {
+    // html`<div .a=${var}></div>`
+    const template = new Template(['<div .a=', '></div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div .a=[PROPERTY]></div>');
+  });
+  it('should prepare a template with quoted property attribute and multiple strings/values', () => {
+    // html`<div .a="${var1} in ${var2}"></div>`
+    const template = new Template(['<div .a="', ' in ', '">', '</div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div .a="[PROPERTY] in [PROPERTY]">[CHILD]</div>');
+  });
+  it('should prepare a template with element attribute', () => {
+    // html`<div ${ref()}></div>`
+    const template = new Template(['<div ', '></div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div [ELEMENT]></div>');
+  });
+  it('should prepare a template with quoted boolean attribute', () => {
+    // html`<div ?a="${var} "></div>`
     const template = new Template(['<div ?a="', '"></div>']);
-    expect(template.strings[0].toString()).to.equal('<div ');
-    expect(template.strings[1].toString()).to.equal('></div>');
-    expect(template.parts[0]).to.be.an.instanceOf(AttributePart);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div [BOOL]></div>');
   });
-  it('should prepare a template with event attribute', () => {
-    const template = new Template(['<div @a="some handler ', '"></div>']);
-    expect(template.strings[0].toString()).to.equal('<div ');
-    expect(template.strings[1].toString()).to.equal('></div>');
-    expect(template.parts[0]).to.be.an.instanceOf(AttributePart);
+  it('should prepare a template with unquoted boolean attribute', () => {
+    // html`<div ?a=${var}></div>`
+    const template = new Template(['<div ?a=', '></div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div [BOOL]></div>');
   });
-  it('should prepare a template with text part tag names', () => {
-    const template = new Template(['<div>', '</div>']);
-    expect(template.parts[0].tagName).to.equal('div');
+  it('should prepare a template with quoted event attribute', () => {
+    // html`<div @a="${var}"></div>`
+    const template = new Template(['<div @a="', '"></div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div [EVENT]></div>');
   });
-  it('should prepare a template with attribute parts tag names', () => {
-    const template = new Template(['<div a="', '"></div>']);
-    expect(template.parts[0].tagName).to.equal('div');
-  });
-  it('should prepare a template with multiple nested parts tag names', () => {
-    const template = new Template(['<div a="', '"><span b="', '"</span></div>']);
-    expect(template.parts[0].tagName).to.equal('div');
-    expect(template.parts[1].tagName).to.equal('span');
+  it('should prepare a template with unquoted event attribute', () => {
+    // html`<div @a=${var}></div>`
+    const template = new Template(['<div @a=', '></div>']);
+    const string = templateToStrings(template);
+    expect(string).to.equal('<div [EVENT]></div>');
   });
 });

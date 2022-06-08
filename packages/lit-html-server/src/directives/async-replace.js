@@ -7,7 +7,6 @@ import { directive } from 'lit-html/directive.js';
 class AsyncReplaceDirective extends AsyncDirective {
   /**
    * Server render "value" asynchronously, rendering the first iterated value before completing
-   *
    * @param { AsyncIterable<T> } value
    * @param { (value: T, index?: number) => unknown } mapper
    */

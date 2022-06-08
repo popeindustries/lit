@@ -2,3 +2,5 @@ package.json
 *.min.js
 test/fixtures/
 test/assets/
+.DS_Store
+.dvlp/

@@ -14,7 +14,6 @@ const RE_SCRIPT_STYLE_TAG = /<\/(script|style)/gi;
 
 /**
  * Safely escape "string" for inlining
- *
  * @param { string } string
  * @param { string } context - one of text|attribute|script|style
  * @returns { string }

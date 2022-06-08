@@ -29,28 +29,27 @@
     "*.d.ts",
     "*.js",
     "README.MD"
-
   ],
   "repository": "https://github.com/popeindustries/lit.git",
   "license": "MIT",
   "engines": {
-    "node": ">=12.2.0"
+    "node": ">=16.0.0"
   },
   "dependencies": {
-    "lit-html": "2.0.0-rc.3"
+    "lit": "2.2.5"
   },
   "devDependencies": {
-    "@lit-labs/ssr": "1.0.0-rc.1",
-    "autocannon": "^7.3.0",
-    "puppeteer": "^9.1.1",
-    "send": "^0.17.1"
+    "@lit-labs/ssr": "2.2.0",
+    "autocannon": "^7.9.0",
+    "puppeteer": "^14.3.0",
+    "send": "^0.18.0"
   },
   "scripts": {
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f",
     "perf": "node test/benchmark/perf.js",
     "test": "npm run build && npm run lint && npm run test:unit && npm run test:browser",
-    "test:unit": "NODE_ENV=test mocha \"test/*-test.js\" --reporter spec --bail --timeout 2000",
+    "test:unit": "NODE_ENV=test mocha --require './src/dom-shim.js' --reporter spec --bail --timeout 2000 'test/*-test.js'",
     "test:browser": "node ./test/browser/cli.js"
   },
   "prettier": {

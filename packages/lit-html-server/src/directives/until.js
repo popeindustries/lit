@@ -7,7 +7,6 @@ class UntilDirective extends AsyncDirective {
    * Not possible to render more than once in a server context, so primitive
    * sync values are prioritised over async, unless there are no more pending
    * values, in which case the last value is always rendered regardless.
-   *
    * @param { ...unknown } values
    */
   render(...values) {
@@ -27,7 +26,6 @@ export const until = directive(UntilDirective);
 
 /**
  * Determine if "value" is a primitive
- *
  * @param { unknown } value
  * @returns { value is null|string|boolean|number }
  */

@@ -5,7 +5,6 @@ const EMPTY_STRING_BUFFER = Buffer.from('');
 
 /**
  * Convert "syncIterable" to an AsyncIterable
- *
  * @param { Iterable<unknown> } syncIterable
  * @returns { AsyncIterable<unknown> }
  */
@@ -17,7 +16,6 @@ export async function* createAsyncIterable(syncIterable) {
 
 /**
  * Convert stream to a Promise
- *
  * @param { import('stream').Readable } stream
  * @returns { Promise<string> }
  */
@@ -66,7 +64,6 @@ export function readTemplateResult(result, options) {
 /**
  * Commit "chunk" to string "buffer".
  * Returns new "buffer" value.
- *
  * @param { Buffer } buffer
  * @param { Array<unknown> } chunks
  * @param { unknown } chunk

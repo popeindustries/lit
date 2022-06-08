@@ -7,7 +7,6 @@ import { AsyncDirective } from 'lit-html/async-directive.js';
 class AsyncAppendDirective extends AsyncDirective {
   /**
    * Constructor
-   *
    * @param { import('lit-html/directive').PartInfo } partInfo
    */
   constructor(partInfo) {
@@ -20,7 +19,6 @@ class AsyncAppendDirective extends AsyncDirective {
 
   /**
    * Server render "value" asynchronously, appending items until the iterator has completed
-   *
    * @param { AsyncIterable<T> } value
    * @param { (value: T, index?: number) => unknown } mapper
    */
@@ -41,7 +39,6 @@ export const asyncAppend = directive(AsyncAppendDirective);
 
 /**
  * Create new asyncIterator from "asuncIterable" that maps results with "mapper"
- *
  * @template T
  * @param { AsyncIterableIterator<T> } asyncIterable
  * @param { (value: T, index: number) => unknown } mapper

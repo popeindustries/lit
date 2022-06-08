@@ -3,7 +3,16 @@ import { isDirective, isTemplateResult } from './is.js';
 import { noChange, nothing } from 'lit-html';
 import { Buffer } from 'buffer';
 import { escape } from './escape.js';
-import { PartType } from 'lit-html/directive.js';
+
+export const partType = {
+  METADATA: 0,
+  ATTRIBUTE: 1,
+  CHILD: 2,
+  PROPERTY: 3,
+  BOOLEAN_ATTRIBUTE: 4,
+  EVENT: 5,
+  ELEMENT: 6,
+};
 
 const EMPTY_STRING_BUFFER = Buffer.from('');
 
@@ -13,25 +22,48 @@ const EMPTY_STRING_BUFFER = Buffer.from('');
 const unsafePrefixString = '__unsafe-lit-html-server-string__';
 
 /**
+ * A template part for hydration metadata
+ * @implements MetadataPartType
+ */
+export class MetadataPart {
+  /**
+   * Constructor
+   * @param { Buffer } value
+   */
+  constructor(value) {
+    this.type = partType.METADATA;
+    this.value = value;
+  }
+
+  /**
+   * Retrieve value given passed "options"
+   * @param { RenderOptions } [options]
+   * @returns { Buffer }
+   */
+  resolveValue(options) {
+    return options !== undefined && options.includeRehydrationMetadata ? this.value : EMPTY_STRING_BUFFER;
+  }
+}
+
+/**
  * A dynamic template part for text nodes
+ * @implements ChildPartType
  */
 export class ChildPart {
   /**
    * Constructor
-   *
    * @param { string } tagName
    */
   constructor(tagName) {
     this.tagName = tagName;
-    this.type = PartType.CHILD;
+    this.type = partType.CHILD;
   }
 
   /**
    * Retrieve resolved value given passed "value"
-   *
-   * @param { any } value
+   * @param { unknown } value
    * @param { RenderOptions } [options]
-   * @returns { any }
+   * @returns { unknown }
    */
   resolveValue(value, options) {
     return resolveNodeValue(value, this);
@@ -41,37 +73,31 @@ export class ChildPart {
 /**
  * A dynamic template part for attributes.
  * Unlike text nodes, attributes may contain multiple strings and parts.
+ * @implements AttributePartType
  */
 export class AttributePart {
   /**
    * Constructor
-   *
    * @param { string } name
-   * @param { Array<Buffer> } strings
    * @param { string } tagName
    * @param { PartType } [type]
    */
-  constructor(name, strings, tagName, type = PartType.ATTRIBUTE) {
+  constructor(name, tagName, type = partType.ATTRIBUTE) {
     this.name = name;
-    this.strings = strings;
     this.tagName = tagName;
     this.type = type;
-    this.length = strings.length - 1;
-    this.prefix = Buffer.from(`${this.name}="`);
-    this.suffix = Buffer.from(`${this.strings[this.length]}"`);
   }
 
   /**
-   * Retrieve resolved string Buffer from passed "values".
+   * Retrieve resolved string Buffer from passed "value".
    * Resolves to a single string, or Promise for a single string,
    * even when responsible for multiple values.
-   *
    * @param { Array<unknown> } values
    * @param { RenderOptions } [options]
    * @returns { Buffer | Promise<Buffer> }
    */
   resolveValue(values, options) {
-    let chunks = [this.prefix];
+    let chunks = [];
     let chunkLength = this.prefix.length;
     let pendingChunks;
 
@@ -130,31 +156,62 @@ export class AttributePart {
 }
 
 /**
- * A dynamic template part for boolean attributes.
- * Boolean attributes are prefixed with "?"
+ * A dynamic template part for property attributes.
+ * Property attributes are prefixed with "."
+ * @implements PropertyPartType
  */
-export class BooleanAttributePart extends AttributePart {
+export class PropertyPart extends AttributePart {
   /**
    * Constructor
-   *
    * @param { string } name
-   * @param { Array<Buffer> } strings
    * @param { string } tagName
-   * @throws error when multiple expressions
    */
-  constructor(name, strings, tagName) {
-    super(name, strings, tagName, PartType.BOOLEAN_ATTRIBUTE);
-
-    this.nameAsBuffer = Buffer.from(this.name);
-
-    if (strings.length !== 2 || strings[0] === EMPTY_STRING_BUFFER || strings[1] === EMPTY_STRING_BUFFER) {
-      throw Error('Boolean attributes can only contain a single expression');
-    }
+  constructor(name, tagName) {
+    super(name, tagName, partType.PROPERTY);
   }
 
   /**
    * Retrieve resolved string Buffer from passed "values".
-   *
+   * Returns an empty string unless "options.serializePropertyAttributes=true"
+   * @param { Array<unknown> } values
+   * @param { RenderOptions } [options]
+   * @returns { Buffer | Promise<Buffer> }
+   */
+  resolveValue(values, options) {
+    if (options !== undefined && options.serializePropertyAttributes) {
+      const value = super.resolveValue(values, options);
+      const prefix = Buffer.from('.');
+
+      return value instanceof Promise
+        ? value.then((value) => Buffer.concat([prefix, value]))
+        : Buffer.concat([prefix, value]);
+    }
+
+    return EMPTY_STRING_BUFFER;
+  }
+}
+
+/**
+ * A dynamic template part for boolean attributes.
+ * Boolean attributes are prefixed with "?"
+ * @implements BooleanAttributePartType
+ */
+export class BooleanAttributePart {
+  /**
+   * Constructor
+   * @param { string } name
+   * @param { string } tagName
+   */
+  constructor(name, tagName) {
+    this.name = name;
+    this.tagName = tagName;
+    this.type = partType.BOOLEAN_ATTRIBUTE;
+
+    this.nameAsBuffer = Buffer.from(this.name);
+  }
+
+  /**
+   * Retrieve resolved string Buffer from passed "values".
    * @param { Array<unknown> } values
    * @param { RenderOptions } [options]
    * @returns { Buffer | Promise<Buffer> }
@@ -175,64 +232,26 @@ export class BooleanAttributePart extends AttributePart {
 }
 
 /**
- * A dynamic template part for property attributes.
- * Property attributes are prefixed with "."
- */
-export class PropertyPart extends AttributePart {
-  /**
-   * Constructor
-   *
-   * @param { string } name
-   * @param { Array<Buffer> } strings
-   * @param { string } tagName
-   */
-  constructor(name, strings, tagName) {
-    super(name, strings, tagName, PartType.PROPERTY);
-  }
-
-  /**
-   * Retrieve resolved string Buffer from passed "values".
-   * Returns an empty string unless "options.serializePropertyAttributes=true"
-   *
-   * @param { Array<unknown> } values
-   * @param { RenderOptions } [options]
-   * @returns { Buffer | Promise<Buffer> }
-   */
-  resolveValue(values, options) {
-    if (options !== undefined && options.serializePropertyAttributes) {
-      const value = super.resolveValue(values, options);
-      const prefix = Buffer.from('.');
-
-      return value instanceof Promise
-        ? value.then((value) => Buffer.concat([prefix, value]))
-        : Buffer.concat([prefix, value]);
-    }
-
-    return EMPTY_STRING_BUFFER;
-  }
-}
-
-/**
  * A dynamic template part for event attributes.
  * Event attributes are prefixed with "@"
+ * @implements EventPartType
  */
-export class EventPart extends AttributePart {
+export class EventPart {
   /**
    * Constructor
-   *
    * @param { string } name
-   * @param { Array<Buffer> } strings
    * @param { string } tagName
    */
-  constructor(name, strings, tagName) {
-    super(name, strings, tagName, PartType.EVENT);
+  constructor(name, tagName) {
+    this.name = name;
+    this.tagName = tagName;
+    this.type = partType.EVENT;
   }
 
   /**
    * Retrieve resolved string Buffer from passed "values".
    * Event bindings have no server-side representation,
    * so always returns an empty string.
-   *
    * @param { Array<unknown> } values
    * @param { RenderOptions } [options]
    * @returns { Buffer }
@@ -244,24 +263,22 @@ export class EventPart extends AttributePart {
 
 /**
  * A dynamic template part for accessing element instances.
+ * @implements ElementPartType
  */
-export class ElementPart extends AttributePart {
+export class ElementPart {
   /**
    * Constructor
-   *
-   * @param { string } name
-   * @param { Array<Buffer> } strings
    * @param { string } tagName
    */
-  constructor(name, strings, tagName) {
-    super(name, strings, tagName, PartType.ELEMENT);
+  constructor(tagName) {
+    this.tagName = tagName;
+    this.type = partType.ELEMENT;
   }
 
   /**
    * Retrieve resolved string Buffer from passed "values".
    * Event bindings have no server-side representation,
    * so always returns an empty string.
-   *
    * @param { Array<unknown> } values
    * @param { RenderOptions } [options]
    * @returns { Buffer }
@@ -273,11 +290,10 @@ export class ElementPart extends AttributePart {
 
 /**
  * Resolve "value" to string if possible
- *
  * @param { unknown } value
  * @param { AttributePart } part
  * @param { boolean } [serialiseObjectsAndArrays]
- * @returns { any }
+ * @returns { unknown }
  */
 function resolveAttributeValue(value, part, serialiseObjectsAndArrays = false) {
   if (isDirective(value)) {
@@ -321,10 +337,9 @@ function resolveAttributeValue(value, part, serialiseObjectsAndArrays = false) {
 
 /**
  * Resolve "value" to string Buffer if possible
- *
  * @param { unknown } value
  * @param { ChildPart } part
- * @returns { any }
+ * @returns { unknown }
  */
 function resolveNodeValue(value, part) {
   if (isDirective(value)) {
@@ -370,7 +385,6 @@ function resolveNodeValue(value, part) {
 
 /**
  * Resolve values of async "iterator"
- *
  * @param { AsyncIterable<unknown> } iterator
  * @param { ChildPart } part
  * @returns { AsyncGenerator }
@@ -383,7 +397,6 @@ async function* resolveAsyncIteratorValue(iterator, part) {
 
 /**
  * Resolve value of "directive"
- *
  * @param { import('lit-html/directive').DirectiveResult } directiveResult
  * @param { { name?: string, tagName: string, type: PartType, strings?: Array<Buffer>, length?: number } } part
  * @returns { unknown }

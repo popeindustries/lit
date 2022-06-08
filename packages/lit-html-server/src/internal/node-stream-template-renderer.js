@@ -3,7 +3,6 @@ import { Readable } from 'stream';
 
 /**
  * Factory for StreamTemplateRenderer instances
- *
  * @param { TemplateResult } result - a template result returned from call to "html`...`"
  * @param { RenderOptions } [options]
  * @returns { Readable }
@@ -18,7 +17,6 @@ export function streamTemplateRenderer(result, options) {
 class StreamTemplateRenderer extends Readable {
   /**
    * Constructor
-   *
    * @param { TemplateResult } result - a template result returned from call to "html`...`"
    * @param { RenderOptions } [options]
    */
@@ -40,7 +38,6 @@ class StreamTemplateRenderer extends Readable {
 
   /**
    * Extend Readalbe.destroy()
-   *
    * @param { Error | null } [err]
    */
   _destroy(err) {

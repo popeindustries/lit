@@ -1,17 +1,38 @@
-import { AttributePart, BooleanAttributePart, ChildPart, EventPart, PropertyPart } from './parts.js';
+import {
+  AttributePart,
+  BooleanAttributePart,
+  ChildPart,
+  ElementPart,
+  EventPart,
+  MetadataPart,
+  PropertyPart,
+} from './parts.js';
 import { Buffer } from 'buffer';
 
 const EMPTY_STRING_BUFFER = Buffer.from('');
-const RE_QUOTE = /"[^"]*|'[^']*$/;
-/* eslint no-control-regex: 0 */
-const RE_TAG_NAME = /[a-zA-Z0-9._-]/;
-const TAG_OPEN = 1;
-const TAG_CLOSED = 0;
-const TAG_NONE = -1;
 
-// Copied from lit-html@1.x.x
-const lastAttributeNameRegex =
-  /([ \x09\x0a\x0c\x0d])([^\0-\x1F\x7F-\x9F "'>=/]+)([ \x09\x0a\x0c\x0d]*=[ \x09\x0a\x0c\x0d]*(?:[^ \x09\x0a\x0c\x0d"'`<>=]*|"[^"]*|'[^']*))$/;
+const ATTR_VALUE_CHAR = `[^ \t\n\f\r"'\`<>=]`;
+const NAME_CHAR = `[^\\s"'>=/]`;
+const SPACE_CHAR = `[ \t\n\f\r]`;
+// const TAG_NAME_CHAR = `[a-zA-Z0-9-]`;
+
+const RE_TEXT_END = /<(?:(?<commentStart>!--|\/[^a-zA-Z])|(?<tagName>\/?[a-zA-Z][^>\s]*)|(?<dynamicTagName>\/?$))/g;
+const RE_COMMENT_END = /-->/g;
+const RE_COMMENT_ALT_END = />/g;
+const RE_TAG_END = new RegExp(
+  `>|${SPACE_CHAR}(?:(?<attributeName>${NAME_CHAR}+)(?<spacesAndEquals>${SPACE_CHAR}*=${SPACE_CHAR}*(?:${ATTR_VALUE_CHAR}|(?<quoteChar>"|')|))|$)`,
+  'g',
+);
+const RE_SINGLE_QUOTE_ATTR_END = /'/g;
+const RE_DOUBLE_QUOTE_ATTR_END = /"/g;
+// const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
+
+// Parse modes:
+const CLOSE = 0;
+const OPEN = 1;
+const ATTRIBUTE = 2;
+const TEXT = 3;
+const COMMENT = 4;
 
 /**
  * A cacheable Template that stores the "strings" and "parts" associated with a
@@ -20,201 +41,189 @@ const lastAttributeNameRegex =
 export class Template {
   /**
    * Create Template instance
-   *
    * @param { TemplateStringsArray } strings
    */
   constructor(strings) {
-    /** @type { Array<Buffer | null> } */
-    this.strings = [];
-    /** @type { Array<Part | null> } */
-    this.parts = [];
-    this.digest = digestForTemplateStrings(strings);
-    console.log('<----------');
-    this._prepare(strings);
-    console.log('---------->');
+    /** @type { Array<Buffer> } */
+    this._strings = [];
+    /** @type { Array<Part> } */
+    this._parts = [];
+    this._parse(strings);
   }
 
   /**
    * Prepare the template's static strings,
    * and create Part instances for the dynamic values,
    * based on lit-html syntax.
-   *
    * @param { TemplateStringsArray } strings
    */
-  _prepare(strings) {
-    const endIndex = strings.length - 1;
-    let attributeMode = false;
+  _parse(strings) {
+    const digest = digestForTemplateStrings(strings);
+    const n = strings.length;
+    let attributeName = '';
+    let hasAttributes = false;
+    let mode = CLOSE;
     let nextString = strings[0];
+    let nodeIndex = -1;
+    let regex = RE_TEXT_END;
     let tagName = '';
 
-    for (let i = 0; i < endIndex; i++) {
+    for (let i = 0; i < n; i++) {
+      const isFirstString = i === 0;
+      const isLastString = i === n - 1;
       let string = nextString;
-      nextString = strings[i + 1];
-      const [tagState, tagStateIndex] = getTagState(string);
-      let skip = 0;
-      let part;
+      nextString = strings[i + 1] ?? '';
+      let lastIndex = 0;
+      let match;
 
-      // Open/close tag found at end of string
-      if (tagState !== TAG_NONE) {
-        attributeMode = tagState !== TAG_CLOSED;
-        // Find tag name if open, or if closed and no existing tag name
-        if (tagState === TAG_OPEN || tagName === '') {
-          tagName = getTagName(string, tagState, tagStateIndex);
-        }
+      // TODO: metadata parts
+      // TODO: custom-element parts
+      // TODO: rawTextEndRegex
+
+      if (isFirstString) {
+        // Add opening metadata before first string in template
+        this._strings.push(EMPTY_STRING_BUFFER);
+        this._parts.push(new MetadataPart(Buffer.from(`<!--lit-part ${digest}-->`)));
+      } else if (mode === TEXT) {
+        // Add closing metadata for child part if between tag open/close and starting new string
+        // metadata.push([0, `<!--/lit-part-->`]);
       }
 
-      if (attributeMode) {
-        const matchName = lastAttributeNameRegex.exec(string);
+      while (lastIndex < string.length) {
+        // Start search from end of last match
+        regex.lastIndex = lastIndex;
+        match = regex.exec(string);
 
-        if (matchName) {
-          let [, prefix, name, suffix] = matchName;
+        if (match === null) {
+          break;
+        }
 
-          // Since attributes are sometimes conditional, remove "name" and "suffix" from static string
-          string = string.slice(0, matchName.index + prefix.length);
+        const groups = /** @type { { [name: string]: string } } */ (match.groups);
+        lastIndex = regex.lastIndex;
 
-          const matchQuote = RE_QUOTE.exec(suffix);
+        if (regex === RE_TEXT_END) {
+          if (groups.commentStart === '!--') {
+            mode = COMMENT;
+            regex = RE_COMMENT_END;
+          } else if (groups.commentStart !== undefined) {
+            mode = COMMENT;
+            regex = RE_COMMENT_ALT_END;
+          } else {
+            const isDynamicTagName = groups.dynamicTagName !== undefined;
+            const rawTagName = isDynamicTagName ? groups.dynamicTagName : groups.tagName;
+            const isOpeningTag = rawTagName[0] !== '/';
 
-          // If attribute is quoted, handle potential multiple values
-          if (matchQuote) {
-            const quoteCharacter = matchQuote[0].charAt(0);
-            // Store any text between quote character and value
-            const attributeStrings = [Buffer.from(suffix.slice(matchQuote.index + 1))];
-            let open = true;
-            skip = 0;
-            let attributeString;
-
-            // Scan ahead and gather all strings for this attribute
-            while (open) {
-              attributeString = strings[i + skip + 1];
-              const closingQuoteIndex = attributeString.indexOf(quoteCharacter);
-
-              if (closingQuoteIndex === -1) {
-                attributeStrings.push(Buffer.from(attributeString));
-                skip++;
-              } else {
-                attributeStrings.push(Buffer.from(attributeString.slice(0, closingQuoteIndex)));
-                nextString = attributeString.slice(closingQuoteIndex + 1);
-                i += skip;
-                open = false;
-              }
+            if (isOpeningTag) {
+              mode = OPEN;
+              tagName = rawTagName;
+              nodeIndex++;
+            } else {
+              mode = CLOSE;
             }
 
-            part = handleAttributeExpressions(name, attributeStrings, tagName);
-          } else {
-            part = handleAttributeExpressions(name, [EMPTY_STRING_BUFFER, EMPTY_STRING_BUFFER], tagName);
+            regex = RE_TAG_END;
+
+            if (isDynamicTagName) {
+              // TODO: dev error
+            } else {
+              // TODO: rawTextEndRegex
+            }
           }
+        } else if (regex === RE_TAG_END) {
+          if (match[0] === '>') {
+            if (mode === OPEN && hasAttributes) {
+              // TODO: insert node metadata
+            }
+            attributeName = '';
+            mode = isLastString ? CLOSE : TEXT;
+            regex = RE_TEXT_END;
+            // TODO: rawTextEndRegex
+          } else if (groups.attributeName === undefined) {
+            hasAttributes = true;
+            attributeName = '';
+            mode = ATTRIBUTE;
+            regex = RE_TAG_END;
+          } else {
+            hasAttributes = true;
+            attributeName = groups.attributeName;
+            mode = ATTRIBUTE;
+            regex =
+              groups.quoteChar === undefined
+                ? RE_TAG_END
+                : groups.quoteChar === '"'
+                ? RE_DOUBLE_QUOTE_ATTR_END
+                : RE_SINGLE_QUOTE_ATTR_END;
+
+            const prefix = attributeName[0];
+            const isConditional = prefix === '?' || prefix === '@';
+
+            // Since some attributes are conditional, remove surrounding text from static strings
+            if (isConditional) {
+              const prefix = groups.attributeName + groups.spacesAndEquals;
+              string = string.slice(0, string.length - prefix.length);
+              lastIndex -= prefix.length;
+
+              if (groups.quoteChar !== undefined) {
+                nextString = nextString.slice(nextString.indexOf(groups.quoteChar) + 1);
+                regex = RE_TAG_END;
+              }
+            }
+          }
+        } else if (regex === RE_DOUBLE_QUOTE_ATTR_END || regex === RE_SINGLE_QUOTE_ATTR_END) {
+          mode = OPEN;
+          regex = RE_TAG_END;
+        } else if (regex === RE_COMMENT_END || regex === RE_COMMENT_ALT_END) {
+          mode = CLOSE;
+          regex == RE_TEXT_END;
         } else {
-          // ElementPart - handle like EventPart
-          part = handleAttributeExpressions('@', [EMPTY_STRING_BUFFER, EMPTY_STRING_BUFFER], tagName);
+          mode = OPEN;
+          regex = RE_TAG_END;
+          // TODO: rawTextEndRegex
         }
-      } else {
-        part = handleTextExpression(tagName);
       }
 
-      this.strings.push(Buffer.from(string));
-      // @ts-ignore: part will never be undefined here
-      this.parts.push(part);
-      // Add placehholders for strings/parts that wil be skipped due to multple values in a single AttributePart
-      if (skip > 0) {
-        this.strings.push(null);
-        this.parts.push(null);
-        skip = 0;
+      this._strings.push(Buffer.from(string));
+
+      if (mode === TEXT) {
+        this._parts.push(new MetadataPart(Buffer.from(`<!--lit-part-->`)));
+        this._strings.push(EMPTY_STRING_BUFFER);
+        this._parts.push(new ChildPart(tagName));
+        this._strings.push(EMPTY_STRING_BUFFER);
+        this._parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
+      } else if (mode === ATTRIBUTE) {
+        this._parts.push(handleAttributeExpressions(attributeName, tagName));
       }
-    }
 
-    this.strings.push(Buffer.from(nextString));
-  }
-}
-
-/**
- * Determine if 'string' terminates with an opened or closed tag.
- *
- * Iterating through all characters has at worst a time complexity of O(n),
- * and is better than the alternative (using "indexOf/lastIndexOf") which is potentially O(2n).
- *
- * @param { string } string
- * @returns { Array<number> } - returns tuple "[-1, -1]" if no tag, "[0, i]" if closed tag, or "[1, i]" if open tag
- */
-function getTagState(string) {
-  for (let i = string.length - 1; i >= 0; i--) {
-    const char = string[i];
-
-    if (char === '>') {
-      return [TAG_CLOSED, i];
-    } else if (char === '<') {
-      return [TAG_OPEN, i];
+      // Add closing metadata
+      if (isLastString) {
+        this._parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
+        this._strings.push(EMPTY_STRING_BUFFER);
+      }
     }
   }
-
-  return [TAG_NONE, -1];
-}
-
-/**
- * Retrieve tag name from "string" starting at "tagStateIndex" position
- * Walks forward or backward based on "tagState" open or closed
- *
- * @param { string } string
- * @param { number } tagState
- * @param { number } tagStateIndex
- * @returns { string }
- */
-function getTagName(string, tagState, tagStateIndex) {
-  let tagName = '';
-
-  if (tagState === TAG_CLOSED) {
-    // Walk backwards until open tag
-    for (let i = tagStateIndex - 1; i >= 0; i--) {
-      const char = string[i];
-
-      if (char === '<') {
-        return getTagName(string, TAG_OPEN, i);
-      }
-    }
-  } else {
-    for (let i = tagStateIndex + 1; i < string.length; i++) {
-      const char = string[i];
-
-      if (!RE_TAG_NAME.test(char)) {
-        break;
-      }
-
-      tagName += char;
-    }
-  }
-
-  return tagName;
 }
 
 /**
  * Create part instance for dynamic attribute values
- *
  * @param { string } name
- * @param { Array<Buffer> } strings
  * @param { string } tagName
- * @returns { AttributePart }
  */
-function handleAttributeExpressions(name, strings = [], tagName) {
+function handleAttributeExpressions(name, tagName) {
+  if (name === '') {
+    return new ElementPart(tagName);
+  }
+
   const prefix = name[0];
 
   if (prefix === '.') {
-    return new PropertyPart(name.slice(1), strings, tagName);
+    return new PropertyPart(name.slice(1), tagName);
   } else if (prefix === '@') {
-    return new EventPart(name.slice(1), strings, tagName);
+    return new EventPart(name.slice(1), tagName);
   } else if (prefix === '?') {
-    return new BooleanAttributePart(name.slice(1), strings, tagName);
+    return new BooleanAttributePart(name.slice(1), tagName);
   }
 
-  return new AttributePart(name, strings, tagName);
-}
-
-/**
- * Create part instance for dynamic text values
- *
- * @param { string } tagName
- * @returns { ChildPart }
- */
-function handleTextExpression(tagName) {
-  return new ChildPart(tagName);
+  return new AttributePart(name, tagName);
 }
 
 /**
@@ -222,7 +231,6 @@ function handleTextExpression(tagName) {
  * Unable to use version imported from lit-html because of reliance on global `btoa`
  * (`btoa` is now a global in Node, but should be avoided at all costs),
  * so copied and modified here instead.
- *
  * @see https://github.com/lit/lit/blob/72877fd1de43ccdd579778d5df407e960cb64b03/packages/lit-html/src/experimental-hydrate.ts#L423
  * @param { TemplateStringsArray } strings
  */

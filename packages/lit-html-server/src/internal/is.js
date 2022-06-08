@@ -1,21 +1,19 @@
 import { Buffer } from 'buffer';
-import { PartType } from 'lit-html/directive.js';
+import { partType } from './parts.js';
 
 export { isDirectiveResult as isDirective } from 'lit-html/directive-helpers.js';
 
 /**
  * Determine if "part" is an AttributePart
- *
  * @param { unknown } part
- * @returns { part is AttributePart }
+ * @returns { part is AttributePartType }
  */
 export function isAttributePart(part) {
-  return part != null && /** @type { Part } */ (part).type !== PartType.CHILD;
+  return part != null && /** @type { Part } */ (part).type !== partType.CHILD;
 }
 
 /**
  * Determine if "value" is a primitive
- *
  * @param { unknown } value
  * @returns { value is null|string|boolean|number }
  */
@@ -26,7 +24,6 @@ export function isPrimitive(value) {
 
 /**
  * Determine whether "result" is a TemplateResult
- *
  * @param { unknown } result
  * @returns { result is TemplateResult }
  */
@@ -37,7 +34,6 @@ export function isTemplateResult(result) {
 
 /**
  * Determine if "promise" is a Promise instance
- *
  * @param { unknown } promise
  * @returns { promise is Promise<unknown> }
  */
@@ -47,7 +43,6 @@ export function isPromise(promise) {
 
 /**
  * Determine if "iterator" is an synchronous iterator
- *
  * @param { unknown } iterator
  * @returns { iterator is IterableIterator<unknown> }
  */
@@ -62,7 +57,6 @@ export function isSyncIterator(iterator) {
 
 /**
  * Determine if "iterator" is an asynchronous iterator
- *
  * @param { unknown } iterator
  * @returns { iterator is AsyncIterable<unknown> }
  */
@@ -74,7 +68,6 @@ export function isAsyncIterator(iterator) {
 
 /**
  * Determine if "result" is an iterator result object
- *
  * @param { unknown } result
  * @returns { result is IteratorResult<unknown, unknown> }
  */
@@ -85,7 +78,6 @@ export function isIteratorResult(result) {
 
 /**
  * Determine if "value" is an object
- *
  * @param { unknown } value
  * @returns { value is object }
  */
@@ -95,7 +87,6 @@ export function isObject(value) {
 
 /**
  * Determine if "value" is a Buffer
- *
  * @param { unknown } value
  * @returns { value is Buffer }
  */
@@ -105,7 +96,6 @@ export function isBuffer(value) {
 
 /**
  * Determine if "value" is an Array
- *
  * @param { unknown } value
  * @returns { value is Array<unknown> }
  */

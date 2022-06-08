@@ -1,9 +1,7 @@
-/* global ReadableStream */
 import { getProcessor } from './template-result-processor.js';
 
 /**
  * A custom Readable stream factory for rendering a template result to a stream
- *
  * @param { TemplateResult } result - a template result returned from call to "html`...`"
  * @param { RenderOptions } [options]
  * @returns { ReadableStream }

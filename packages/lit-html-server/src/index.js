@@ -9,19 +9,19 @@ export { noChange, nothing } from 'lit-html';
 
 /**
  * Default templateResult factory
- *
  * @param { unknown } value
  * @returns { TemplateResult }
  */
-// prettier-ignore
-const DEFAULT_TEMPLATE_FN = (value) => html`${value}`;
+const DEFAULT_TEMPLATE_FN = (value) =>
+  html`
+    ${value}
+  `;
 
 const templateCache = new Map();
 
 /**
  * Interprets a template literal as an HTML template that can be
  * rendered as a Readable stream or String
- *
  * @param { TemplateStringsArray } strings
  * @param  { ...unknown } values
  * @returns { TemplateResult }
@@ -39,7 +39,6 @@ function html(strings, ...values) {
 
 /**
  * Render a template result to a Readable stream
- *
  * @param { unknown } result - a template result returned from call to "html`...`"
  * @param { RenderOptions } [options]
  * @returns { import('stream').Readable | ReadableStream }
@@ -50,7 +49,6 @@ function renderToStream(result, options) {
 
 /**
  * Render a template result to a string resolving Promise.
- *
  * @param { unknown } result - a template result returned from call to "html`...`"
  * @param { RenderOptions } [options]
  * @returns { Promise<string> }
@@ -61,7 +59,6 @@ function renderToString(result, options) {
 
 /**
  * Render a template result to a Buffer resolving Promise.
- *
  * @param { unknown } result - a template result returned from call to "html`...`"
  * @param { RenderOptions } [options]
  * @returns { Promise<Buffer> }
@@ -72,7 +69,6 @@ function renderToBuffer(result, options) {
 
 /**
  * Retrieve TemplateResult for render
- *
  * @param { unknown} result
  * @returns { TemplateResult }
  */

@@ -8,7 +8,6 @@ let id = 0;
 export class TemplateResult {
   /**
    * Constructor
-   *
    * @param { Template } template
    * @param { Array<unknown> } values
    */
@@ -21,7 +20,6 @@ export class TemplateResult {
 
   /**
    * Consume template result content one chunk at a time.
-   *
    * @param { RenderOptions } [options]
    * @returns { unknown }
    */

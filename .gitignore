@@ -7,3 +7,6 @@ node_modules
 /browser.js
 /shared.js
 /directives/
+# The package store used during GitHub workflows
+# Will be commited by Changeset if not ignored
+.pnpm-store/

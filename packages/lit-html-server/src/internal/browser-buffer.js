@@ -7,7 +7,6 @@
 export class Buffer {
   /**
    * Determine if 'buffer' is a buffer
-   *
    * @param { any } buffer
    * @returns { boolean }
    */
@@ -17,7 +16,6 @@ export class Buffer {
 
   /**
    * Create buffer from 'string'
-   *
    * @param { string } string
    * @returns { Buffer }
    */
@@ -28,7 +26,6 @@ export class Buffer {
 
   /**
    * Join 'buffers' into a single string
-   *
    * @param { Array<any> } buffers
    * @param { number } [length]
    * @returns { Buffer }
@@ -51,7 +48,6 @@ export class Buffer {
 
   /**
    * Construct Buffer instance
-   *
    * @param { string } string
    */
   constructor(string) {
@@ -60,7 +56,6 @@ export class Buffer {
 
   /**
    * Stringify
-   *
    * @returns { string }
    */
   toString() {

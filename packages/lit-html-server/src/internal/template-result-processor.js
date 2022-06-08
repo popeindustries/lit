@@ -4,7 +4,6 @@ import { Buffer } from 'buffer';
 
 /**
  * Process "stack" and push chunks to "renderer"
- *
  * @param { TemplateResultRenderer } renderer
  * @param { Array<unknown> } stack
  * @param { number } [highWaterMark] - byte length to buffer before pushing data
@@ -125,7 +124,6 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options) {
 /**
  * Retrieve next chunk from "result".
  * Adds nested TemplateResults to the stack if necessary.
- *
  * @param { TemplateResult } result
  * @param { Array<unknown> } stack
  * @param { RenderOptions } [options]

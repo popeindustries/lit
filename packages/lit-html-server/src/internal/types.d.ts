@@ -12,11 +12,9 @@ declare type TemplateResult = {
  * tagged template literal invoked with "html`...`".
  */
 declare class Template {
-  strings: Array<Buffer | null>;
-  parts: Array<Part | null>;
-  digest: string;
   constructor(strings: TemplateStringsArray, processor: TemplateProcessor);
-  protected _prepare(strings: TemplateStringsArray, processor: TemplateProcessor): void;
+  getStrings(options?: RenderOptions): Array<Buffer>;
+  getParts(): Array<Part>;
 }
 
 interface TemplateResultRenderer {
@@ -24,87 +22,56 @@ interface TemplateResultRenderer {
   destroy: (err: Error) => void;
 }
 
-/**
- * A dynamic template part for text nodes
- */
-class ChildPart {
+declare enum PartType {
+  METADATA = 0,
+  ATTRIBUTE = 1,
+  CHILD = 2,
+  PROPERTY = 3,
+  BOOLEAN_ATTRIBUTE = 4,
+  EVENT = 5,
+  ELEMENT = 6,
+}
+
+interface MetadataPartType {
+  readonly type: PartType;
+  resolveValue(options?: RenderOptions): Buffer;
+}
+
+interface ChildPartType {
   tagName: string;
-  readonly type = 2;
-  constructor(tagName: string);
-  /**
-   * Retrieve resolved string from passed `value`
-   */
+  readonly type: PartType;
   resolveValue(value: unknown, options?: RenderOptions): unknown;
 }
-/**
- * A dynamic template part for attributes.
- * Unlike text nodes, attributes may contain multiple strings and parts.
- */
-class AttributePart {
-  strings: Array<Buffer>;
-  length: number;
+interface AttributePartType {
   tagName: string;
   readonly name: string;
-  readonly type: 1 | 3 | 4 | 5 | 6;
-  protected prefix: Buffer;
-  protected suffix: Buffer;
-  protected _value: unknown;
-  constructor(name: string, strings: Array<Buffer>, tagName: string);
-  /*
-   * Retrieve resolved string from passed `value`
-   */
+  readonly type: PartType;
   resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer | Promise<Buffer>;
 }
-/**
- * A dynamic template part for property attributes.
- * Property attributes are prefixed with "."
- */
-class PropertyPart extends AttributePart {
-  readonly type = 3;
-  /**
-   * Retrieve resolved string Buffer from passed `values`.
-   * Properties have no server-side representation unless `RenderOptions.serializePropertyAttributes`
-   */
+interface PropertyPartType extends AttributePartType {
+  readonly type: PartType;
   resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer | Promise<Buffer>;
 }
-/**
- * A dynamic template part for boolean attributes.
- * Boolean attributes are prefixed with "?"
- */
-class BooleanAttributePart extends AttributePart {
-  readonly type = 4;
-  protected nameAsBuffer: Buffer;
+interface BooleanAttributePartType {
+  readonly type: PartType;
+  nameAsBuffer: Buffer;
 }
-/**
- * A dynamic template part for event attributes.
- * Event attributes are prefixed with "@"
- */
-class EventPart extends AttributePart {
-  readonly type = 5;
-  /**
-   * Retrieve resolved string Buffer from passed `values`.
-   * Event bindings have no server-side representation, so always returns an empty string.
-   */
+interface EventPartType {
+  readonly type: PartType;
   resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer;
 }
-/**
- * A dynamic template part for accessing element instances.
- */
-class ElementPart extends AttributePart {
-  readonly type = 6;
-  /**
-   * Retrieve resolved string Buffer from passed `values`.
-   * Element bindings have no server-side representation, so always returns an empty string.
-   */
+interface ElementPartType {
+  readonly type: PartType;
   resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer;
 }
-declare type Part = ChildPart | AttributePart | PropertyPart | BooleanAttributePart | ElementPart | EventPart;
-declare type ChildPart = typeof ChildPart;
-declare type AttributePart = typeof AttributePart;
-declare type PropertyPart = typeof PropertyPart;
-declare type BooleanAttributePart = typeof BooleanAttributePart;
-declare type EventPart = typeof EventPart;
-declare type ElementPart = typeof ElementPart;
+declare type Part =
+  | MetadataPartType
+  | ChildPartType
+  | AttributePartType
+  | PropertyPartType
+  | BooleanAttributePartType
+  | ElementPartType
+  | EventPartType;
 
 /**
  * Options supported by template render functions
