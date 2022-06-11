@@ -4,12 +4,30 @@ import { partType } from './parts.js';
 export { isDirectiveResult as isDirective } from 'lit-html/directive-helpers.js';
 
 /**
- * Determine if "part" is an AttributePart
+ * Determine if "part" is an AttributePart or PropertyPart
  * @param { unknown } part
  * @returns { part is AttributePartType }
  */
-export function isAttributePart(part) {
-  return part != null && /** @type { Part } */ (part).type !== partType.CHILD;
+export function isAttributeOrPropertyPart(part) {
+  if (part) {
+    const type = /** @type { Part } */ (part).type;
+    return type === partType.ATTRIBUTE || type === partType.PROPERTY;
+  }
+
+  return false;
+}
+
+/**
+ * Determine if "part" is a MetadataPart
+ * @param { unknown } part
+ * @returns { part is MetadataPartType }
+ */
+export function isMetadataPart(part) {
+  if (part) {
+    return /** @type { Part } */ (part).type === partType.METADATA;
+  }
+
+  return false;
 }
 
 /**

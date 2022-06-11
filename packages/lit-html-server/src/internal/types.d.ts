@@ -12,7 +12,9 @@ declare type TemplateResult = {
  * tagged template literal invoked with "html`...`".
  */
 declare class Template {
-  constructor(strings: TemplateStringsArray, processor: TemplateProcessor);
+  strings: Array<Buffer>;
+  parts: Array<Part>;
+  constructor(strings: TemplateStringsArray);
   getStrings(options?: RenderOptions): Array<Buffer>;
   getParts(): Array<Part>;
 }
@@ -38,13 +40,14 @@ interface MetadataPartType {
 }
 
 interface ChildPartType {
-  tagName: string;
+  readonly tagName: string;
   readonly type: PartType;
   resolveValue(value: unknown, options?: RenderOptions): unknown;
 }
 interface AttributePartType {
-  tagName: string;
+  readonly length: number;
   readonly name: string;
+  readonly tagName: string;
   readonly type: PartType;
   resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer | Promise<Buffer>;
 }
@@ -53,16 +56,21 @@ interface PropertyPartType extends AttributePartType {
   resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer | Promise<Buffer>;
 }
 interface BooleanAttributePartType {
+  readonly name: string;
+  readonly tagName: string;
   readonly type: PartType;
-  nameAsBuffer: Buffer;
+  resolveValue(value: unknown, options?: RenderOptions): Buffer | Promise<Buffer>;
 }
 interface EventPartType {
+  readonly name: string;
+  readonly tagName: string;
   readonly type: PartType;
-  resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer;
+  resolveValue(value: unknown, options?: RenderOptions): Buffer;
 }
 interface ElementPartType {
+  readonly tagName: string;
   readonly type: PartType;
-  resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer;
+  resolveValue(value: unknown, options?: RenderOptions): Buffer;
 }
 declare type Part =
   | MetadataPartType

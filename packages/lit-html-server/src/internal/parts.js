@@ -108,11 +108,7 @@ export class AttributePart {
 
     for (let i = 0; i < this.length; i++) {
       const string = this.strings[i];
-      let value = resolveAttributeValue(
-        values[i],
-        this,
-        options !== undefined ? options.serializePropertyAttributes : false,
-      );
+      let value = resolveAttributeValue(values[i], this);
 
       // Bail if 'nothing'
       if (value === nothing) {
@@ -153,9 +149,11 @@ export class AttributePart {
 
     chunks.push(this.suffix);
     chunkLength += this.suffix.length;
+
     if (pendingChunks !== undefined) {
       return Promise.all(pendingChunks).then(() => Buffer.concat(chunks, chunkLength));
     }
+
     return Buffer.concat(chunks, chunkLength);
   }
 }
@@ -178,18 +176,13 @@ export class PropertyPart extends AttributePart {
 
   /**
    * Retrieve resolved string Buffer from passed "values".
-   * Returns an empty string unless "options.serializePropertyAttributes=true"
+   * Property bindings have no server-side representation,
+   * so always returns an empty string.
    * @param { Array<unknown> } values
    * @param { RenderOptions } [options]
    * @returns { Buffer | Promise<Buffer> }
    */
   resolveValue(values, options) {
-    const value = super.resolveValue(values, options);
-
-    // return value instanceof Promise
-    //   ? value.then((value) => Buffer.concat([prefix, value]))
-    //   : Buffer.concat([prefix, value]);
-
     return EMPTY_STRING_BUFFER;
   }
 }
@@ -214,14 +207,12 @@ export class BooleanAttributePart {
   }
 
   /**
-   * Retrieve resolved string Buffer from passed "values".
-   * @param { Array<unknown> } values
+   * Retrieve resolved string Buffer from passed "value".
+   * @param { unknown } value
    * @param { RenderOptions } [options]
    * @returns { Buffer | Promise<Buffer> }
    */
-  resolveValue(values, options) {
-    let value = values[0];
-
+  resolveValue(value, options) {
     if (isDirective(value)) {
       value = resolveDirectiveValue(value, this);
     }
@@ -252,20 +243,20 @@ export class EventPart {
   }
 
   /**
-   * Retrieve resolved string Buffer from passed "values".
+   * Retrieve resolved string Buffer from passed "value".
    * Event bindings have no server-side representation,
    * so always returns an empty string.
-   * @param { Array<unknown> } values
+   * @param { unknown } value
    * @param { RenderOptions } [options]
    * @returns { Buffer }
    */
-  resolveValue(values, options) {
+  resolveValue(value, options) {
     return EMPTY_STRING_BUFFER;
   }
 }
 
 /**
- * A dynamic template part for accessing element instances.
+ * A dynamic template part for element attributes.
  * @implements ElementPartType
  */
 export class ElementPart {
@@ -279,14 +270,14 @@ export class ElementPart {
   }
 
   /**
-   * Retrieve resolved string Buffer from passed "values".
-   * Event bindings have no server-side representation,
+   * Retrieve resolved string Buffer from passed "value".
+   * Element bindings have no server-side representation,
    * so always returns an empty string.
-   * @param { Array<unknown> } values
+   * @param { unknown } value
    * @param { RenderOptions } [options]
    * @returns { Buffer }
    */
-  resolveValue(values, options) {
+  resolveValue(value, options) {
     return EMPTY_STRING_BUFFER;
   }
 }
@@ -295,10 +286,9 @@ export class ElementPart {
  * Resolve "value" to string if possible
  * @param { unknown } value
  * @param { AttributePart } part
- * @param { boolean } [serialiseObjectsAndArrays]
  * @returns { unknown }
  */
-function resolveAttributeValue(value, part, serialiseObjectsAndArrays = false) {
+function resolveAttributeValue(value, part) {
   if (isDirective(value)) {
     value = resolveDirectiveValue(value, part);
   }
@@ -313,10 +303,8 @@ function resolveAttributeValue(value, part, serialiseObjectsAndArrays = false) {
     return Buffer.from(string.indexOf(unsafePrefixString) === 0 ? string.slice(33) : escape(string, 'attribute'));
   } else if (isBuffer(value)) {
     return value;
-  } else if (serialiseObjectsAndArrays && (isObject(value) || isArray(value))) {
-    return Buffer.from(escape(JSON.stringify(value), 'attribute'));
   } else if (isPromise(value)) {
-    return value.then((value) => resolveAttributeValue(value, part, serialiseObjectsAndArrays));
+    return value.then((value) => resolveAttributeValue(value, part));
   } else if (isSyncIterator(value)) {
     if (!isArray(value)) {
       value = Array.from(value);
@@ -324,7 +312,7 @@ function resolveAttributeValue(value, part, serialiseObjectsAndArrays = false) {
     return Buffer.concat(
       // @ts-ignore: already converted to Array
       value.reduce((values, value) => {
-        value = resolveAttributeValue(value, part, serialiseObjectsAndArrays);
+        value = resolveAttributeValue(value, part);
         // Flatten
         if (isArray(value)) {
           return values.concat(value);

@@ -57,9 +57,9 @@ export class Template {
    */
   constructor(strings) {
     /** @type { Array<Buffer> } */
-    this._strings = [];
+    this.strings = [];
     /** @type { Array<Part> } */
-    this._parts = [];
+    this.parts = [];
     this._parse(strings);
   }
 
@@ -86,7 +86,6 @@ export class Template {
     let regex = RE_TAG;
     let tagName = '';
 
-    console.log(strings);
     for (let i = 0; i < n; i++) {
       let string = nextString;
       nextString = strings[i + 1] ?? '';
@@ -94,15 +93,13 @@ export class Template {
       /** @type { RegExpMatchArray | null } */
       let match;
 
-      console.log('+++++', { string, nextString, n });
-
       // TODO: custom-element parts
       // TODO: rawTextEndRegex
 
       // Add opening metadata before first string in template
       if (i === 0) {
-        this._strings.push(EMPTY_STRING_BUFFER);
-        this._parts.push(new MetadataPart(Buffer.from(`<!--lit-part ${digest}-->`)));
+        this.strings.push(EMPTY_STRING_BUFFER);
+        this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part ${digest}-->`)));
       }
 
       while (lastIndex < string.length) {
@@ -115,7 +112,6 @@ export class Template {
         }
 
         lastIndex = regex.lastIndex;
-        console.log({ match: `|${match?.[0]}|`, groups: match.groups, lastIndex });
 
         if (regex === RE_TAG) {
           const groups = /** @type { RegexTagGroups } */ (match.groups);
@@ -155,8 +151,8 @@ export class Template {
           if (match[0] === '>') {
             // Insert metadata for attributes after close of opening tag
             if (hasAttributeParts) {
-              this._strings.push(Buffer.from(string.slice(0, lastIndex)));
-              this._parts.push(new MetadataPart(Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
+              this.strings.push(Buffer.from(string.slice(0, lastIndex)));
+              this.parts.push(new MetadataPart(Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
               string = string.slice(lastIndex);
               lastIndex = 0;
             }
@@ -206,6 +202,8 @@ export class Template {
                 if (attributeValue !== '') {
                   isStatic = true;
                   attributes[attributeName] = attributeValue;
+                } else {
+                  attributeStrings.push(EMPTY_STRING_BUFFER, EMPTY_STRING_BUFFER);
                 }
               } else {
                 while (valueString !== undefined) {
@@ -219,21 +217,20 @@ export class Template {
                     valueMatch.groups
                   );
 
-                  // attributeStrings.push(EMPTY_STRING_BUFFER);
-
                   if (closingChar !== undefined) {
                     // Static value since closed on first pass
                     if (j === 0) {
                       isStatic = true;
                       attributes[attributeName] = attributeValue;
                     } else {
-                      // attributeStrings.push(Buffer.from(attributeValue));
+                      attributeStrings.push(Buffer.from(attributeValue));
                       i += j - 1;
                       nextString = valueString.slice(valueMatch[0].length - 1);
                     }
                     break;
                   }
-                  // attributeStrings.push(Buffer.from(attributeValue));
+
+                  attributeStrings.push(Buffer.from(attributeValue));
                   valueString = strings[i + ++j];
                 }
               }
@@ -260,24 +257,23 @@ export class Template {
           // TODO: rawTextEndRegex
         }
       }
-      console.log({ mode, string, isLastString: i === n - 1 });
 
-      this._strings.push(Buffer.from(string));
+      this.strings.push(Buffer.from(string));
 
       if (mode === TEXT) {
-        this._parts.push(new MetadataPart(Buffer.from(`<!--lit-part-->`)));
-        this._strings.push(EMPTY_STRING_BUFFER);
-        this._parts.push(new ChildPart(tagName));
-        this._strings.push(EMPTY_STRING_BUFFER);
-        this._parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
+        this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part-->`)));
+        this.strings.push(EMPTY_STRING_BUFFER);
+        this.parts.push(new ChildPart(tagName));
+        this.strings.push(EMPTY_STRING_BUFFER);
+        this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
       } else if (mode === ATTRIBUTE) {
-        this._parts.push(handleAttributeExpressions(attributeName ?? '', attributeStrings, tagName));
+        this.parts.push(handleAttributeExpressions(attributeName ?? '', attributeStrings, tagName));
       }
 
       // Add closing metadata
       if (i === n - 1) {
-        this._parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
-        this._strings.push(EMPTY_STRING_BUFFER);
+        this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
+        this.strings.push(EMPTY_STRING_BUFFER);
       }
     }
   }
