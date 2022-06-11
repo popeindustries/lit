@@ -27,7 +27,7 @@ declare enum PartType {
   ATTRIBUTE = 1,
   CHILD = 2,
   PROPERTY = 3,
-  BOOLEAN_ATTRIBUTE = 4,
+  BOOLEAN = 4,
   EVENT = 5,
   ELEMENT = 6,
 }
@@ -85,4 +85,21 @@ declare type RenderOptions = {
    * JSON serialize property attributes (default `false`)
    */
   serializePropertyAttributes?: boolean;
+};
+
+declare type RegexTagGroups = {
+  commentStart: string | undefined;
+  tagName: string | undefined;
+  dynamicTagName: string | undefined;
+};
+
+declare type RegexAttrGroups = {
+  attributeName: string | undefined;
+  spacesAndEquals: string | undefined;
+  quoteChar: string | undefined;
+};
+
+declare type RegexAttrValueGroups = {
+  attributeValue: string | undefined;
+  closingChar: string | undefined;
 };

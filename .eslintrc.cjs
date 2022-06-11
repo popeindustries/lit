@@ -16,6 +16,7 @@ module.exports = {
     'plugin:prettier/recommended',
   ],
   rules: {
+    'no-constant-condition': 'off',
     'no-prototype-builtins': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/no-this-alias': 'off',

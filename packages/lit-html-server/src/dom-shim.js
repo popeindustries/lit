@@ -3,7 +3,15 @@
 const RE_VALID_NAME = /^[a-z][a-z0-9._-]*-[a-z0-9._-]*$/;
 
 if (typeof globalThis.window === 'undefined') {
-  class Element {}
+  class Element {
+    constructor() {
+      this._hasShadowDOM = false;
+    }
+
+    attachShadow(init) {
+      this._hasShadowDOM = true;
+    }
+  }
 
   class HTMLElement extends Element {}
 

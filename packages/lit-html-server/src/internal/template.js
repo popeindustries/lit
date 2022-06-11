@@ -11,20 +11,32 @@ import { Buffer } from 'buffer';
 
 const EMPTY_STRING_BUFFER = Buffer.from('');
 
-const ATTR_VALUE_CHAR = `[^ \t\n\f\r"'\`<>=]`;
-const NAME_CHAR = `[^\\s"'>=/]`;
-const SPACE_CHAR = `[ \t\n\f\r]`;
+// const ATTR_VALUE_CHAR = `[^ \t\n\f\r"'\`<>=]`;
+// const NAME_CHAR = `[^\\s"'>=/]`;
+// const SPACE_CHAR = `[ \t\n\f\r]`;
 // const TAG_NAME_CHAR = `[a-zA-Z0-9-]`;
 
-const RE_TEXT_END = /<(?:(?<commentStart>!--|\/[^a-zA-Z])|(?<tagName>\/?[a-zA-Z][^>\s]*)|(?<dynamicTagName>\/?$))/g;
+// https://html.spec.whatwg.org/multipage/scripting.html#valid-custom-element-name
+const HTML_TAGS_WITH_HYPHENS = new Set([
+  'annotation-xml',
+  'color-profile',
+  'font-face',
+  'font-face-src',
+  'font-face-uri',
+  'font-face-format',
+  'font-face-name',
+  'missing-glyph',
+]);
+
+const RE_TAG = /<(?:(?<commentStart>!--|\/[^a-zA-Z])|(?<tagName>\/?[a-zA-Z][^>\s]*)|(?<dynamicTagName>\/?$))/g;
+const RE_ATTR =
+  />|[ \t\n\f\r](?:(?<attributeName>[^\s"'>=/]+)(?:(?<spacesAndEquals>[ \t\n\f\r]*=[ \t\n\f\r]*)(?<quoteChar>["'])?)?)/g;
 const RE_COMMENT_END = /-->/g;
 const RE_COMMENT_ALT_END = />/g;
-const RE_TAG_END = new RegExp(
-  `>|${SPACE_CHAR}(?:(?<attributeName>${NAME_CHAR}+)(?<spacesAndEquals>${SPACE_CHAR}*=${SPACE_CHAR}*(?:${ATTR_VALUE_CHAR}|(?<quoteChar>"|')|))|$)`,
-  'g',
-);
-const RE_SINGLE_QUOTE_ATTR_END = /'/g;
-const RE_DOUBLE_QUOTE_ATTR_END = /"/g;
+const RE_CUSTOM_ELEMENT = /^[a-z][a-z0-9._\p{Emoji_Presentation}]*-[a-z0-9._\p{Emoji_Presentation}]*$/u;
+const RE_SINGLE_QUOTED_ATTR_VALUE = /(?<attributeValue>[^'\n\f\r]+)(?:(?<closingChar>')|$)/;
+const RE_DOUBLE_QUOTED_ATTR_VALUE = /(?<attributeValue>[^"\n\f\r]+)(?:(?<closingChar>")|$)/;
+const RE_UNQUOTED_ATTR_VALUE = /(?<attributeValue>[^'"=<>` \t\n\f\r]+(?:(?<closingChar>.)|$))/;
 // const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
 
 // Parse modes:
@@ -59,34 +71,38 @@ export class Template {
    */
   _parse(strings) {
     const digest = digestForTemplateStrings(strings);
-    const n = strings.length;
-    let attributeName = '';
-    let hasAttributes = false;
+    /** @type { { [name: string]: string } } */
+    let attributes = {};
+    /** @type { string | undefined } */
+    let attributeName;
+    /** @type { Array<Buffer> } */
+    let attributeStrings = [];
+    let hasAttributeParts = false;
+    let isCustomElement = false;
     let mode = CLOSE;
+    let n = strings.length;
     let nextString = strings[0];
     let nodeIndex = -1;
-    let regex = RE_TEXT_END;
+    let regex = RE_TAG;
     let tagName = '';
 
+    console.log(strings);
     for (let i = 0; i < n; i++) {
-      const isFirstString = i === 0;
-      const isLastString = i === n - 1;
       let string = nextString;
       nextString = strings[i + 1] ?? '';
       let lastIndex = 0;
+      /** @type { RegExpMatchArray | null } */
       let match;
 
-      // TODO: metadata parts
+      console.log('+++++', { string, nextString, n });
+
       // TODO: custom-element parts
       // TODO: rawTextEndRegex
 
-      if (isFirstString) {
-        // Add opening metadata before first string in template
+      // Add opening metadata before first string in template
+      if (i === 0) {
         this._strings.push(EMPTY_STRING_BUFFER);
         this._parts.push(new MetadataPart(Buffer.from(`<!--lit-part ${digest}-->`)));
-      } else if (mode === TEXT) {
-        // Add closing metadata for child part if between tag open/close and starting new string
-        // metadata.push([0, `<!--/lit-part-->`]);
       }
 
       while (lastIndex < string.length) {
@@ -98,10 +114,12 @@ export class Template {
           break;
         }
 
-        const groups = /** @type { { [name: string]: string } } */ (match.groups);
         lastIndex = regex.lastIndex;
+        console.log({ match: `|${match?.[0]}|`, groups: match.groups, lastIndex });
 
-        if (regex === RE_TEXT_END) {
+        if (regex === RE_TAG) {
+          const groups = /** @type { RegexTagGroups } */ (match.groups);
+
           if (groups.commentStart === '!--') {
             mode = COMMENT;
             regex = RE_COMMENT_END;
@@ -110,18 +128,19 @@ export class Template {
             regex = RE_COMMENT_ALT_END;
           } else {
             const isDynamicTagName = groups.dynamicTagName !== undefined;
-            const rawTagName = isDynamicTagName ? groups.dynamicTagName : groups.tagName;
+            const rawTagName = /** @type { string } */ (isDynamicTagName ? groups.dynamicTagName : groups.tagName);
             const isOpeningTag = rawTagName[0] !== '/';
 
+            attributes = {};
+            hasAttributeParts = false;
+            isCustomElement = isCustomElementTagName(rawTagName);
+            mode = isOpeningTag ? OPEN : CLOSE;
+            regex = RE_ATTR;
+
             if (isOpeningTag) {
-              mode = OPEN;
               tagName = rawTagName;
               nodeIndex++;
-            } else {
-              mode = CLOSE;
             }
-
-            regex = RE_TAG_END;
 
             if (isDynamicTagName) {
               // TODO: dev error
@@ -129,58 +148,106 @@ export class Template {
               // TODO: rawTextEndRegex
             }
           }
-        } else if (regex === RE_TAG_END) {
+        } else if (regex === RE_ATTR) {
+          const groups = /** @type { RegexAttrGroups } */ (match.groups);
+
+          // Tag close
           if (match[0] === '>') {
-            if (mode === OPEN && hasAttributes) {
-              // TODO: insert node metadata
+            // Insert metadata for attributes after close of opening tag
+            if (hasAttributeParts) {
+              this._strings.push(Buffer.from(string.slice(0, lastIndex)));
+              this._parts.push(new MetadataPart(Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
+              string = string.slice(lastIndex);
+              lastIndex = 0;
             }
-            attributeName = '';
-            mode = isLastString ? CLOSE : TEXT;
-            regex = RE_TEXT_END;
+            attributeName = undefined;
+            attributeStrings = [];
+            mode = i === n - 1 ? CLOSE : TEXT;
+            regex = RE_TAG;
             // TODO: rawTextEndRegex
-          } else if (groups.attributeName === undefined) {
-            hasAttributes = true;
-            attributeName = '';
+          }
+          // No attribute name, so must be `ElementAttribute`
+          else if (groups.attributeName === undefined) {
+            attributeName = undefined;
+            attributeStrings = [];
+            hasAttributeParts = true;
             mode = ATTRIBUTE;
-            regex = RE_TAG_END;
-          } else {
-            hasAttributes = true;
+            regex = RE_ATTR;
+          }
+          // Attribute, static or dynamic
+          else {
             attributeName = groups.attributeName;
             mode = ATTRIBUTE;
-            regex =
-              groups.quoteChar === undefined
-                ? RE_TAG_END
+
+            // Attribute name index is current position less full matching string (not including leading space)
+            const attributeNameIndex = lastIndex - match[0].length + 1;
+            const hasQuotes = groups.quoteChar !== undefined;
+            let isStatic = false;
+
+            // Static boolean attribute
+            if (groups.spacesAndEquals === undefined) {
+              isStatic = true;
+              attributes[attributeName] = '';
+            } else {
+              attributeStrings = [];
+              const stringToEnd = string.slice(lastIndex);
+              const valueRegex = !hasQuotes
+                ? RE_UNQUOTED_ATTR_VALUE
                 : groups.quoteChar === '"'
-                ? RE_DOUBLE_QUOTE_ATTR_END
-                : RE_SINGLE_QUOTE_ATTR_END;
+                ? RE_DOUBLE_QUOTED_ATTR_VALUE
+                : RE_SINGLE_QUOTED_ATTR_VALUE;
+              let j = 0;
+              let valueString = stringToEnd;
 
-            const prefix = attributeName[0];
-            const isConditional = prefix === '?' || prefix === '@';
+              while (true) {
+                const valueMatch = valueRegex.exec(valueString);
 
-            // Since some attributes are conditional, remove surrounding text from static strings
-            if (isConditional) {
-              const prefix = groups.attributeName + groups.spacesAndEquals;
-              string = string.slice(0, string.length - prefix.length);
-              lastIndex -= prefix.length;
+                if (valueMatch == null) {
+                  break;
+                }
 
-              if (groups.quoteChar !== undefined) {
+                const { attributeValue = '', closingChar } = /** @type { RegexAttrValueGroups } */ (valueMatch.groups);
+
+                if (closingChar !== undefined) {
+                  // Static value since closed on first pass
+                  if (j === 0) {
+                    isStatic = true;
+                    attributes[attributeName] = attributeValue;
+                  } else {
+                    attributeStrings.push(Buffer.from(attributeValue));
+                    i += j - 1;
+                    nextString = valueString.slice(valueMatch[0].length);
+                  }
+                  break;
+                }
+
+                attributeStrings.push(Buffer.from(attributeValue));
+                valueString = strings[i + ++j];
+              }
+            }
+
+            if (!isStatic) {
+              hasAttributeParts = true;
+              // Trim leading attribute characters (name, spaces, equals, quotes)
+              string = string.slice(0, attributeNameIndex);
+              lastIndex = attributeNameIndex;
+              // Trim closing quotes from start of next string
+              if (hasQuotes) {
+                // @ts-ignore
                 nextString = nextString.slice(nextString.indexOf(groups.quoteChar) + 1);
-                regex = RE_TAG_END;
               }
             }
           }
-        } else if (regex === RE_DOUBLE_QUOTE_ATTR_END || regex === RE_SINGLE_QUOTE_ATTR_END) {
-          mode = OPEN;
-          regex = RE_TAG_END;
         } else if (regex === RE_COMMENT_END || regex === RE_COMMENT_ALT_END) {
           mode = CLOSE;
-          regex == RE_TEXT_END;
+          regex == RE_TAG;
         } else {
           mode = OPEN;
-          regex = RE_TAG_END;
+          regex = RE_ATTR;
           // TODO: rawTextEndRegex
         }
       }
+      console.log({ mode, string, regex, isLastString: i === n - 1, attributes, attributeStrings });
 
       this._strings.push(Buffer.from(string));
 
@@ -191,11 +258,11 @@ export class Template {
         this._strings.push(EMPTY_STRING_BUFFER);
         this._parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
       } else if (mode === ATTRIBUTE) {
-        this._parts.push(handleAttributeExpressions(attributeName, tagName));
+        this._parts.push(handleAttributeExpressions(attributeName ?? '', attributeStrings, tagName));
       }
 
       // Add closing metadata
-      if (isLastString) {
+      if (i === n - 1) {
         this._parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
         this._strings.push(EMPTY_STRING_BUFFER);
       }
@@ -206,9 +273,10 @@ export class Template {
 /**
  * Create part instance for dynamic attribute values
  * @param { string } name
+ * @param { Array<Buffer> } strings
  * @param { string } tagName
  */
-function handleAttributeExpressions(name, tagName) {
+function handleAttributeExpressions(name, strings, tagName) {
   if (name === '') {
     return new ElementPart(tagName);
   }
@@ -216,14 +284,14 @@ function handleAttributeExpressions(name, tagName) {
   const prefix = name[0];
 
   if (prefix === '.') {
-    return new PropertyPart(name.slice(1), tagName);
+    return new PropertyPart(name.slice(1), strings, tagName);
   } else if (prefix === '@') {
     return new EventPart(name.slice(1), tagName);
   } else if (prefix === '?') {
     return new BooleanAttributePart(name.slice(1), tagName);
   }
 
-  return new AttributePart(name, tagName);
+  return new AttributePart(name, strings, tagName);
 }
 
 /**
@@ -245,4 +313,12 @@ function digestForTemplateStrings(strings) {
   }
 
   return Buffer.from(String.fromCharCode(...new Uint8Array(hashes.buffer)), 'binary').toString('base64');
+}
+
+/**
+ * Determine whether `tagName` is a custom element name
+ * @param { string } tagName
+ */
+function isCustomElementTagName(tagName) {
+  return !HTML_TAGS_WITH_HYPHENS.has(tagName) && RE_CUSTOM_ELEMENT.test(tagName);
 }

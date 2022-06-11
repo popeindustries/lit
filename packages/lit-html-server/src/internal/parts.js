@@ -9,7 +9,7 @@ export const partType = {
   ATTRIBUTE: 1,
   CHILD: 2,
   PROPERTY: 3,
-  BOOLEAN_ATTRIBUTE: 4,
+  BOOLEAN: 4,
   EVENT: 5,
   ELEMENT: 6,
 };
@@ -79,11 +79,16 @@ export class AttributePart {
   /**
    * Constructor
    * @param { string } name
+   * @param { Array<Buffer> } strings
    * @param { string } tagName
    * @param { PartType } [type]
    */
-  constructor(name, tagName, type = partType.ATTRIBUTE) {
+  constructor(name, strings, tagName, type = partType.ATTRIBUTE) {
+    this.length = strings.length - 1;
     this.name = name;
+    this.prefix = Buffer.from(`${this.name}="`);
+    this.strings = strings;
+    this.suffix = Buffer.from(`${this.strings[this.length]}"`);
     this.tagName = tagName;
     this.type = type;
   }
@@ -97,7 +102,7 @@ export class AttributePart {
    * @returns { Buffer | Promise<Buffer> }
    */
   resolveValue(values, options) {
-    let chunks = [];
+    let chunks = [this.prefix];
     let chunkLength = this.prefix.length;
     let pendingChunks;
 
@@ -164,10 +169,11 @@ export class PropertyPart extends AttributePart {
   /**
    * Constructor
    * @param { string } name
+   * @param { Array<Buffer> } strings
    * @param { string } tagName
    */
-  constructor(name, tagName) {
-    super(name, tagName, partType.PROPERTY);
+  constructor(name, strings, tagName) {
+    super(name, strings, tagName, partType.PROPERTY);
   }
 
   /**
@@ -178,14 +184,11 @@ export class PropertyPart extends AttributePart {
    * @returns { Buffer | Promise<Buffer> }
    */
   resolveValue(values, options) {
-    if (options !== undefined && options.serializePropertyAttributes) {
-      const value = super.resolveValue(values, options);
-      const prefix = Buffer.from('.');
+    const value = super.resolveValue(values, options);
 
-      return value instanceof Promise
-        ? value.then((value) => Buffer.concat([prefix, value]))
-        : Buffer.concat([prefix, value]);
-    }
+    // return value instanceof Promise
+    //   ? value.then((value) => Buffer.concat([prefix, value]))
+    //   : Buffer.concat([prefix, value]);
 
     return EMPTY_STRING_BUFFER;
   }
@@ -205,7 +208,7 @@ export class BooleanAttributePart {
   constructor(name, tagName) {
     this.name = name;
     this.tagName = tagName;
-    this.type = partType.BOOLEAN_ATTRIBUTE;
+    this.type = partType.BOOLEAN;
 
     this.nameAsBuffer = Buffer.from(this.name);
   }
