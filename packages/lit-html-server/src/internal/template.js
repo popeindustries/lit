@@ -30,13 +30,13 @@ const HTML_TAGS_WITH_HYPHENS = new Set([
 
 const RE_TAG = /<(?:(?<commentStart>!--|\/[^a-zA-Z])|(?<tagName>\/?[a-zA-Z][^>\s]*)|(?<dynamicTagName>\/?$))/g;
 const RE_ATTR =
-  />|[ \t\n\f\r](?:(?<attributeName>[^\s"'>=/]+)(?:(?<spacesAndEquals>[ \t\n\f\r]*=[ \t\n\f\r]*)(?<quoteChar>["'])?)?)/g;
+  />|[ \t\n\f\r](?:(?<attributeName>[^\s"'>=/]+)(?:(?<spacesAndEquals>[ \t\n\f\r]*=[ \t\n\f\r]*)(?<quoteChar>["'])?)?|$)/g;
 const RE_COMMENT_END = /-->/g;
 const RE_COMMENT_ALT_END = />/g;
 const RE_CUSTOM_ELEMENT = /^[a-z][a-z0-9._\p{Emoji_Presentation}]*-[a-z0-9._\p{Emoji_Presentation}]*$/u;
-const RE_SINGLE_QUOTED_ATTR_VALUE = /(?<attributeValue>[^'\n\f\r]+)(?:(?<closingChar>')|$)/;
-const RE_DOUBLE_QUOTED_ATTR_VALUE = /(?<attributeValue>[^"\n\f\r]+)(?:(?<closingChar>")|$)/;
-const RE_UNQUOTED_ATTR_VALUE = /(?<attributeValue>[^'"=<>` \t\n\f\r]+(?:(?<closingChar>.)|$))/;
+const RE_SINGLE_QUOTED_ATTR_VALUE = /^(?<attributeValue>[^'\n\f\r]*)(?:(?<closingChar>')|$)/;
+const RE_DOUBLE_QUOTED_ATTR_VALUE = /^(?<attributeValue>[^"\n\f\r]*)(?:(?<closingChar>")|$)/;
+const RE_UNQUOTED_ATTR_VALUE = /^(?<attributeValue>[^'"=<>` \t\n\f\r]+)/;
 // const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
 
 // Parse modes:
@@ -183,6 +183,7 @@ export class Template {
             const attributeNameIndex = lastIndex - match[0].length + 1;
             const hasQuotes = groups.quoteChar !== undefined;
             let isStatic = false;
+            let valueString = string.slice(lastIndex);
 
             // Static boolean attribute
             if (groups.spacesAndEquals === undefined) {
@@ -190,39 +191,51 @@ export class Template {
               attributes[attributeName] = '';
             } else {
               attributeStrings = [];
-              const stringToEnd = string.slice(lastIndex);
               const valueRegex = !hasQuotes
                 ? RE_UNQUOTED_ATTR_VALUE
                 : groups.quoteChar === '"'
                 ? RE_DOUBLE_QUOTED_ATTR_VALUE
                 : RE_SINGLE_QUOTED_ATTR_VALUE;
               let j = 0;
-              let valueString = stringToEnd;
 
-              while (true) {
+              if (!hasQuotes) {
                 const valueMatch = valueRegex.exec(valueString);
+                // @ts-ignore
+                const attributeValue = valueMatch?.groups.attributeValue ?? '';
 
-                if (valueMatch == null) {
-                  break;
+                if (attributeValue !== '') {
+                  isStatic = true;
+                  attributes[attributeName] = attributeValue;
                 }
+              } else {
+                while (valueString !== undefined) {
+                  const valueMatch = valueRegex.exec(valueString);
 
-                const { attributeValue = '', closingChar } = /** @type { RegexAttrValueGroups } */ (valueMatch.groups);
-
-                if (closingChar !== undefined) {
-                  // Static value since closed on first pass
-                  if (j === 0) {
-                    isStatic = true;
-                    attributes[attributeName] = attributeValue;
-                  } else {
-                    attributeStrings.push(Buffer.from(attributeValue));
-                    i += j - 1;
-                    nextString = valueString.slice(valueMatch[0].length);
+                  if (valueMatch === null) {
+                    break;
                   }
-                  break;
-                }
 
-                attributeStrings.push(Buffer.from(attributeValue));
-                valueString = strings[i + ++j];
+                  const { attributeValue = '', closingChar } = /** @type { RegexAttrValueGroups } */ (
+                    valueMatch.groups
+                  );
+
+                  // attributeStrings.push(EMPTY_STRING_BUFFER);
+
+                  if (closingChar !== undefined) {
+                    // Static value since closed on first pass
+                    if (j === 0) {
+                      isStatic = true;
+                      attributes[attributeName] = attributeValue;
+                    } else {
+                      // attributeStrings.push(Buffer.from(attributeValue));
+                      i += j - 1;
+                      nextString = valueString.slice(valueMatch[0].length - 1);
+                    }
+                    break;
+                  }
+                  // attributeStrings.push(Buffer.from(attributeValue));
+                  valueString = strings[i + ++j];
+                }
               }
             }
 
@@ -247,7 +260,7 @@ export class Template {
           // TODO: rawTextEndRegex
         }
       }
-      console.log({ mode, string, regex, isLastString: i === n - 1, attributes, attributeStrings });
+      console.log({ mode, string, isLastString: i === n - 1 });
 
       this._strings.push(Buffer.from(string));
 
