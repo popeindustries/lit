@@ -4,7 +4,7 @@ import { renderToStream, renderToString } from '../src/index.js';
 import { renderLitTemplate, t } from './utils.js';
 import assert from 'node:assert';
 
-describe.only('Server template render', () => {
+describe('Server template render', () => {
   const tests = [
     {
       title: 'plain text',
@@ -50,6 +50,16 @@ describe.only('Server template render', () => {
       result:
         '<!--lit-part BRUAAAUVAAA=--><!--lit-part--><!--lit-part-->1<!--/lit-part--><!--lit-part-->2<!--/lit-part--><!--lit-part--><!--lit-part-->3<!--/lit-part--><!--lit-part--><!--lit-part-->4<!--/lit-part--><!--lit-part-->5<!--/lit-part--><!--/lit-part--><!--/lit-part--><!--/lit-part--><!--/lit-part-->',
     },
+    {
+      title: 'Promise value',
+      templates: t`${Promise.resolve('some')} text`,
+      result: '<!--lit-part NC6GC4lvWQA=--><!--lit-part-->some<!--/lit-part--> text<!--/lit-part-->',
+    },
+    {
+      title: 'template value',
+      templates: t`some ${t`text`}`,
+      result: '<!--lit-part e5CHC29vWQA=-->some <!--lit-part iW9ZALRtWQA=-->text<!--/lit-part--><!--/lit-part-->',
+    },
   ];
   const only = tests.filter(({ only }) => only);
 
@@ -90,12 +100,6 @@ describe.only('Server template render', () => {
     it('should render a template with array of nested template values', async () => {
       const result = () => h`some ${[1, 2, 3].map((i) => h`${i}`)} text`;
       const expected = 'some 123 text';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with Promise value', async () => {
-      const result = () => h`${Promise.resolve('some')} text`;
-      const expected = 'some text';
       assert((await renderToString(result())) === expected);
       assert((await streamAsPromise(renderToStream(result()))) === expected);
     });

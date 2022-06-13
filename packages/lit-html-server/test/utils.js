@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { isArray, isAsyncIterator, isBuffer, isPromise, isTemplateResult } from '../src/internal/is.js';
 import { Buffer } from 'buffer';
 import { html } from '../src/index.js';
@@ -12,7 +13,23 @@ const EMPTY_STRING_BUFFER = Buffer.from('');
  * @param  {...unknown} values
  */
 export function t(strings, ...values) {
-  return [html(strings, ...values), litHtml(strings, ...values)];
+  const vh = [];
+  const vl = [];
+
+  for (const v of values) {
+    if (v?.__t) {
+      vh.push(v[0]);
+      vl.push(v[1]);
+    } else {
+      vh.push(v);
+      vl.push(v);
+    }
+  }
+
+  const result = [html(strings, ...vh), litHtml(strings, ...vl)];
+  result.__t = true;
+
+  return result;
 }
 
 /**

@@ -54,6 +54,7 @@ export class Template {
    * @param { TemplateStringsArray } strings
    */
   constructor(strings) {
+    this.digest = digestForTemplateStrings(strings);
     /** @type { Array<Buffer> } */
     this.strings = [];
     /** @type { Array<Part> } */
@@ -68,7 +69,6 @@ export class Template {
    * @param { TemplateStringsArray } strings
    */
   _parse(strings) {
-    const digest = digestForTemplateStrings(strings);
     /** @type { { [name: string]: string } } */
     let attributes = {};
     /** @type { string | undefined } */
@@ -97,10 +97,10 @@ export class Template {
       // TODO: rawTextEndRegex
 
       // Add opening metadata before first string in template
-      if (isFirstString) {
-        this.strings.push(EMPTY_STRING_BUFFER);
-        this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part ${digest}-->`)));
-      }
+      // if (isFirstString) {
+      //   this.strings.push(EMPTY_STRING_BUFFER);
+      //   this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part ${digest}-->`)));
+      // }
 
       while (lastIndex < string.length) {
         // Start search from end of last match
@@ -262,17 +262,17 @@ export class Template {
 
       if (!isLastString) {
         if (mode === TEXT) {
-          this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part-->`)));
-          this.strings.push(EMPTY_STRING_BUFFER);
+          // this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part-->`)));
+          // this.strings.push(EMPTY_STRING_BUFFER);
           this.parts.push(new ChildPart(tagName));
-          this.strings.push(EMPTY_STRING_BUFFER);
-          this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
+          // this.strings.push(EMPTY_STRING_BUFFER);
+          // this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
         } else if (mode === ATTRIBUTE) {
           this.parts.push(handleAttributeExpressions(attributeName ?? '', attributeStrings, tagName));
         }
       } else {
-        this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
-        this.strings.push(EMPTY_STRING_BUFFER);
+        // this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
+        // this.strings.push(EMPTY_STRING_BUFFER);
       }
     }
   }
@@ -292,7 +292,7 @@ function handleAttributeExpressions(name, strings, tagName) {
   const prefix = name[0];
 
   if (prefix === '.') {
-    return new PropertyPart(name.slice(1), tagName);
+    return new PropertyPart(name.slice(1), strings, tagName);
   } else if (prefix === '@') {
     return new EventPart(name.slice(1), tagName);
   } else if (prefix === '?') {

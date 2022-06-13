@@ -1,6 +1,9 @@
+import { isBuffer } from './is.js';
 import { partType } from './parts.js';
 
 const EMPTY_STRING_BUFFER = Buffer.from('');
+const META_OPEN = Buffer.from(`<!--lit-part-->`);
+const META_CLOSE = Buffer.from(`<!--/lit-part-->`);
 
 let id = 0;
 
@@ -18,7 +21,12 @@ export class TemplateResult {
     this.values = values;
     this.id = id++;
     this.index = 0;
+    this.maxIndex = this.template.strings.length + this.template.parts.length - 1;
     this.valueIndex = 0;
+    this._metadata = {
+      open: Buffer.from(`<!--lit-part ${this.template.digest}-->`),
+      close: META_CLOSE,
+    };
   }
 
   /**
@@ -27,11 +35,14 @@ export class TemplateResult {
    * @returns { unknown }
    */
   readChunk(options) {
-    const isString = this.index % 2 === 0;
     const index = (this.index / 2) | 0;
+    const isString = this.index % 2 === 0;
+    const isFirstString = this.index === 0;
+    const isLastString = this.index === this.maxIndex;
+    const withMetadata = options?.includeRehydrationMetadata;
 
     // Finished
-    if (!isString && index >= this.template.strings.length - 1) {
+    if (!isString && this.index >= this.maxIndex) {
       // Reset
       this.index = 0;
       this.valueIndex = 0;
@@ -41,13 +52,25 @@ export class TemplateResult {
     this.index++;
 
     if (isString) {
-      return this.template.strings[index];
+      let string = this.template.strings[index];
+
+      if (withMetadata) {
+        if (isFirstString) {
+          string = Buffer.concat([this._metadata.open, string]);
+        }
+        if (isLastString) {
+          string = Buffer.concat([string, this._metadata.close]);
+        }
+      }
+
+      return string;
     }
 
     const part = this.template.parts[index];
 
     switch (part.type) {
-      case partType.ATTRIBUTE: {
+      case partType.ATTRIBUTE:
+      case partType.PROPERTY: {
         const length = /** @type { AttributePartType } */ (part).length;
         let value;
         // AttributeParts can have multiple values, so slice based on length
@@ -59,19 +82,23 @@ export class TemplateResult {
         }
         this.valueIndex += length;
         // @ts-ignore
-        return part.resolveValue(value, options);
+        return part.type === partType.PROPERTY ? part.value : part.resolveValue(value, options);
       }
-      case partType.BOOLEAN:
-      case partType.CHILD: {
+      case partType.BOOLEAN: {
         // @ts-ignore
         const value = part.resolveValue(this.values[this.valueIndex], options);
         this.valueIndex++;
         return value;
       }
-      case partType.METADATA: {
-        const hasMetadata = options?.includeRehydrationMetadata;
+      case partType.CHILD: {
         // @ts-ignore
-        return hasMetadata ? part.value : EMPTY_STRING_BUFFER;
+        let value = part.resolveValue(this.values[this.valueIndex], options);
+        this.valueIndex++;
+        return value;
+      }
+      case partType.METADATA: {
+        // @ts-ignore
+        return withMetadata ? part.value : EMPTY_STRING_BUFFER;
       }
       default:
         this.valueIndex++;

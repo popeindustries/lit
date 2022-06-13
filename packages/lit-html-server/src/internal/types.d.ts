@@ -12,6 +12,7 @@ declare type TemplateResult = {
  * tagged template literal invoked with "html`...`".
  */
 declare class Template {
+  digest: string;
   strings: Array<Buffer>;
   parts: Array<Part>;
   constructor(strings: TemplateStringsArray);
@@ -40,16 +41,17 @@ interface MetadataPartType {
 interface ChildPartType {
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(value: unknown, options?: RenderOptions): unknown;
+  resolveValue(value: unknown, withMetadata: boolean): unknown;
 }
 interface AttributePartType {
   readonly length: number;
   readonly name: string;
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(value: unknown, options?: RenderOptions): Buffer;
+  resolveValue(value: unknown): Buffer;
 }
 interface PropertyPartType {
+  readonly length: number;
   readonly name: string;
   readonly tagName: string;
   readonly type: PartType;
@@ -59,7 +61,7 @@ interface BooleanAttributePartType {
   readonly name: string;
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(value: unknown, options?: RenderOptions): Buffer;
+  resolveValue(value: unknown): Buffer;
 }
 interface EventPartType {
   readonly name: string;

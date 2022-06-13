@@ -15,6 +15,8 @@ export const partType = {
 };
 
 const EMPTY_STRING_BUFFER = Buffer.from('');
+const META_OPEN = Buffer.from(`<!--lit-part-->`);
+const META_CLOSE = Buffer.from(`<!--/lit-part-->`);
 
 /**
  * A prefix value for strings that should not be escaped
@@ -53,11 +55,11 @@ export class ChildPart {
   /**
    * Retrieve resolved value given passed "value"
    * @param { unknown } value
-   * @param { RenderOptions } [options]
+   * @param { boolean } [withMetadata]
    * @returns { unknown }
    */
-  resolveValue(value, options) {
-    return resolveNodeValue(value, this);
+  resolveValue(value, withMetadata = false) {
+    return resolveNodeValue(value, this, withMetadata);
   }
 }
 
@@ -131,9 +133,11 @@ export class PropertyPart {
   /**
    * Constructor
    * @param { string } name
+   * @param { Array<Buffer> } strings
    * @param { string } tagName
    */
-  constructor(name, tagName) {
+  constructor(name, strings, tagName) {
+    this.length = strings.length - 1;
     this.name = name;
     this.tagName = tagName;
     this.type = partType.PROPERTY;
@@ -241,36 +245,41 @@ function resolveAttributeValue(value, part) {
  * Resolve "value" to string Buffer if possible
  * @param { unknown } value
  * @param { ChildPart } part
+ * @param { boolean } withMetadata
  * @returns { unknown }
  */
-function resolveNodeValue(value, part) {
+function resolveNodeValue(value, part, withMetadata) {
   if (isDirective(value)) {
     value = resolveDirectiveValue(value, part);
   }
 
   if (value === nothing || value == null) {
-    return EMPTY_STRING_BUFFER;
+    value = EMPTY_STRING_BUFFER;
   }
 
   if (isPrimitive(value)) {
     const string = typeof value !== 'string' ? String(value) : value;
     // Escape if not prefixed with unsafePrefixString, otherwise strip prefix
-    return Buffer.from(
+    value = Buffer.from(
       string.indexOf(unsafePrefixString) === 0
         ? string.slice(33)
         : escape(string, part.tagName === 'script' || part.tagName === 'style' ? part.tagName : 'text'),
     );
-  } else if (isTemplateResult(value) || isBuffer(value)) {
+  }
+
+  if (isBuffer(value)) {
+    return withMetadata ? Buffer.concat([META_OPEN, value, META_CLOSE]) : value;
+  } else if (isTemplateResult(value)) {
     return value;
   } else if (isPromise(value)) {
-    return value.then((value) => resolveNodeValue(value, part));
+    return value.then((value) => resolveNodeValue(value, part, withMetadata));
   } else if (isSyncIterator(value)) {
     if (!isArray(value)) {
       value = Array.from(value);
     }
     // @ts-ignore: already converted to Array
     return value.reduce((values, value) => {
-      value = resolveNodeValue(value, part);
+      value = resolveNodeValue(value, part, withMetadata);
       // Flatten
       if (isArray(value)) {
         return values.concat(value);
@@ -279,7 +288,7 @@ function resolveNodeValue(value, part) {
       return values;
     }, []);
   } else if (isAsyncIterator(value)) {
-    return resolveAsyncIteratorValue(value, part);
+    return resolveAsyncIteratorValue(value, part, withMetadata);
   } else {
     throw Error(`unknown NodePart value: ${value}`);
   }
@@ -289,11 +298,12 @@ function resolveNodeValue(value, part) {
  * Resolve values of async "iterator"
  * @param { AsyncIterable<unknown> } iterator
  * @param { ChildPart } part
+ * @param { boolean } withMetadata
  * @returns { AsyncGenerator<unknown> }
  */
-async function* resolveAsyncIteratorValue(iterator, part) {
+async function* resolveAsyncIteratorValue(iterator, part, withMetadata) {
   for await (const value of iterator) {
-    yield resolveNodeValue(value, part);
+    yield resolveNodeValue(value, part, withMetadata);
   }
 }
 
