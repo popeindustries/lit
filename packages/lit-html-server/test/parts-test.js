@@ -38,7 +38,7 @@ describe('Parts', () => {
     });
     it('should resolve a null value', () => {
       const part = new ChildPart('div');
-      expect(part.resolveValue(null).toString()).to.equal('null');
+      expect(part.resolveValue(null).toString()).to.equal('');
     });
     it('should resolve an undefined value', () => {
       const part = new ChildPart('div');
@@ -75,7 +75,7 @@ describe('Parts', () => {
     it('should resolve a null Promise value', async () => {
       const part = new ChildPart('div');
       const promise = Promise.resolve(null);
-      expect((await part.resolveValue(promise)).toString()).to.equal('null');
+      expect((await part.resolveValue(promise)).toString()).to.equal('');
     });
     it('should resolve an undefined Promise value', async () => {
       const part = new ChildPart('div');
@@ -219,13 +219,13 @@ describe('Parts', () => {
 
   describe('BooleanAttributePart', () => {
     it('should resolve truthy values', () => {
-      const part = new BooleanAttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
+      const part = new BooleanAttributePart('a', 'div');
       expect(part.resolveValue(true).toString()).to.equal('a');
       expect(part.resolveValue('true').toString()).to.equal('a');
       expect(part.resolveValue(1).toString()).to.equal('a');
     });
     it('should resolve falsey values', () => {
-      const part = new BooleanAttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
+      const part = new BooleanAttributePart('a', 'div');
       expect(part.resolveValue(false).toString()).to.equal('');
       expect(part.resolveValue('').toString()).to.equal('');
       expect(part.resolveValue(0).toString()).to.equal('');
@@ -233,13 +233,13 @@ describe('Parts', () => {
       expect(part.resolveValue(undefined).toString()).to.equal('');
     });
     it('should resolve a truthy Promise value', async () => {
-      const part = new BooleanAttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
+      const part = new BooleanAttributePart('a', 'div');
       expect((await part.resolveValue(Promise.resolve(true))).toString()).to.equal('a');
       expect((await part.resolveValue(Promise.resolve('true'))).toString()).to.equal('a');
       expect((await part.resolveValue(Promise.resolve(1))).toString()).to.equal('a');
     });
     it('should resolve a falsey Promise value', async () => {
-      const part = new BooleanAttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
+      const part = new BooleanAttributePart('a', 'div');
       expect((await part.resolveValue(Promise.resolve(false))).toString()).to.equal('');
       expect((await part.resolveValue(Promise.resolve(''))).toString()).to.equal('');
       expect((await part.resolveValue(Promise.resolve(0))).toString()).to.equal('');
@@ -250,22 +250,22 @@ describe('Parts', () => {
 
   describe('ElementPart', () => {
     it('should resolve to empty string', () => {
-      const part = new ElementPart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      expect(part.resolveValue('text').toString()).to.equal('');
+      const part = new ElementPart('a');
+      expect(part.value.toString()).to.equal('');
     });
   });
 
   describe('EventPart', () => {
     it('should resolve to empty string', () => {
-      const part = new EventPart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      expect(part.resolveValue('text').toString()).to.equal('');
+      const part = new EventPart('a', 'div');
+      expect(part.value.toString()).to.equal('');
     });
   });
 
   describe('PropertyPart', () => {
     it('should resolve to empty string', () => {
-      const part = new PropertyPart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      expect(part.resolveValue('text').toString()).to.equal('');
+      const part = new PropertyPart('a', 'div');
+      expect(part.value.toString()).to.equal('');
     });
   });
 });

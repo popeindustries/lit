@@ -40,11 +40,9 @@ const RE_UNQUOTED_ATTR_VALUE = /^(?<attributeValue>[^'"=<>` \t\n\f\r]+)/;
 // const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
 
 // Parse modes:
-const CLOSE = 0;
-const OPEN = 1;
+const TEXT = 1;
 const ATTRIBUTE = 2;
-const TEXT = 3;
-const COMMENT = 4;
+const COMMENT = 3;
 
 /**
  * A cacheable Template that stores the "strings" and "parts" associated with a
@@ -79,7 +77,7 @@ export class Template {
     let attributeStrings = [];
     let hasAttributeParts = false;
     let isCustomElement = false;
-    let mode = CLOSE;
+    let mode = TEXT;
     let n = strings.length;
     let nextString = strings[0];
     let nodeIndex = -1;
@@ -87,6 +85,8 @@ export class Template {
     let tagName = '';
 
     for (let i = 0; i < n; i++) {
+      const isFirstString = i === 0;
+      const isLastString = i === n - 1;
       let string = nextString;
       nextString = strings[i + 1] ?? '';
       let lastIndex = 0;
@@ -97,7 +97,7 @@ export class Template {
       // TODO: rawTextEndRegex
 
       // Add opening metadata before first string in template
-      if (i === 0) {
+      if (isFirstString) {
         this.strings.push(EMPTY_STRING_BUFFER);
         this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part ${digest}-->`)));
       }
@@ -130,7 +130,7 @@ export class Template {
             attributes = {};
             hasAttributeParts = false;
             isCustomElement = isCustomElementTagName(rawTagName);
-            mode = isOpeningTag ? OPEN : CLOSE;
+            mode = ATTRIBUTE;
             regex = RE_ATTR;
 
             if (isOpeningTag) {
@@ -158,7 +158,7 @@ export class Template {
             }
             attributeName = undefined;
             attributeStrings = [];
-            mode = i === n - 1 ? CLOSE : TEXT;
+            mode = TEXT;
             regex = RE_TAG;
             // TODO: rawTextEndRegex
           }
@@ -249,10 +249,10 @@ export class Template {
             }
           }
         } else if (regex === RE_COMMENT_END || regex === RE_COMMENT_ALT_END) {
-          mode = CLOSE;
+          mode = TEXT;
           regex == RE_TAG;
         } else {
-          mode = OPEN;
+          mode = ATTRIBUTE;
           regex = RE_ATTR;
           // TODO: rawTextEndRegex
         }
@@ -260,18 +260,17 @@ export class Template {
 
       this.strings.push(Buffer.from(string));
 
-      if (mode === TEXT) {
-        this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part-->`)));
-        this.strings.push(EMPTY_STRING_BUFFER);
-        this.parts.push(new ChildPart(tagName));
-        this.strings.push(EMPTY_STRING_BUFFER);
-        this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
-      } else if (mode === ATTRIBUTE) {
-        this.parts.push(handleAttributeExpressions(attributeName ?? '', attributeStrings, tagName));
-      }
-
-      // Add closing metadata
-      if (i === n - 1) {
+      if (!isLastString) {
+        if (mode === TEXT) {
+          this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part-->`)));
+          this.strings.push(EMPTY_STRING_BUFFER);
+          this.parts.push(new ChildPart(tagName));
+          this.strings.push(EMPTY_STRING_BUFFER);
+          this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
+        } else if (mode === ATTRIBUTE) {
+          this.parts.push(handleAttributeExpressions(attributeName ?? '', attributeStrings, tagName));
+        }
+      } else {
         this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
         this.strings.push(EMPTY_STRING_BUFFER);
       }
@@ -293,7 +292,7 @@ function handleAttributeExpressions(name, strings, tagName) {
   const prefix = name[0];
 
   if (prefix === '.') {
-    return new PropertyPart(name.slice(1), strings, tagName);
+    return new PropertyPart(name.slice(1), tagName);
   } else if (prefix === '@') {
     return new EventPart(name.slice(1), tagName);
   } else if (prefix === '?') {

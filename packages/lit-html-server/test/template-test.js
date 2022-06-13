@@ -1,12 +1,17 @@
 // @ts-nocheck
-import { AttributePart, ChildPart, partType } from '../src/internal/parts.js';
 import { expect } from 'chai';
 import { Template } from '../src/internal/template.js';
+import { templateToString } from './utils.js';
 
 describe('Template class', () => {
   describe('parsing without values', () => {
     const tests = [
       { title: 'plain text', template: 'text', result: '<!--lit-part iW9ZALRtWQA=-->text<!--/lit-part-->' },
+      {
+        title: 'plain text value',
+        template: 'some ${x} here',
+        result: '<!--lit-part m4ZhgXUCc3w=-->some <!--lit-part-->[CHILD]<!--/lit-part--> here<!--/lit-part-->',
+      },
       {
         title: 'child value',
         template: '<div>${x}</div>',
@@ -173,9 +178,10 @@ describe('Template class', () => {
       },
       {
         title: 'quoted attribute and multiple strings/values',
-        template: '<div a=" look ${x} in ${x} "></div>',
-        values: [['a', 'a']],
-        result: '<!--lit-part wUnUgpIpnBg=--><div a=" look a in a "><!--lit-node 0--></div><!--/lit-part-->',
+        template: '<div a=" look ${x} in ${x}">${x}</div>',
+        values: [['a', 'a'], 'text'],
+        result:
+          '<!--lit-part q25itvhrjRg=--><div a=" look a in a"><!--lit-node 0--><!--lit-part-->text<!--/lit-part--></div><!--/lit-part-->',
       },
       {
         title: 'unquoted attribute',
@@ -245,45 +251,3 @@ describe('Template class', () => {
     }
   });
 });
-
-/**
- * @param { Template } template
- * @param { Array<unknown> } [values]
- */
-function templateToString(template, values) {
-  const { strings, parts } = template;
-  let result = '';
-  let i = 0;
-  for (; i < strings.length - 1; i++) {
-    const string = strings[i];
-    const part = parts[i];
-    result += string.toString();
-    result += values && part.type !== partType.METADATA ? part.resolveValue(values.shift()) : partTypeToName(part);
-  }
-  result += strings[i].toString();
-  return result;
-}
-
-/**
- * @param { Part } part
- */
-function partTypeToName(part) {
-  switch (part.type) {
-    case partType.CHILD:
-      return '[CHILD]';
-    case partType.ATTRIBUTE:
-      return '[ATTR]';
-    case partType.BOOLEAN:
-      return '[BOOL]';
-    case partType.ELEMENT:
-      return '[ELEMENT]';
-    case partType.EVENT:
-      return '[EVENT]';
-    case partType.METADATA:
-      return part.value.toString();
-    case partType.PROPERTY:
-      return '[PROPERTY]';
-    default:
-      return '[PART]';
-  }
-}

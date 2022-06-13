@@ -1,4 +1,6 @@
-import { isAttributeOrPropertyPart, isMetadataPart } from './is.js';
+import { partType } from './parts.js';
+
+const EMPTY_STRING_BUFFER = Buffer.from('');
 
 let id = 0;
 
@@ -16,7 +18,7 @@ export class TemplateResult {
     this.values = values;
     this.id = id++;
     this.index = 0;
-    this.valueOffset = 0;
+    this.valueIndex = 0;
   }
 
   /**
@@ -27,13 +29,12 @@ export class TemplateResult {
   readChunk(options) {
     const isString = this.index % 2 === 0;
     const index = (this.index / 2) | 0;
-    const addMetadata = options !== undefined && options.includeRehydrationMetadata;
 
     // Finished
     if (!isString && index >= this.template.strings.length - 1) {
       // Reset
       this.index = 0;
-      this.valueOffset = 0;
+      this.valueIndex = 0;
       return null;
     }
 
@@ -44,24 +45,38 @@ export class TemplateResult {
     }
 
     const part = this.template.parts[index];
-    const isMetadata = isMetadataPart(part);
-    let value;
 
-    if (isMetadata) {
-      this.valueOffset++;
-    } else if (isAttributeOrPropertyPart(part)) {
-      // AttributeParts can have multiple values, so slice based on length
-      // (strings in-between values are already handled by the instance)
-      if (part.length > 1) {
-        value = part.resolveValue(this.values.slice(index, index + part.length), options);
-        this.index += part.length;
-      } else {
-        value = part.resolveValue([this.values[index]], options);
+    switch (part.type) {
+      case partType.ATTRIBUTE: {
+        const length = /** @type { AttributePartType } */ (part).length;
+        let value;
+        // AttributeParts can have multiple values, so slice based on length
+        // (strings in-between values are already handled by the instance)
+        if (length > 1) {
+          value = this.values.slice(this.valueIndex, this.valueIndex + length);
+        } else {
+          value = [this.values[this.valueIndex]];
+        }
+        this.valueIndex += length;
+        // @ts-ignore
+        return part.resolveValue(value, options);
       }
-    } else {
-      value = part.resolveValue(this.values[index], options);
+      case partType.BOOLEAN:
+      case partType.CHILD: {
+        // @ts-ignore
+        const value = part.resolveValue(this.values[this.valueIndex], options);
+        this.valueIndex++;
+        return value;
+      }
+      case partType.METADATA: {
+        const hasMetadata = options?.includeRehydrationMetadata;
+        // @ts-ignore
+        return hasMetadata ? part.value : EMPTY_STRING_BUFFER;
+      }
+      default:
+        this.valueIndex++;
+        // @ts-ignore
+        return part.value;
     }
-
-    return value;
   }
 }

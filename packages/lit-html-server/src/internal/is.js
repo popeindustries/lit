@@ -4,14 +4,13 @@ import { partType } from './parts.js';
 export { isDirectiveResult as isDirective } from 'lit-html/directive-helpers.js';
 
 /**
- * Determine if "part" is an AttributePart or PropertyPart
+ * Determine if "part" is an AttributePart
  * @param { unknown } part
  * @returns { part is AttributePartType }
  */
 export function isAttributeOrPropertyPart(part) {
   if (part) {
-    const type = /** @type { Part } */ (part).type;
-    return type === partType.ATTRIBUTE || type === partType.PROPERTY;
+    return /** @type { Part } */ (part).type === partType.ATTRIBUTE;
   }
 
   return false;

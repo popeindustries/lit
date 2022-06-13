@@ -1,5 +1,7 @@
 import { isArray, isAsyncIterator, isBuffer, isPromise, isTemplateResult } from '../src/internal/is.js';
 import { Buffer } from 'buffer';
+import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
+import { partType } from '../src/internal/parts.js';
 
 const EMPTY_STRING_BUFFER = Buffer.from('');
 
@@ -34,15 +36,14 @@ export function streamAsPromise(stream) {
 
 /**
  * @param { TemplateResult } result
- * @param { RenderOptions } [options]
  */
-export function readTemplateResult(result, options) {
+export async function readTemplateResult(result) {
   let buffer = EMPTY_STRING_BUFFER;
   let chunk;
   /** @type { Array<Buffer> | undefined } */
   let chunks;
 
-  while ((chunk = result.readChunk(options)) !== null) {
+  while ((chunk = result.readChunk({ includeRehydrationMetadata: true })) !== null) {
     if (isBuffer(chunk)) {
       buffer = Buffer.concat([buffer, chunk], buffer.length + chunk.length);
     } else {
@@ -55,10 +56,12 @@ export function readTemplateResult(result, options) {
 
   if (chunks !== undefined) {
     chunks.push(buffer);
-    return chunks.length > 1 ? chunks : chunks[0];
+    for await (const chunk of chunks) {
+      buffer = Buffer.concat([buffer, chunk], buffer.length + chunk.length);
+    }
   }
 
-  return buffer;
+  return buffer.toString();
 }
 
 /**
@@ -82,4 +85,66 @@ function reduce(buffer, chunks, chunk) {
     chunks.push(buffer, chunk);
     return EMPTY_STRING_BUFFER;
   }
+}
+
+/**
+ * @param { Template } template
+ * @param { Array<unknown> } [values]
+ */
+export function templateToString(template, values) {
+  const { strings, parts } = template;
+  let result = '';
+  let i = 0;
+  for (; i < strings.length - 1; i++) {
+    const string = strings[i];
+    const part = parts[i];
+    result += string.toString();
+
+    if (values && part.type !== partType.METADATA) {
+      const value = values.shift();
+      // @ts-ignore
+      result += part.value ?? part.resolveValue(value);
+    } else {
+      result += partTypeToName(part);
+    }
+  }
+
+  result += strings[i].toString();
+  return result;
+}
+
+/**
+ * @param { Part } part
+ */
+function partTypeToName(part) {
+  switch (part.type) {
+    case partType.CHILD:
+      return '[CHILD]';
+    case partType.ATTRIBUTE:
+      return '[ATTR]';
+    case partType.BOOLEAN:
+      return '[BOOL]';
+    case partType.ELEMENT:
+      return '[ELEMENT]';
+    case partType.EVENT:
+      return '[EVENT]';
+    case partType.METADATA:
+      // @ts-ignore
+      return part.value.toString();
+    case partType.PROPERTY:
+      return '[PROPERTY]';
+    default:
+      return '[PART]';
+  }
+}
+
+/**
+ * @param { import('lit-html').TemplateResult } template
+ */
+export function renderLitTemplate(template) {
+  let buffer = '';
+  for (const chunk of render(template)) {
+    buffer += chunk;
+  }
+  return buffer.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;quot;', '"').replaceAll('&quot;', '"');
 }

@@ -15,8 +15,6 @@ declare class Template {
   strings: Array<Buffer>;
   parts: Array<Part>;
   constructor(strings: TemplateStringsArray);
-  getStrings(options?: RenderOptions): Array<Buffer>;
-  getParts(): Array<Part>;
 }
 
 interface TemplateResultRenderer {
@@ -36,7 +34,7 @@ declare enum PartType {
 
 interface MetadataPartType {
   readonly type: PartType;
-  resolveValue(options?: RenderOptions): Buffer;
+  value: Buffer;
 }
 
 interface ChildPartType {
@@ -49,11 +47,13 @@ interface AttributePartType {
   readonly name: string;
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer | Promise<Buffer>;
+  resolveValue(value: unknown, options?: RenderOptions): Buffer | Promise<Buffer>;
 }
-interface PropertyPartType extends AttributePartType {
+interface PropertyPartType {
+  readonly name: string;
+  readonly tagName: string;
   readonly type: PartType;
-  resolveValue(values: Array<unknown>, options?: RenderOptions): Buffer | Promise<Buffer>;
+  value: Buffer;
 }
 interface BooleanAttributePartType {
   readonly name: string;
@@ -65,12 +65,12 @@ interface EventPartType {
   readonly name: string;
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(value: unknown, options?: RenderOptions): Buffer;
+  value: Buffer;
 }
 interface ElementPartType {
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(value: unknown, options?: RenderOptions): Buffer;
+  value: Buffer;
 }
 declare type Part =
   | MetadataPartType
@@ -89,10 +89,6 @@ declare type RenderOptions = {
    * Include inline metadata for rehydration in the browser (default `false`)
    */
   includeRehydrationMetadata?: boolean;
-  /**
-   * JSON serialize property attributes (default `false`)
-   */
-  serializePropertyAttributes?: boolean;
 };
 
 declare type RegexTagGroups = {

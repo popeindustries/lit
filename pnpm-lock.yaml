@@ -5,6 +5,8 @@ importers:
   .:
     specifiers:
       '@changesets/cli': ^2.22.0
+      '@types/chai': ^4.3.1
+      '@types/mocha': ^9.1.1
       '@types/node': ^17.0.41
       '@typescript-eslint/eslint-plugin': ^5.27.1
       '@typescript-eslint/parser': ^5.27.1
@@ -20,6 +22,8 @@ importers:
       typescript: ^4.7.3
     devDependencies:
       '@changesets/cli': 2.22.0
+      '@types/chai': 4.3.1
+      '@types/mocha': 9.1.1
       '@types/node': 17.0.41
       '@typescript-eslint/eslint-plugin': 5.27.1_043f48e0ee10c350c28cdede89899bc7
       '@typescript-eslint/parser': 5.27.1_eslint@8.17.0+typescript@4.7.3
@@ -373,6 +377,10 @@ packages:
       fastq: 1.13.0
     dev: true
 
+  /@types/chai/4.3.1:
+    resolution: {integrity: sha512-/zPMqDkzSZ8t3VtxOa4KPq7uzzW978M9Tvh+j7GHKuo6k6GTLxPJ4J5gE5cjfJ26pnXst0N5Hax8Sr0T2Mi9zQ==}
+    dev: true
+
   /@types/is-ci/3.0.0:
     resolution: {integrity: sha512-Q0Op0hdWbYd1iahB+IFNQcWXFq4O0Q5MwQP7uN0souuQ4rPg1vEYcnIOfr1gY+M+6rc8FGoRaBO1mOOvL29sEQ==}
     dependencies:
@@ -385,6 +393,10 @@ packages:
 
   /@types/minimist/1.2.2:
     resolution: {integrity: sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==}
+    dev: true
+
+  /@types/mocha/9.1.1:
+    resolution: {integrity: sha512-Z61JK7DKDtdKTWwLeElSEBcWGRLY8g95ic5FoQqI9CMx0ns/Ghep3B4DfcEimiKMvtamNVULVNKEsiwV3aQmXw==}
     dev: true
 
   /@types/node/12.20.55:

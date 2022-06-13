@@ -34,15 +34,6 @@ export class MetadataPart {
     this.type = partType.METADATA;
     this.value = value;
   }
-
-  /**
-   * Retrieve value given passed "options"
-   * @param { RenderOptions } [options]
-   * @returns { Buffer }
-   */
-  resolveValue(options) {
-    return options !== undefined && options.includeRehydrationMetadata ? this.value : EMPTY_STRING_BUFFER;
-  }
 }
 
 /**
@@ -94,7 +85,7 @@ export class AttributePart {
   }
 
   /**
-   * Retrieve resolved string Buffer from passed "value".
+   * Retrieve resolved string Buffer from passed "values".
    * Resolves to a single string, or Promise for a single string,
    * even when responsible for multiple values.
    * @param { Array<unknown> } values
@@ -160,30 +151,20 @@ export class AttributePart {
 
 /**
  * A dynamic template part for property attributes.
- * Property attributes are prefixed with "."
+ * Property attributes are prefixed with "." and have no server-side representation.
  * @implements PropertyPartType
  */
-export class PropertyPart extends AttributePart {
+export class PropertyPart {
   /**
    * Constructor
    * @param { string } name
-   * @param { Array<Buffer> } strings
    * @param { string } tagName
    */
-  constructor(name, strings, tagName) {
-    super(name, strings, tagName, partType.PROPERTY);
-  }
-
-  /**
-   * Retrieve resolved string Buffer from passed "values".
-   * Property bindings have no server-side representation,
-   * so always returns an empty string.
-   * @param { Array<unknown> } values
-   * @param { RenderOptions } [options]
-   * @returns { Buffer | Promise<Buffer> }
-   */
-  resolveValue(values, options) {
-    return EMPTY_STRING_BUFFER;
+  constructor(name, tagName) {
+    this.name = name;
+    this.tagName = tagName;
+    this.type = partType.PROPERTY;
+    this.value = EMPTY_STRING_BUFFER;
   }
 }
 
@@ -227,7 +208,7 @@ export class BooleanAttributePart {
 
 /**
  * A dynamic template part for event attributes.
- * Event attributes are prefixed with "@"
+ * Event attributes are prefixed with "@" and have no server-side representation.
  * @implements EventPartType
  */
 export class EventPart {
@@ -240,23 +221,13 @@ export class EventPart {
     this.name = name;
     this.tagName = tagName;
     this.type = partType.EVENT;
-  }
-
-  /**
-   * Retrieve resolved string Buffer from passed "value".
-   * Event bindings have no server-side representation,
-   * so always returns an empty string.
-   * @param { unknown } value
-   * @param { RenderOptions } [options]
-   * @returns { Buffer }
-   */
-  resolveValue(value, options) {
-    return EMPTY_STRING_BUFFER;
+    this.value = EMPTY_STRING_BUFFER;
   }
 }
 
 /**
- * A dynamic template part for element attributes.
+ * A dynamic template part for element bindings.
+ * Element parts have no server-side representation.
  * @implements ElementPartType
  */
 export class ElementPart {
@@ -267,18 +238,7 @@ export class ElementPart {
   constructor(tagName) {
     this.tagName = tagName;
     this.type = partType.ELEMENT;
-  }
-
-  /**
-   * Retrieve resolved string Buffer from passed "value".
-   * Element bindings have no server-side representation,
-   * so always returns an empty string.
-   * @param { unknown } value
-   * @param { RenderOptions } [options]
-   * @returns { Buffer }
-   */
-  resolveValue(value, options) {
-    return EMPTY_STRING_BUFFER;
+    this.value = EMPTY_STRING_BUFFER;
   }
 }
 
@@ -337,7 +297,7 @@ function resolveNodeValue(value, part) {
     value = resolveDirectiveValue(value, part);
   }
 
-  if (value === nothing || value === undefined) {
+  if (value === nothing || value == null) {
     return EMPTY_STRING_BUFFER;
   }
 
@@ -378,7 +338,7 @@ function resolveNodeValue(value, part) {
  * Resolve values of async "iterator"
  * @param { AsyncIterable<unknown> } iterator
  * @param { ChildPart } part
- * @returns { AsyncGenerator }
+ * @returns { AsyncGenerator<unknown> }
  */
 async function* resolveAsyncIteratorValue(iterator, part) {
   for await (const value of iterator) {
