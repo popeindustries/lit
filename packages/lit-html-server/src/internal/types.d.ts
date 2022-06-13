@@ -47,7 +47,7 @@ interface AttributePartType {
   readonly name: string;
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(value: unknown, options?: RenderOptions): Buffer | Promise<Buffer>;
+  resolveValue(value: unknown, options?: RenderOptions): Buffer;
 }
 interface PropertyPartType {
   readonly name: string;
@@ -59,7 +59,7 @@ interface BooleanAttributePartType {
   readonly name: string;
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(value: unknown, options?: RenderOptions): Buffer | Promise<Buffer>;
+  resolveValue(value: unknown, options?: RenderOptions): Buffer;
 }
 interface EventPartType {
   readonly name: string;

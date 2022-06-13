@@ -1,9 +1,19 @@
 import { isArray, isAsyncIterator, isBuffer, isPromise, isTemplateResult } from '../src/internal/is.js';
 import { Buffer } from 'buffer';
+import { html } from '../src/index.js';
+import { html as litHtml } from 'lit';
 import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 import { partType } from '../src/internal/parts.js';
 
 const EMPTY_STRING_BUFFER = Buffer.from('');
+
+/**
+ * @param { TemplateStringsArray } strings
+ * @param  {...unknown} values
+ */
+export function t(strings, ...values) {
+  return [html(strings, ...values), litHtml(strings, ...values)];
+}
 
 /**
  * Convert "syncIterable" to an AsyncIterable
@@ -139,7 +149,7 @@ function partTypeToName(part) {
 }
 
 /**
- * @param { import('lit-html').TemplateResult } template
+ * @param { import('lit').TemplateResult } template
  */
 export function renderLitTemplate(template) {
   let buffer = '';

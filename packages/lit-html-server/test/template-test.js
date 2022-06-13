@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { expect } from 'chai';
+import assert from 'node:assert';
 import { Template } from '../src/internal/template.js';
 import { templateToString } from './utils.js';
 
@@ -144,7 +144,7 @@ describe('Template class', () => {
     for (const { title, template, result } of filteredTests) {
       it(`should parse template with ${title}`, () => {
         const string = templateToString(new Template(template.split('${x}')));
-        expect(string).to.equal(result);
+        assert(string === result);
       });
     }
   });
@@ -246,7 +246,7 @@ describe('Template class', () => {
     for (const { title, template, values, result } of filteredTests) {
       it(`should parse template with ${title}`, () => {
         const string = templateToString(new Template(template.split('${x}')), values);
-        expect(string).to.equal(result);
+        assert(string === result);
       });
     }
   });

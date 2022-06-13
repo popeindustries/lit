@@ -1,6 +1,6 @@
 import { isArray, isAsyncIterator, isBuffer, isObject, isPrimitive, isPromise, isSyncIterator } from './is.js';
 import { isDirective, isTemplateResult } from './is.js';
-import { noChange, nothing } from 'lit-html';
+import { noChange, nothing } from 'lit';
 import { Buffer } from 'buffer';
 import { escape } from './escape.js';
 
@@ -90,7 +90,7 @@ export class AttributePart {
    * even when responsible for multiple values.
    * @param { Array<unknown> } values
    * @param { RenderOptions } [options]
-   * @returns { Buffer | Promise<Buffer> }
+   * @returns { Buffer }
    */
   resolveValue(values, options) {
     let chunks = [this.prefix];
@@ -112,38 +112,11 @@ export class AttributePart {
       if (isBuffer(value)) {
         chunks.push(value);
         chunkLength += value.length;
-      } else if (isPromise(value)) {
-        // Lazy init for uncommon scenario
-        if (pendingChunks === undefined) {
-          pendingChunks = [];
-        }
-
-        // @ts-ignore
-        const index = chunks.push(value) - 1;
-
-        pendingChunks.push(
-          value.then((value) => {
-            // @ts-ignore
-            chunks[index] = value;
-            // @ts-ignore
-            chunkLength += value.length;
-          }),
-        );
-      } else if (isArray(value)) {
-        for (const chunk of value) {
-          const buffer = /** @type { Buffer } */ (chunk);
-          chunks.push(buffer);
-          chunkLength += buffer.length;
-        }
       }
     }
 
     chunks.push(this.suffix);
     chunkLength += this.suffix.length;
-
-    if (pendingChunks !== undefined) {
-      return Promise.all(pendingChunks).then(() => Buffer.concat(chunks, chunkLength));
-    }
 
     return Buffer.concat(chunks, chunkLength);
   }
@@ -191,15 +164,11 @@ export class BooleanAttributePart {
    * Retrieve resolved string Buffer from passed "value".
    * @param { unknown } value
    * @param { RenderOptions } [options]
-   * @returns { Buffer | Promise<Buffer> }
+   * @returns { Buffer }
    */
   resolveValue(value, options) {
     if (isDirective(value)) {
       value = resolveDirectiveValue(value, this);
-    }
-
-    if (isPromise(value)) {
-      return value.then((value) => (value ? this.nameAsBuffer : EMPTY_STRING_BUFFER));
     }
 
     return value ? this.nameAsBuffer : EMPTY_STRING_BUFFER;
@@ -263,24 +232,6 @@ function resolveAttributeValue(value, part) {
     return Buffer.from(string.indexOf(unsafePrefixString) === 0 ? string.slice(33) : escape(string, 'attribute'));
   } else if (isBuffer(value)) {
     return value;
-  } else if (isPromise(value)) {
-    return value.then((value) => resolveAttributeValue(value, part));
-  } else if (isSyncIterator(value)) {
-    if (!isArray(value)) {
-      value = Array.from(value);
-    }
-    return Buffer.concat(
-      // @ts-ignore: already converted to Array
-      value.reduce((values, value) => {
-        value = resolveAttributeValue(value, part);
-        // Flatten
-        if (isArray(value)) {
-          return values.concat(value);
-        }
-        values.push(value);
-        return values;
-      }, []),
-    );
   } else {
     return Buffer.from(String(value));
   }
@@ -348,7 +299,7 @@ async function* resolveAsyncIteratorValue(iterator, part) {
 
 /**
  * Resolve value of "directive"
- * @param { import('lit-html/directive').DirectiveResult } directiveResult
+ * @param { import('lit/directive').DirectiveResult } directiveResult
  * @param { { name?: string, tagName: string, type: PartType, strings?: Array<Buffer>, length?: number } } part
  * @returns { unknown }
  */
@@ -364,6 +315,7 @@ function resolveDirectiveValue(directiveResult, part) {
   }
   // @ts-ignore
   const directive = new directiveResult._$litDirective$(partInfo);
+  // @ts-ignore
   const result = directive.render(...directiveResult.values);
 
   if (result === noChange) {

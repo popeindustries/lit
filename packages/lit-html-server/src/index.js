@@ -5,7 +5,7 @@ import { streamTemplateRenderer } from './internal/node-stream-template-renderer
 import { Template } from './internal/template.js';
 import { TemplateResult } from './internal/template-result.js';
 
-export { noChange, nothing } from 'lit-html';
+export { noChange, nothing } from 'lit';
 
 /**
  * Default templateResult factory
