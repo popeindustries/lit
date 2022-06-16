@@ -7,14 +7,8 @@ import {
   MetadataPart,
   PropertyPart,
 } from './parts.js';
+import { EMPTY_STRING_BUFFER } from './consts.js';
 import { Buffer } from 'buffer';
-
-const EMPTY_STRING_BUFFER = Buffer.from('');
-
-// const ATTR_VALUE_CHAR = `[^ \t\n\f\r"'\`<>=]`;
-// const NAME_CHAR = `[^\\s"'>=/]`;
-// const SPACE_CHAR = `[ \t\n\f\r]`;
-// const TAG_NAME_CHAR = `[a-zA-Z0-9-]`;
 
 // https://html.spec.whatwg.org/multipage/scripting.html#valid-custom-element-name
 const HTML_TAGS_WITH_HYPHENS = new Set([
@@ -95,12 +89,6 @@ export class Template {
 
       // TODO: custom-element parts
       // TODO: rawTextEndRegex
-
-      // Add opening metadata before first string in template
-      // if (isFirstString) {
-      //   this.strings.push(EMPTY_STRING_BUFFER);
-      //   this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part ${digest}-->`)));
-      // }
 
       while (lastIndex < string.length) {
         // Start search from end of last match
@@ -262,17 +250,10 @@ export class Template {
 
       if (!isLastString) {
         if (mode === TEXT) {
-          // this.parts.push(new MetadataPart(Buffer.from(`<!--lit-part-->`)));
-          // this.strings.push(EMPTY_STRING_BUFFER);
           this.parts.push(new ChildPart(tagName));
-          // this.strings.push(EMPTY_STRING_BUFFER);
-          // this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
         } else if (mode === ATTRIBUTE) {
           this.parts.push(handleAttributeExpressions(attributeName ?? '', attributeStrings, tagName));
         }
-      } else {
-        // this.parts.push(new MetadataPart(Buffer.from(`<!--/lit-part-->`)));
-        // this.strings.push(EMPTY_STRING_BUFFER);
       }
     }
   }

@@ -2,6 +2,7 @@
  * The return type of the template tag functions
  */
 declare type TemplateResult = {
+  id: number;
   template: Template;
   values: Array<unknown>;
   readChunk(options?: RenderOptions): unknown;

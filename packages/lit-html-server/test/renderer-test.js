@@ -1,114 +1,177 @@
 // @ts-nocheck
-import { createAsyncIterable, streamAsPromise } from './utils.js';
+import { getTemplates, renderLitTemplate } from './utils.js';
 import { renderToStream, renderToString } from '../src/index.js';
-import { renderLitTemplate, t } from './utils.js';
 import assert from 'node:assert';
+import { streamAsPromise } from './utils.js';
 
 describe('Server template render', () => {
   const tests = [
     {
       title: 'plain text',
-      templates: t`text`,
-      result: '<!--lit-part iW9ZALRtWQA=-->text<!--/lit-part-->',
+      template: 'html`<div>text</div>`',
+      result: '<!--lit-part pxc8m9UUJbo=--><div>text</div><!--/lit-part-->',
     },
     {
       title: 'text value',
-      templates: t`${'text'}`,
-      result: '<!--lit-part BRUAAAUVAAA=--><!--lit-part-->text<!--/lit-part--><!--/lit-part-->',
+      template: "html`<div>${'text'}</div>`",
+      result: '<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part-->text<!--/lit-part--></div><!--/lit-part-->',
     },
     {
       title: 'number value',
-      templates: t`${1}`,
-      result: '<!--lit-part BRUAAAUVAAA=--><!--lit-part-->1<!--/lit-part--><!--/lit-part-->',
+      template: 'html`<div>${1}</div>`',
+      result: '<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part-->1<!--/lit-part--></div><!--/lit-part-->',
     },
     {
       title: 'boolean value',
-      templates: t`${true}`,
-      result: '<!--lit-part BRUAAAUVAAA=--><!--lit-part-->true<!--/lit-part--><!--/lit-part-->',
+      template: 'html`<div>${true}</div>`',
+      result: '<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part-->true<!--/lit-part--></div><!--/lit-part-->',
     },
     {
       title: 'null value',
-      templates: t`${null}`,
-      result: '<!--lit-part BRUAAAUVAAA=--><!--lit-part--><!--/lit-part--><!--/lit-part-->',
+      template: 'html`<div>${null}</div>`',
+      result: '<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part--><!--/lit-part--></div><!--/lit-part-->',
     },
     {
       title: 'undefined value',
-      templates: t`${undefined}`,
-      result: '<!--lit-part BRUAAAUVAAA=--><!--lit-part--><!--/lit-part--><!--/lit-part-->',
+      template: 'html`<div>${undefined}</div>`',
+      result: '<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part--><!--/lit-part--></div><!--/lit-part-->',
     },
     {
-      skip: true,
       title: 'array value',
-      templates: t`${[1, 2, 3]}`,
+      template: 'html`<div>${[1, 2, 3]}</div>`',
       result:
-        '<!--lit-part BRUAAAUVAAA=--><!--lit-part--><!--lit-part-->1<!--/lit-part--><!--lit-part-->2<!--/lit-part--><!--lit-part-->3<!--/lit-part--><!--/lit-part--><!--/lit-part-->',
+        '<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part--><!--lit-part-->1<!--/lit-part--><!--lit-part-->2<!--/lit-part--><!--lit-part-->3<!--/lit-part--><!--/lit-part--></div><!--/lit-part-->',
     },
     {
-      skip: true,
       title: 'nested array value',
-      templates: t`${[1, 2, [3, [4, 5]]]}`,
+      template: 'html`<div>${[1, 2, [3, [4, 5]]]}</div>`',
       result:
-        '<!--lit-part BRUAAAUVAAA=--><!--lit-part--><!--lit-part-->1<!--/lit-part--><!--lit-part-->2<!--/lit-part--><!--lit-part--><!--lit-part-->3<!--/lit-part--><!--lit-part--><!--lit-part-->4<!--/lit-part--><!--lit-part-->5<!--/lit-part--><!--/lit-part--><!--/lit-part--><!--/lit-part--><!--/lit-part-->',
-    },
-    {
-      title: 'Promise value',
-      templates: t`${Promise.resolve('some')} text`,
-      result: '<!--lit-part NC6GC4lvWQA=--><!--lit-part-->some<!--/lit-part--> text<!--/lit-part-->',
+        '<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part--><!--lit-part-->1<!--/lit-part--><!--lit-part-->2<!--/lit-part--><!--lit-part--><!--lit-part-->3<!--/lit-part--><!--lit-part--><!--lit-part-->4<!--/lit-part--><!--lit-part-->5<!--/lit-part--><!--/lit-part--><!--/lit-part--><!--/lit-part--></div><!--/lit-part-->',
     },
     {
       title: 'template value',
-      templates: t`some ${t`text`}`,
-      result: '<!--lit-part e5CHC29vWQA=-->some <!--lit-part iW9ZALRtWQA=-->text<!--/lit-part--><!--/lit-part-->',
+      template: 'html`<div>some ${html`text`}</div>`',
+      result:
+        '<!--lit-part qjs5mhF6hQ0=--><div>some <!--lit-part iW9ZALRtWQA=-->text<!--/lit-part--></div><!--/lit-part-->',
+    },
+    {
+      title: 'Promise value',
+      template: "html`<div>${Promise.resolve('some')} text</div>`",
+      result: '<!--lit-part h+ilbtUUJbo=--><div><!--lit-part-->some<!--/lit-part--> text</div><!--/lit-part-->',
+    },
+    {
+      title: 'Promise template value',
+      template: 'html`<div>${Promise.resolve(html`some`)} text</div>`',
+      result:
+        '<!--lit-part h+ilbtUUJbo=--><div><!--lit-part +3BZAG9vWQA=-->some<!--/lit-part--> text</div><!--/lit-part-->',
+    },
+    {
+      skip: true,
+      title: 'sync iterator value',
+      template:
+        "html`<div>Well ${['hello ', 'there ', 'world', [', hows ', 'it ', 'going']][Symbol.iterator]()}?</div>`",
+      result:
+        '<!--lit-part AB0dAcJ7zUo=--><div>Well <!--lit-part--><!--lit-part-->hello <!--/lit-part--><!--lit-part-->there <!--/lit-part--><!--lit-part-->world<!--/lit-part--><!--lit-part--><!--lit-part-->, hows <!--/lit-part--><!--lit-part-->it <!--/lit-part--><!--lit-part-->going<!--/lit-part--><!--/lit-part--><!--/lit-part-->?</div><!--/lit-part-->',
+    },
+    {
+      title: 'array of nested template values',
+      template: 'html`<div>some ${[1, 2, 3].map((i) => html`${i}`)} text</div>`',
+      result:
+        '<!--lit-part rQEcjeuOsoE=--><div>some <!--lit-part--><!--lit-part BRUAAAUVAAA=--><!--lit-part-->1<!--/lit-part--><!--/lit-part--><!--lit-part BRUAAAUVAAA=--><!--lit-part-->2<!--/lit-part--><!--/lit-part--><!--lit-part BRUAAAUVAAA=--><!--lit-part-->3<!--/lit-part--><!--/lit-part--><!--/lit-part--> text</div><!--/lit-part-->',
+    },
+    {
+      skip: true,
+      title: 'AsyncIterator value',
+      template: "html`<div>${createAsyncIterable(['some', ' async'])} text</div>`",
+      result:
+        '<!--lit-part h+ilbtUUJbo=--><div><!--lit-part-->some<!--/lit-part--><!--lit-part--> async<!--/lit-part--> text</div><!--/lit-part-->',
+    },
+    {
+      skip: true,
+      title: 'AsyncIterator template value',
+      template: 'html`<div>${createAsyncIterable([html`some`, html` async`])} text</div>`',
+      result:
+        '<!--lit-part h+ilbtUUJbo=--><div><!--lit-part +3BZAG9vWQA=-->some<!--/lit-part--><!--lit-part eDGGC741hws=--> async<!--/lit-part--> text</div><!--/lit-part-->',
+    },
+    {
+      title: 'quoted text attribute',
+      template: 'html`<div a="${"text"}"></div>`',
+      result: '<!--lit-part gYgzm5LkVDI=--><div a="text"><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'quoted array attribute',
+      template: 'html`<div a="${[1,2,3]}"></div>`',
+      result: '<!--lit-part gYgzm5LkVDI=--><div a="1,2,3"><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'unquoted text attribute',
+      template: 'html`<div a=${"text"}></div>`',
+      result: '<!--lit-part K+c1m3iKv0M=--><div a="text"><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'quoted text attribute with extra whitespace',
+      template: 'html`<div a=" ${"text"} "></div>`',
+      result: '<!--lit-part K8pqMbhSWzI=--><div a=" text "><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'quoted text attribute with extra strings',
+      template: 'html`<div a="some ${"text"}"></div>`',
+      result: '<!--lit-part f8xfJ7hWEaU=--><div a="some text"><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'quoted text attribute with multiple strings/values',
+      template: 'html`<div a="this is ${"some"} ${"text"}"></div>`',
+      result: '<!--lit-part D6xN2GCdvaE=--><div a="this is some text"><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'truthy boolean attribute',
+      template: 'html`<div ?a="${true}"></div>`',
+      result: '<!--lit-part X7msddNbKag=--><div a><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'falsey boolean attribute',
+      template: 'html`<div ?a="${false}"></div>`',
+      result: '<!--lit-part X7msddNbKag=--><div ><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'element attribute',
+      template: 'html`<div ${()=>{}}></div>`',
+      result: '<!--lit-part liPcn9lj0Ak=--><div ><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'event attribute',
+      template: 'html`<div @a="${"event"}"></div>`',
+      result: '<!--lit-part X7msdUw8k34=--><div ><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'property attribute',
+      template: 'html`<div .a="${"event"}"></div>`',
+      result: '<!--lit-part X7msdWIx9Mg=--><div ><!--lit-node 0--></div><!--/lit-part-->',
     },
   ];
   const only = tests.filter(({ only }) => only);
 
-  for (const { title, templates, result, skip } of only.length ? only : tests) {
+  for (const { title, template, result, skip } of only.length ? only : tests) {
     const fullTitle = `should generate result with ${title}`;
 
     if (skip) {
       it.skip(fullTitle);
     } else {
       it(fullTitle, async () => {
-        const [h, l] = templates;
-        const lit = renderLitTemplate(l);
+        const [h, l] = getTemplates(template);
         const string = await renderToString(h, { includeRehydrationMetadata: true });
         const stream = await streamAsPromise(renderToStream(h, { includeRehydrationMetadata: true }));
+        const lit = renderLitTemplate(l);
         if (string !== lit) {
           console.warn(`not valid with lit ssr: \n  ${string}\n  ${lit}`);
         }
-        assert(string === result);
-        assert(string === stream);
+        assert.equal(string, stream);
+        assert.equal(string, result);
       });
     }
   }
 
   /**describe.skip('text', () => {
-    it('should render a template with sync iterator value', async () => {
-      const array = ['hello ', 'there ', 'world', [", how's ", 'it ', 'going']];
-      const result = () => h`Well ${array[Symbol.iterator]()}?`;
-      const expected = 'Well hello there world, how&#x27;s it going?';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with nested template value', async () => {
-      const result = () => h`some ${h`text`}`;
-      const expected = 'some text';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with array of nested template values', async () => {
-      const result = () => h`some ${[1, 2, 3].map((i) => h`${i}`)} text`;
-      const expected = 'some 123 text';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with Promise template value', async () => {
-      const result = () => h`${Promise.resolve(h`some`)} text`;
-      const expected = 'some text';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
     it('should not render a template with Promise errors', async () => {
       const result = () => h`${Promise.reject(Error('errored!'))}`;
       try {
@@ -142,18 +205,6 @@ describe('Server template render', () => {
         assert(err).to.have.property('message', 'errored!');
       }
     });
-    it('should render a template with AsyncIterator value', async () => {
-      const result = () => h`${createAsyncIterable(['some', ' async'])} text`;
-      const expected = 'some async text';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with AsyncIterator template value', async () => {
-      const result = () => h`${createAsyncIterable([h`some`, h` async`])} text`;
-      const expected = 'some async text';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
     it('should render a template with deeply nested sync/async templates', async () => {
       const data = { title: 'title', body: 'this is body text' };
       const nestedVeryDeep = async () => ['and ', "don't ", 'forget ', ['this']];
@@ -165,164 +216,7 @@ describe('Server template render', () => {
       assert((await renderToString(result())) === expected);
       assert((await streamAsPromise(renderToStream(result()))) === expected);
     });
-    it('should allow multiple renders of existing template results', async () => {
-      const result = h`text`;
-      const expected = 'text';
-      assert((await streamAsPromise(renderToStream(result))) === expected);
-      assert((await streamAsPromise(renderToStream(result))) === expected);
-    });
-    it('should render plain string result', async () => {
-      const result = () => 'text';
-      const expected = 'text';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
   });
 
-  describe.skip('attributes', () => {
-    it('should render a template with quoted text attribute', async () => {
-      const value = 'text';
-      const result = () => h`<div a="${value}"></div>`;
-      const expected = '<div a="text"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with quoted array attribute', async () => {
-      const value = [1, 2, 3];
-      const result = () => h`<div a="${value}"></div>`;
-      const expected = '<div a="123"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with unquoted attribute', async () => {
-      const value = 'text';
-      const result = () => h`<div a=${value}></div>`;
-      const expected = '<div a="text"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with quoted attribute and extra whitespace', async () => {
-      const value = 'text';
-      const result = () => h`<div a = " ${value} "></div>`;
-      const expected = '<div a=" text "></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with quoted attribute and extra strings', async () => {
-      const value = 'text';
-      const result = () => h`<div a="some ${value}"></div>`;
-      const expected = '<div a="some text"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with quoted attribute and multiple strings/values', async () => {
-      const value = 'text';
-      const result = () => h`<div a="this is ${'some'} ${value}">${'node'}</div>`;
-      const expected = '<div a="this is some text">node</div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with boolean attribute', async () => {
-      const value = true;
-      const result = () => h`<div ?a="${value}"></div>`;
-      const expected = '<div a></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with element attribute', async () => {
-      const result = () => h`<div ${function () {}}></div>`;
-      const expected = '<div ></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with event attribute', async () => {
-      const result = () => h`<div @a="${'some event'}"></div>`;
-      const expected = '<div ></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with property attribute', async () => {
-      const result = () => h`<div .a="${'some prop'}"></div>`;
-      const expected = '<div ></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should not render a template with nested template attribute', async () => {
-      const result = () => h`<div a="some ${h`text`}"></div>`;
-      const expected = '<div a="some [object Object]"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should not render a template with nested template array attribute', async () => {
-      const result = () => h`<div a="some ${[h`1`, h`2`, h`3`]}"></div>`;
-      const expected = '<div a="some [object Object][object Object][object Object]"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with Promise text attribute', async () => {
-      const result = () => h`<div a="some ${Promise.resolve('text')} here"></div>`;
-      const expected = '<div a="some text here"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with Promise array attribute', async () => {
-      const result = () => h`<div a="some ${Promise.resolve([1, 2, 3])} here"></div>`;
-      const expected = '<div a="some 123 here"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with Promise template attribute', async () => {
-      const result = () => h`<div a="some ${Promise.resolve('text')} here"></div>`;
-      const expected = '<div a="some text here"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should render a template with multiple Promise templates attribute', async () => {
-      const result = () => h`<div a="some ${Promise.resolve('text')} here ${Promise.resolve('too')}"></div>`;
-      const expected = '<div a="some text here too"></div>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-    it('should not render a template attribute with Promise errors', async () => {
-      const result = () => h`<div a="some ${Promise.reject(Error('errored!'))}"></div>`;
-      try {
-        const html = await renderToString(result());
-        assert(html).to.not.exist;
-      } catch (err) {
-        assert(err).to.have.property('message', 'errored!');
-      }
-      try {
-        const html = await streamAsPromise(renderToStream(result()));
-        assert(html).to.not.exist;
-      } catch (err) {
-        assert(err).to.have.property('message', 'errored!');
-      }
-    });
-    it('should not render a template attribute with Promise that throws errors', async () => {
-      const result = () =>
-        h`<div a="some ${new Promise(() => {
-          throw Error('errored!');
-        })}"></div>`;
-      try {
-        const html = await renderToString(result());
-        assert(html).to.not.exist;
-      } catch (err) {
-        assert(err).to.have.property('message', 'errored!');
-      }
-      try {
-        const html = await streamAsPromise(renderToStream(result()));
-        assert(html).to.not.exist;
-      } catch (err) {
-        assert(err).to.have.property('message', 'errored!');
-      }
-    });
-    it('should render a template with stringified property object when options.serializePropertyAttributes', async () => {
-      const value = { some: 'text' };
-      const result = () => h`<div .a="${value}"></div>`;
-      const expected = '<div .a="{&quot;some&quot;:&quot;text&quot;}"></div>';
-      const options = { serializePropertyAttributes: true };
-      assert((await renderToString(result(), options)) === expected);
-      assert((await streamAsPromise(renderToStream(result(), options))) === expected);
-    });
-  });*/
+*/
 });

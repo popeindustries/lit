@@ -1,3 +1,4 @@
+import { EMPTY_STRING_BUFFER, META_CLOSE, META_OPEN } from './consts.js';
 import { isArray, isAsyncIterator, isBuffer, isObject, isPrimitive, isPromise, isSyncIterator } from './is.js';
 import { isDirective, isTemplateResult } from './is.js';
 import { noChange, nothing } from 'lit';
@@ -13,10 +14,6 @@ export const partType = {
   EVENT: 5,
   ELEMENT: 6,
 };
-
-const EMPTY_STRING_BUFFER = Buffer.from('');
-const META_OPEN = Buffer.from(`<!--lit-part-->`);
-const META_CLOSE = Buffer.from(`<!--/lit-part-->`);
 
 /**
  * A prefix value for strings that should not be escaped
@@ -268,7 +265,7 @@ function resolveNodeValue(value, part, withMetadata) {
   }
 
   if (isBuffer(value)) {
-    return withMetadata ? Buffer.concat([META_OPEN, value, META_CLOSE]) : value;
+    return withMetadata ? [META_OPEN, value, META_CLOSE] : value;
   } else if (isTemplateResult(value)) {
     return value;
   } else if (isPromise(value)) {
@@ -277,16 +274,21 @@ function resolveNodeValue(value, part, withMetadata) {
     if (!isArray(value)) {
       value = Array.from(value);
     }
-    // @ts-ignore: already converted to Array
-    return value.reduce((values, value) => {
-      value = resolveNodeValue(value, part, withMetadata);
+    /** @type { Array<unknown> } */
+    const collection = withMetadata ? [META_OPEN] : [];
+    for (let val of /** @type { Array<unknown> } */ (value)) {
+      val = resolveNodeValue(val, part, withMetadata);
       // Flatten
-      if (isArray(value)) {
-        return values.concat(value);
+      if (isArray(val)) {
+        collection.push(...val);
+      } else {
+        collection.push(val);
       }
-      values.push(value);
-      return values;
-    }, []);
+    }
+    if (withMetadata) {
+      collection.push(META_CLOSE);
+    }
+    return collection;
   } else if (isAsyncIterator(value)) {
     return resolveAsyncIteratorValue(value, part, withMetadata);
   } else {

@@ -8,7 +8,6 @@ import { ref } from 'lit/directives/ref.js';
  */
 export default function everything(html, data) {
   return html`
-    <!-- comment -->
     <header><h1 class="${classMap({ negative: data.isTrue })}" ?negative="${data.isTrue}">${data.title}</h1></header>
     <main>
       <ol>
@@ -21,7 +20,7 @@ export default function everything(html, data) {
           `,
         )}
       </ol>
-      <p>
+      <p ?a="${true}">
         First Paragraph: Duis eleifend nec lectus a ${data.number}. Suspendisse placerat mollis porta. Pellentesque nec
         quam non sapien facilisis ultricies quis nec risus. Quisque feugiat dui quis lectus iaculis, molestie pretium
         augue tincidunt. Suspendisse potenti. Pellentesque habitant morbi tristique senectus et netus et malesuada fames
@@ -31,7 +30,7 @@ export default function everything(html, data) {
         tellus iaculis orci, sit amet sodales velit augue non felis. Nullam vehicula gravida justo non lacinia.
       </p>
       <p>${nestedTemplate(html, data)}</p>
-      <p>
+      <p ?a="${false}">
         Second Paragraph: Mauris lobortis, nisl vitae hendrerit vulputate, est lacus efficitur ipsum, nec blandit nisi
         diam in dolor. Proin ${JSON.stringify(data)} laoreet nisi a vulputate. Praesent non congue quam, ut sodales
         risus. Curabitur ornare elit at suscipit pulvinar. Suspendisse vitae orci a justo laoreet vestibulum quis et ex.
@@ -45,9 +44,9 @@ export default function everything(html, data) {
       </p>
       <button ${ref((el) => console.log(el))} @click=${() => console.log('click')}>Button: Lorem ipsum!</button>
       <div .prop=${data.isTrue}><span>Div: Lorem ipsum</span></div>
-      <custom-element ?negative="${data.isTrue}"></custom-element>
     </main>
   `;
+  // <custom-element ?negative="${data.isTrue}"></custom-element>
 }
 
 /**

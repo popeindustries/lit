@@ -1,10 +1,12 @@
+// @ts-nocheck
 import autocannon from 'autocannon';
 import { fileURLToPath } from 'url';
 import { fork } from 'child_process';
 import path from 'path';
 
 const url = `http://localhost:3000`;
-const child = fork(path.resolve(path.dirname(fileURLToPath(import.meta.url)), './server.js'), { silent: false });
+const server = process.argv[2] === 'ssr' ? './server-lit.js' : './server.js';
+const child = fork(path.resolve(path.dirname(fileURLToPath(import.meta.url)), server), { silent: false });
 
 (async () => {
   await stress();

@@ -1,9 +1,5 @@
-import { isBuffer } from './is.js';
+import { EMPTY_STRING_BUFFER, META_CLOSE } from './consts.js';
 import { partType } from './parts.js';
-
-const EMPTY_STRING_BUFFER = Buffer.from('');
-const META_OPEN = Buffer.from(`<!--lit-part-->`);
-const META_CLOSE = Buffer.from(`<!--/lit-part-->`);
 
 let id = 0;
 
@@ -22,11 +18,8 @@ export class TemplateResult {
     this.id = id++;
     this.index = 0;
     this.maxIndex = this.template.strings.length + this.template.parts.length - 1;
+    this.metadata = Buffer.from(`<!--lit-part ${this.template.digest}-->`);
     this.valueIndex = 0;
-    this._metadata = {
-      open: Buffer.from(`<!--lit-part ${this.template.digest}-->`),
-      close: META_CLOSE,
-    };
   }
 
   /**
@@ -56,10 +49,10 @@ export class TemplateResult {
 
       if (withMetadata) {
         if (isFirstString) {
-          string = Buffer.concat([this._metadata.open, string]);
+          string = Buffer.concat([this.metadata, string]);
         }
         if (isLastString) {
-          string = Buffer.concat([string, this._metadata.close]);
+          string = Buffer.concat([string, META_CLOSE]);
         }
       }
 
@@ -98,7 +91,7 @@ export class TemplateResult {
       }
       case partType.METADATA: {
         // @ts-ignore
-        return withMetadata ? part.value : EMPTY_STRING_BUFFER;
+        return options?.includeRehydrationMetadata ? part.value : EMPTY_STRING_BUFFER;
       }
       default:
         this.valueIndex++;
