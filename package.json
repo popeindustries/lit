@@ -2,15 +2,12 @@
   "name": "@popeindustries/lit-monorepo",
   "version": "0.0.0",
   "description": "A monorepo for the lit-html-server family of packages",
-  "author": "Alexander Pope <alex@pope-industries.com>",
+  "author": "Alexander Pope <alex@pope.industries>",
   "private": true,
   "license": "MIT",
   "type": "module",
   "repository": "https://github.com/popeindusties/lit",
   "homepage": "https://github.com/popeindusties/lit#readme",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "build": "pnpm -r run build",
     "clean": "git clean -x -f",
