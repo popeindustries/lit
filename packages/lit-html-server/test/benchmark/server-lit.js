@@ -2,6 +2,7 @@ import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 import { Readable } from 'stream';
 import everything from './the-everything-bagel-template.js';
 import http from 'http';
+import { html as litHtml } from 'lit';
 
 const html = String.raw;
 
@@ -14,7 +15,7 @@ http
     };
     res.writeHead(200);
 
-    const stream = Readable.from(render(template(data)));
+    const stream = Readable.from(template(data));
     stream.pipe(res);
   })
   .listen(3000);
@@ -22,8 +23,8 @@ http
 /**
  * @param { { title: string, isTrue: boolean, number: number } } data
  */
-function template(data) {
-  return html`
+function* template(data) {
+  yield `
     <!DOCTYPE html>
     <html lang="en">
       <head>
@@ -31,9 +32,7 @@ function template(data) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>${data.title}</title>
       </head>
-      <body>
-        ${everything(html, data)}
-      </body>
-    </html>
-  `;
+      <body>`;
+  yield* render(everything(litHtml, data));
+  yield `</body></html>`;
 }
