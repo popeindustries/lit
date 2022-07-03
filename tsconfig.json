@@ -5,12 +5,10 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "lib": ["esnext", "dom"],
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "noEmit": true,
     "strict": true,
     "target": "esnext"
-  },
-  "include": ["packages/**/src", "packages/**/test"],
-  "exclude": ["node_modules"]
+  }
 }

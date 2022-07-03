@@ -1,5 +1,5 @@
 {
-  "name": "@popeindustries/lit-html-server",
+  "name": "@popeindustries/lit-html",
   "version": "4.0.0-beta.1",
   "description": "Render lit-html templates on the server",
   "author": "Alexander Pope <alex@pope.industries>",
@@ -21,11 +21,9 @@
     ".": {
       "browser": "./browser.js",
       "node": "./index.js"
-    },
-    "./directives/*": "./directives/*"
+    }
   },
   "files": [
-    "directives",
     "*.d.ts",
     "*.js",
     "README.MD"
@@ -36,19 +34,14 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "lit": "^2.2.7"
+    "lit-html": "^2.2.6"
   },
   "devDependencies": {
-    "@lit-labs/ssr": "2.2.1",
-    "autocannon": "^7.9.0",
-    "send": "^0.18.0"
+    "assert": "^2.0.0"
   },
   "scripts": {
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f",
-    "perf": "node test/benchmark/perf.js",
-    "test": "npm run build && npm run lint && npm run test:unit && npm run test:browser",
-    "test:unit": "NODE_ENV=test mocha --require './src/dom-shim.js' --reporter spec --timeout 2000 'test/*-test.js'",
-    "test:browser": "node ./test/browser/cli.js"
+    "test": "echo \"no tests\""
   }
 }
