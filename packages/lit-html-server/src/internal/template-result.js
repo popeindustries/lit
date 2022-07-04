@@ -1,4 +1,5 @@
 import { EMPTY_STRING_BUFFER, META_CLOSE } from './consts.js';
+import { Buffer } from '#buffer';
 import { partType } from './parts.js';
 
 let id = 0;

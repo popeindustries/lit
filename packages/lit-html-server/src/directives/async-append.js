@@ -1,5 +1,5 @@
-import { directive, PartType } from 'lit/directive.js';
-import { AsyncDirective } from 'lit/async-directive.js';
+import { directive, PartType } from 'lit-html/directive.js';
+import { AsyncDirective } from 'lit-html/async-directive.js';
 
 /**
  * @template T
@@ -7,7 +7,7 @@ import { AsyncDirective } from 'lit/async-directive.js';
 class AsyncAppendDirective extends AsyncDirective {
   /**
    * Constructor
-   * @param { import('lit/directive').PartInfo } partInfo
+   * @param { import('lit-html/directive.js').PartInfo } partInfo
    */
   constructor(partInfo) {
     super(partInfo);

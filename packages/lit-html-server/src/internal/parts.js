@@ -1,8 +1,8 @@
 import { EMPTY_STRING_BUFFER, META_CLOSE, META_OPEN } from './consts.js';
 import { isArray, isAsyncIterator, isBuffer, isObject, isPrimitive, isPromise, isSyncIterator } from './is.js';
 import { isDirective, isTemplateResult } from './is.js';
-import { noChange, nothing } from 'lit';
-import { Buffer } from 'buffer';
+import { noChange, nothing } from 'lit-html';
+import { Buffer } from '#buffer';
 import { escape } from './escape.js';
 
 export const partType = {
@@ -311,7 +311,7 @@ async function* resolveAsyncIteratorValue(iterator, part, withMetadata) {
 
 /**
  * Resolve value of "directive"
- * @param { import('lit/directive').DirectiveResult } directiveResult
+ * @param { import('lit-html/directive.js').DirectiveResult } directiveResult
  * @param { { name?: string, tagName: string, type: PartType, strings?: Array<Buffer>, length?: number } } part
  * @returns { unknown }
  */

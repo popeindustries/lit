@@ -1,6 +1,6 @@
 /* eslint no-constant-condition:0 */
 import { isArray, isAsyncIterator, isBuffer, isIteratorResult, isPromise, isTemplateResult } from './is.js';
-import { Buffer } from 'buffer';
+import { Buffer } from '#buffer';
 
 /**
  * Process "stack" and push chunks to "renderer"

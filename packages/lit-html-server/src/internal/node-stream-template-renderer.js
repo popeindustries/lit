@@ -1,5 +1,5 @@
 import { getProcessor } from './template-result-processor.js';
-import { Readable } from 'stream';
+import { Readable } from '#stream';
 
 /**
  * Factory for StreamTemplateRenderer instances

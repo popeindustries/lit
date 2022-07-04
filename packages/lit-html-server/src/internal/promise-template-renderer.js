@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { Buffer } from '#buffer';
 import { getProcessor } from './template-result-processor.js';
 
 /**

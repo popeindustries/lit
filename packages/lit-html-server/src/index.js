@@ -1,21 +1,18 @@
 import './dom-shim.js'; // Needs to be bundled as "external" in order to shim before lit-html imports
 import { isTemplateResult } from './internal/is.js';
 import { promiseTemplateRenderer } from './internal/promise-template-renderer.js';
-import { streamTemplateRenderer } from './internal/node-stream-template-renderer.js';
+import { streamTemplateRenderer } from '#template-renderer';
 import { Template } from './internal/template.js';
 import { TemplateResult } from './internal/template-result.js';
 
-export { noChange, nothing } from 'lit';
+export { noChange, nothing } from 'lit-html';
 
 /**
  * Default templateResult factory
  * @param { unknown } value
  * @returns { TemplateResult }
  */
-const DEFAULT_TEMPLATE_FN = (value) =>
-  html`
-    ${value}
-  `;
+const DEFAULT_TEMPLATE_FN = (value) => html` ${value} `;
 
 const templateCache = new Map();
 

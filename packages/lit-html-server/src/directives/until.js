@@ -1,5 +1,5 @@
-import { AsyncDirective } from 'lit/async-directive.js';
-import { directive } from 'lit/directive.js';
+import { AsyncDirective } from 'lit-html/async-directive.js';
+import { directive } from 'lit-html/directive.js';
 
 class UntilDirective extends AsyncDirective {
   /**

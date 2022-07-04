@@ -15,14 +15,30 @@
   ],
   "type": "module",
   "types": "index.d.ts",
-  "main": "index.js",
-  "browser": "./browser.js",
   "exports": {
     ".": {
       "browser": "./browser.js",
       "node": "./index.js"
     },
     "./directives/*": "./directives/*"
+  },
+  "imports": {
+    "#buffer": {
+      "browser": "./src/internal/browser-buffer.js",
+      "node": "./src/internal/buffer.js"
+    },
+    "#digest": {
+      "browser": "./src/internal/browser-digest.js",
+      "node": "./src/internal/digest.js"
+    },
+    "#stream": {
+      "browser": "./src/internal/browser-stream.js",
+      "node": "./src/internal/stream.js"
+    },
+    "#template-renderer": {
+      "browser": "./src/internal/browser-stream-template-renderer.js",
+      "node": "./src/internal/node-stream-template-renderer.js"
+    }
   },
   "files": [
     "directives",
@@ -36,7 +52,7 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "lit": "^2.2.7"
+    "lit-html": "^2.2.6"
   },
   "devDependencies": {
     "@lit-labs/ssr": "2.2.1",
