@@ -1,6 +1,6 @@
 import { noChange, _$LH } from 'lit-html';
 import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/directive-helpers.js';
-import { digestForTemplateResult } from 'lit-html/experimental-hydrate.js';
+import { digestForTemplateStrings } from './internal/browser-digest.js';
 import { PartType } from 'lit-html/directive.js';
 
 const {
@@ -12,24 +12,24 @@ const {
 } = _$LH;
 
 /**
- *
+ * Hydrate existing server-rendered markup.
  * @param { unknown } value
  * @param { HTMLElement | DocumentFragment } container
- * @param { RenderOptions } [options]
+ * @param { ClientRenderOptions } [options]
  */
-export function hydrate(value, container, options = {}) {
+export function hydrateOrRender(value, container, options = {}) {
   // @ts-expect-error - internal property
   if (container['_$litPart$'] !== undefined) {
     // TODO: call render instead
     console.log('already hydrated');
   }
 
-  /** @type { ChildPart | undefined } */
+  /** @type { ClientChildPart | undefined } */
   let rootPart = undefined;
-  /** @type { ChildPart | undefined } */
+  /** @type { ClientChildPart | undefined } */
   let currentChildPart = undefined;
 
-  /** @type { Array<ChildPartState> } */
+  /** @type { Array<ClientChildPartState> } */
   const stack = [];
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_COMMENT);
   /** @type { Comment | null } */
@@ -71,8 +71,8 @@ export function hydrate(value, container, options = {}) {
  *
  * @param { unknown } value
  * @param { Comment } marker
- * @param { Array<ChildPartState> } stack
- * @param { RenderOptions } [options]
+ * @param { Array<ClientChildPartState> } stack
+ * @param { ClientRenderOptions } [options]
  */
 function openChildPart(value, marker, stack, options) {
   let part;
@@ -99,7 +99,7 @@ function openChildPart(value, marker, stack, options) {
       } else {
         value = result.value;
       }
-      /** @type { Array<ChildPart> } */ (state.part._$committedValue).push(part);
+      /** @type { Array<ClientChildPart> } */ (state.part._$committedValue).push(part);
     } else {
       // TODO: unexpected. Error?
       part = new ChildPart(marker, null, state.part, options);
@@ -115,7 +115,7 @@ function openChildPart(value, marker, stack, options) {
     stack.push({ part, type: 'leaf' });
     // TODO: primitive instead of TemplateResult. Error?
   } else if (isTemplateResult(value)) {
-    const markerWithDigest = `lit-part ${digestForTemplateResult(value)}`;
+    const markerWithDigest = `lit-part ${digestForTemplateStrings(value.strings)}`;
 
     if (marker.data !== markerWithDigest) {
       throw Error('Hydration value mismatch: Unexpected TemplateResult rendered to part');
@@ -154,8 +154,8 @@ function openChildPart(value, marker, stack, options) {
 /**
  *
  * @param { Comment } marker
- * @param { ChildPart | undefined } part
- * @param { Array<ChildPartState> } stack
+ * @param { ClientChildPart | undefined } part
+ * @param { Array<ClientChildPartState> } stack
  */
 function closeChildPart(marker, part, stack) {
   if (part === undefined) {
@@ -165,7 +165,7 @@ function closeChildPart(marker, part, stack) {
   // @ts-expect-error - internal property
   part._$endNode = marker;
 
-  const currentState = /** @type { ChildPartState } */ (stack.pop());
+  const currentState = /** @type { ClientChildPartState } */ (stack.pop());
 
   if (currentState.type === 'iterable') {
     if (!currentState.iterator.next().done) {
@@ -183,8 +183,8 @@ function closeChildPart(marker, part, stack) {
 /**
  *
  * @param { Comment } comment
- * @param { Array<ChildPartState> } stack
- * @param { RenderOptions } [options]
+ * @param { Array<ClientChildPartState> } stack
+ * @param { ClientRenderOptions } [options]
  */
 function createAttributeParts(comment, stack, options) {
   const node = comment.previousElementSibling ?? comment.parentElement;

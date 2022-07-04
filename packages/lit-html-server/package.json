@@ -20,6 +20,7 @@
       "browser": "./browser.js",
       "node": "./index.js"
     },
+    "./hydrate.js": "./hydrate.js",
     "./directives/*": "./directives/*"
   },
   "imports": {
