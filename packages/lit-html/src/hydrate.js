@@ -21,6 +21,7 @@ export function hydrate(value, container, options = {}) {
   // @ts-expect-error - internal property
   if (container['_$litPart$'] !== undefined) {
     // TODO: call render instead
+    console.log('already hydrated');
   }
 
   /** @type { ChildPart | undefined } */
@@ -61,6 +62,7 @@ export function hydrate(value, container, options = {}) {
     // @ts-expect-error - internal property
     container['_$litPart$'] = rootPart;
   } catch (err) {
+    console.error(err);
     // TODO: clear container and call render instead
   }
 }

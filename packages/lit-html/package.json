@@ -16,12 +16,8 @@
   "type": "module",
   "types": "index.d.ts",
   "main": "index.js",
-  "browser": "./browser.js",
   "exports": {
-    ".": {
-      "browser": "./browser.js",
-      "node": "./index.js"
-    }
+    ".": "./index.js"
   },
   "files": [
     "*.d.ts",
@@ -37,6 +33,7 @@
     "lit-html": "^2.2.6"
   },
   "devDependencies": {
+    "@popeindustries/lit-html-server": "workspace:*",
     "assert": "^2.0.0"
   },
   "scripts": {
