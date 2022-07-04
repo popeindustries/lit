@@ -3,7 +3,9 @@ import { isArray, isAsyncIterator, isBuffer, isObject, isPrimitive, isPromise, i
 import { isDirective, isTemplateResult } from './is.js';
 import { noChange, nothing } from 'lit-html';
 import { Buffer } from '#buffer';
+import { digestForTemplateStrings } from '#digest';
 import { escape } from './escape.js';
+import { TemplateResult } from './template-result.js';
 
 export const partType = {
   METADATA: 0,
@@ -88,7 +90,7 @@ export class AttributePart {
    * Resolves to a single string, or Promise for a single string,
    * even when responsible for multiple values.
    * @param { Array<unknown> } values
-   * @param { RenderOptions } [options]
+   * @param { InternalRenderOptions } [options]
    * @returns { Buffer }
    */
   resolveValue(values, options) {
@@ -164,7 +166,7 @@ export class BooleanAttributePart {
   /**
    * Retrieve resolved string Buffer from passed "value".
    * @param { unknown } value
-   * @param { RenderOptions } [options]
+   * @param { InternalRenderOptions } [options]
    * @returns { Buffer }
    */
   resolveValue(value, options) {
@@ -332,10 +334,18 @@ function resolveDirectiveValue(directiveResult, part) {
 
   if (result === noChange) {
     return EMPTY_STRING_BUFFER;
-    // Handle fake TemplateResult from unsafeHTML/unsafeSVG
-  } else if (isObject(result) && 'strings' in result) {
+  }
+  // Handle fake TemplateResult from unsafeHTML/unsafeSVG
+  else if (isObject(result) && 'strings' in result) {
     // @ts-ignore
-    return unsafePrefixString + result.strings[0];
+    const unsafeStrings = result.strings;
+    // Make fake Template instance to avoid unnecessary parsing
+    const template = {
+      digest: digestForTemplateStrings(unsafeStrings),
+      strings: [Buffer.from(unsafeStrings[0])],
+      parts: [],
+    };
+    return new TemplateResult(template, []);
   } else {
     return result;
   }

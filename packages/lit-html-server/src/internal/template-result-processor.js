@@ -7,10 +7,10 @@ import { Buffer } from '#buffer';
  * @param { TemplateResultRenderer } renderer
  * @param { Array<unknown> } stack
  * @param { number } [highWaterMark] - byte length to buffer before pushing data
- * @param { RenderOptions } [options]
+ * @param { InternalRenderOptions } [options]
  * @returns { () => void }
  */
-export function getProcessor(renderer, stack, highWaterMark = 0, options) {
+export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
   /** @type { Array<Buffer> } */
   const buffer = [];
   let bufferLength = 0;
@@ -126,9 +126,15 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options) {
  * Adds nested TemplateResults to the stack if necessary.
  * @param { TemplateResult } result
  * @param { Array<unknown> } stack
- * @param { RenderOptions } [options]
+ * @param { InternalRenderOptions } options
  */
 function getTemplateResultChunk(result, stack, options) {
+  // Enable hydration metadata for subtree
+  if (result.rehydratable && !options.includeRehydrationMetadata) {
+    options.includeRehydrationMetadata = true;
+    options.hydrationRoot = result.id;
+  }
+
   let chunk = result.readChunk(options);
 
   // Skip empty strings
@@ -138,6 +144,11 @@ function getTemplateResultChunk(result, stack, options) {
 
   // Finished reading, dispose
   if (chunk === null) {
+    // Disable hydration metadata when finished with subtree
+    if (options.hydrationRoot === result.id) {
+      options.includeRehydrationMetadata = false;
+      options.hydrationRoot = undefined;
+    }
     stack.shift();
   } else if (isTemplateResult(chunk)) {
     // Add to top of stack

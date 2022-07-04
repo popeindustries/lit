@@ -12,20 +12,22 @@ export class TemplateResult {
    * Constructor
    * @param { Template } template
    * @param { Array<unknown> } values
+   * @param { boolean } [rehydratable]
    */
-  constructor(template, values) {
-    this.template = template;
-    this.values = values;
+  constructor(template, values, rehydratable = false) {
     this.id = id++;
     this.index = 0;
-    this.maxIndex = this.template.strings.length + this.template.parts.length - 1;
-    this.metadata = Buffer.from(`<!--lit-part ${this.template.digest}-->`);
+    this.maxIndex = template.strings.length + template.parts.length - 1;
+    this.metadata = Buffer.from(`<!--lit-part ${template.digest}-->`);
+    this.rehydratable = rehydratable;
+    this.template = template;
     this.valueIndex = 0;
+    this.values = values;
   }
 
   /**
    * Consume template result content one chunk at a time.
-   * @param { RenderOptions } [options]
+   * @param { InternalRenderOptions } options
    * @returns { unknown }
    */
   readChunk(options) {
@@ -86,7 +88,7 @@ export class TemplateResult {
       }
       case partType.CHILD: {
         // @ts-ignore
-        let value = part.resolveValue(this.values[this.valueIndex], options);
+        let value = part.resolveValue(this.values[this.valueIndex], options.includeRehydrationMetadata);
         this.valueIndex++;
         return value;
       }

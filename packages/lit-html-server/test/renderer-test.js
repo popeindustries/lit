@@ -148,6 +148,12 @@ describe('Server template render', () => {
       template: 'html`<div .a="${"event"}"></div>`',
       result: '<!--lit-part X7msdWIx9Mg=--><div ><!--lit-node 0--></div><!--/lit-part-->',
     },
+    {
+      title: 'unsafeHTML directive',
+      template: 'html`<div>${unsafeHTML("<span>hi</span>")}</div>`',
+      result:
+        '<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part f/pfTVHPXqM=--><span>hi</span><!--/lit-part--></div><!--/lit-part-->',
+    },
   ];
   const only = tests.filter(({ only }) => only);
 

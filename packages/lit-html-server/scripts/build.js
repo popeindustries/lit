@@ -5,7 +5,7 @@ import path from 'node:path';
 await esbuild.build({
   bundle: true,
   entryPoints: ['./src/index.js'],
-  external: ['lit-html', 'lit-html/*'],
+  external: ['lit-html', 'lit-html/*', '*dom-shim.js'],
   format: 'esm',
   target: 'node16',
   platform: 'node',
@@ -63,6 +63,8 @@ fs.writeFileSync(
   path.resolve('hydrate.d.ts'),
   `${typesHydrate}\n${fs.readFileSync(path.resolve('src/hydrate.d.ts'), 'utf8')}`,
 );
+
+fs.copyFileSync(path.resolve('src/dom-shim.js'), path.resolve('dom-shim.js'));
 
 if (!fs.existsSync(path.resolve('directives'))) {
   fs.mkdirSync(path.resolve('directives'));

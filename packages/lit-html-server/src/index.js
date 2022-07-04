@@ -18,12 +18,37 @@ const templateCache = new Map();
 
 /**
  * Interprets a template literal as an HTML template that can be
- * rendered as a Readable stream or String
+ * rendered as a Readable stream, string, or Buffer.
  * @param { TemplateStringsArray } strings
  * @param  { ...unknown } values
  * @returns { TemplateResult }
  */
 function html(strings, ...values) {
+  const template = getTemplate(strings);
+
+  return new TemplateResult(template, values, false);
+}
+
+/**
+ * Interprets a template literal as an HTML template that can be
+ * rendered as a Readable stream, string, or Buffer.
+ * Includes rehydration metadata.
+ * @param { TemplateStringsArray } strings
+ * @param  { ...unknown } values
+ * @returns { TemplateResult }
+ */
+function rehydratableHtml(strings, ...values) {
+  const template = getTemplate(strings);
+
+  return new TemplateResult(template, values, true);
+}
+
+/**
+ * Retrieve `Template` instance
+ * @param { TemplateStringsArray } strings
+ * @returns { Template }
+ */
+function getTemplate(strings) {
   let template = templateCache.get(strings);
 
   if (template === undefined) {
@@ -31,7 +56,7 @@ function html(strings, ...values) {
     templateCache.set(strings, template);
   }
 
-  return new TemplateResult(template, values);
+  return template;
 }
 
 /**
@@ -41,7 +66,7 @@ function html(strings, ...values) {
  * @returns { import('stream').Readable | ReadableStream }
  */
 function renderToStream(result, options) {
-  return streamTemplateRenderer(getRenderResult(result), options);
+  return streamTemplateRenderer(getRenderResult(result), { ...options });
 }
 
 /**
@@ -51,7 +76,7 @@ function renderToStream(result, options) {
  * @returns { Promise<string> }
  */
 function renderToString(result, options) {
-  return promiseTemplateRenderer(getRenderResult(result), false, options);
+  return promiseTemplateRenderer(getRenderResult(result), false, { ...options });
 }
 
 /**
@@ -61,7 +86,7 @@ function renderToString(result, options) {
  * @returns { Promise<Buffer> }
  */
 function renderToBuffer(result, options) {
-  return promiseTemplateRenderer(getRenderResult(result), true, options);
+  return promiseTemplateRenderer(getRenderResult(result), true, { ...options });
 }
 
 /**
@@ -74,4 +99,12 @@ function getRenderResult(result) {
   return !isTemplateResult(result) ? DEFAULT_TEMPLATE_FN(result) : result;
 }
 
-export { html, renderToBuffer, renderToStream, renderToString, html as svg };
+export {
+  html,
+  rehydratableHtml,
+  renderToBuffer,
+  renderToStream,
+  renderToString,
+  html as svg,
+  rehydratableHtml as rehydratableSvg,
+};

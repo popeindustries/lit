@@ -3,9 +3,10 @@
  */
 declare type TemplateResult = {
   id: number;
+  rehydratable: boolean;
   template: Template;
   values: Array<unknown>;
-  readChunk(options?: RenderOptions): unknown;
+  readChunk(options?: InternalRenderOptions): unknown;
 };
 
 /**
@@ -87,11 +88,11 @@ declare type Part =
 /**
  * Options supported by template render functions
  */
-declare type RenderOptions = {
-  /**
-   * Include inline metadata for rehydration in the browser (default `false`)
-   */
+declare type RenderOptions = {};
+
+declare type InternalRenderOptions = RenderOptions & {
   includeRehydrationMetadata?: boolean;
+  hydrationRoot?: number;
 };
 
 declare type RegexTagGroups = {

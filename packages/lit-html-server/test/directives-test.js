@@ -1,17 +1,17 @@
 // @ts-nocheck
-import { directive, Directive } from 'lit/directive.js';
+import { directive, Directive } from 'lit-html/directive.js';
 import { html as h, renderToString as render } from '../src/index.js';
 import assert from 'assert';
 import { asyncAppend } from '../src/directives/async-append.js';
 import { asyncReplace } from '../src/directives/async-replace.js';
-import { cache } from 'lit/directives/cache.js';
-import { classMap } from 'lit/directives/class-map.js';
+import { cache } from 'lit-html/directives/cache.js';
+import { classMap } from 'lit-html/directives/class-map.js';
 import { createAsyncIterable } from './utils.js';
-import { guard } from 'lit/directives/guard.js';
-import { ifDefined } from 'lit/directives/if-defined.js';
-import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { guard } from 'lit-html/directives/guard.js';
+import { ifDefined } from 'lit-html/directives/if-defined.js';
+import { repeat } from 'lit-html/directives/repeat.js';
+import { styleMap } from 'lit-html/directives/style-map.js';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { until } from '../src/directives/until.js';
 
 describe('directives', () => {

@@ -5,7 +5,7 @@ import { getProcessor } from './template-result-processor.js';
  * A factory for rendering a template result to a string resolving Promise
  * @param { TemplateResult } result
  * @param { boolean } [asBuffer]
- * @param { RenderOptions } [options]
+ * @param { InternalRenderOptions } [options]
  */
 export function promiseTemplateRenderer(result, asBuffer = false, options) {
   return new Promise((resolve, reject) => {

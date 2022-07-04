@@ -4,12 +4,31 @@ const RE_VALID_NAME = /^[a-z][a-z0-9._-]*-[a-z0-9._-]*$/;
 
 if (typeof globalThis.window === 'undefined') {
   class Element {
-    constructor() {
-      this._hasShadowDOM = false;
+    _attributes = {};
+    _hasShadowDOM = false;
+
+    get attributes() {
+      return Object.keys(this._attributes);
     }
 
     attachShadow(init) {
-      this._hasShadowDOM = true;
+      const shadowRoot = { host: this };
+
+      // TODO: mode closed?
+      if (init && init.mode === 'open') {
+        this._hasShadowDOM = true;
+      }
+
+      return shadowRoot;
+    }
+
+    getAttribute(name) {
+      const value = this._attributes[name];
+      return value === undefined ? null : value;
+    }
+
+    setAttribute(name, value) {
+      this._attributes[name] = String(value);
     }
   }
 
@@ -37,6 +56,8 @@ if (typeof globalThis.window === 'undefined') {
         throw Error(`the constructor has already been registered under another name`);
       }
 
+      // Trigger getter
+      constructor.observedAttributes;
       this._registry.set(name, constructor);
     }
   }
