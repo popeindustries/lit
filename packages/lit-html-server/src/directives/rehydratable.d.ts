@@ -6,7 +6,7 @@ declare class RehydratableDirective extends Directive {
    * On the client, pass the same `value: TemplateResult` to `hydrateOrRender()`
    * to rehydrate the server-rendered DOM into an active lit-html template.
    */
-  render(value: TemplateResult): TemplateResult;
+  render(value: TemplateResult | Promise<TemplateResult>): TemplateResult | Promise<TemplateResult>;
 }
 
 export function rehydratable(value: TemplateResult): DirectiveResult<typeof RehydratableDirective>;

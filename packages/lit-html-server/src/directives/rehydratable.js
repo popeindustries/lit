@@ -15,14 +15,29 @@ class RehydratableDirective extends Directive {
 
   /**
    * Server renders an html subtree with rehydration metadata.
-   * On the client, pass the same `value: TemplateResult` to `hydrateOrRender()`
+   * On the client, pass the same `TemplateResult` resolved by `value` to `hydrateOrRender()`
    * to rehydrate the server-rendered DOM into an active lit-html template.
-   * @param { TemplateResult } value
+   * @param { TemplateResult | Promise<TemplateResult> } value
    */
   render(value) {
+    if (isPromise(value)) {
+      return value.then((result) => {
+        result.rehydratable = true;
+        return result;
+      });
+    }
     value.rehydratable = true;
     return value;
   }
 }
 
 export const rehydratable = directive(RehydratableDirective);
+
+/**
+ * Determine if "promise" is a Promise instance
+ * @param { unknown } promise
+ * @returns { promise is Promise<unknown> }
+ */
+function isPromise(promise) {
+  return promise != null && /** @type { Promise<unknown> } */ (promise).then != null;
+}
