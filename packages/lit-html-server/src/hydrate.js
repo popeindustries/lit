@@ -18,24 +18,46 @@ const {
  * @param { ClientRenderOptions } [options]
  */
 export function hydrateOrRender(value, container, options = {}) {
-  // @ts-expect-error - internal property
-  if (container['_$litPart$'] !== undefined) {
-    // TODO: call render instead
-    console.log('already hydrated');
-  }
-
-  /** @type { ClientChildPart | undefined } */
-  let rootPart = undefined;
-  /** @type { ClientChildPart | undefined } */
-  let currentChildPart = undefined;
-
-  /** @type { Array<ClientChildPartState> } */
-  const stack = [];
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_COMMENT);
-  /** @type { Comment | null } */
-  let marker;
-
   try {
+    const partOwnerNode = options.renderBefore ?? container;
+
+    // @ts-expect-error - internal property
+    if (partOwnerNode['_$litPart$'] !== undefined) {
+      // TODO: call render instead?
+      throw Error('already hydrated');
+    }
+
+    // Since `container` can have more than one rehydratable template,
+    // find nearest closing and opening *sibling* comments to isolate rehydratable elements.
+    // Start from last `container` child or `renderBefore` node if specified
+    const startNode = /** @type { Node } */ (options.renderBefore ?? container.lastChild);
+    const [openingComment, closingComment] = findEnclosingCommentNodes(startNode);
+
+    let active = false;
+    /** @param { Node } node */
+    const acceptFn = (node) => {
+      if (node === closingComment) {
+        active = false;
+        return NodeFilter.FILTER_ACCEPT;
+      } else if (active || node === openingComment) {
+        active = true;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+
+      return NodeFilter.FILTER_SKIP;
+    };
+
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_COMMENT, acceptFn);
+    /** @type { ClientChildPart | undefined } */
+    let rootPart = undefined;
+    /** @type { ClientChildPart | undefined } */
+    let currentChildPart = undefined;
+    /** @type { Comment | null } */
+    let marker;
+
+    /** @type { Array<ClientChildPartState> } */
+    const stack = [];
+
     // @ts-expect-error - only walking comments
     while ((marker = walker.nextNode()) !== null) {
       const markerText = marker.data;
@@ -60,11 +82,45 @@ export function hydrateOrRender(value, container, options = {}) {
     }
 
     // @ts-expect-error - internal property
-    container['_$litPart$'] = rootPart;
+    partOwnerNode['_$litPart$'] = rootPart;
   } catch (err) {
     console.error(err);
-    // TODO: clear container and call render instead
+    // TODO: call render instead?
   }
+}
+
+/**
+ * @param { Node } startNode
+ * @returns { [Comment, Comment] }
+ */
+function findEnclosingCommentNodes(startNode) {
+  /** @type { Comment | undefined } */
+  let closingComment;
+  /** @type { Comment | undefined } */
+  let openingComment;
+  /** @type { Node | null } */
+  let previous = startNode;
+
+  while (previous != null) {
+    // Comment
+    if (previous.nodeType === 8) {
+      const comment = /** @type { Comment } */ (previous);
+
+      if (closingComment === undefined) {
+        closingComment = comment;
+      } else {
+        openingComment = comment;
+        break;
+      }
+    }
+    previous = previous.previousSibling;
+  }
+
+  if (openingComment === undefined || closingComment === undefined) {
+    throw Error(`unable to find enclosing comment nodes in ${startNode.parentElement}`);
+  }
+
+  return [openingComment, closingComment];
 }
 
 /**
