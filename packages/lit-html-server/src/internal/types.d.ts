@@ -92,10 +92,34 @@ declare type Part =
   | ElementPartType
   | EventPartType;
 
+declare type ElementRendererConstructor = (new (tagName: string) => ElementRenderer) & typeof ElementRenderer;
+
+declare class ElementRenderer {
+  /**
+   * Should return true when given custom element class and/or tag name
+   * should be handled by this renderer.
+   */
+  static matchesClass(ceClass: typeof HTMLElement, tagName: string): boolean;
+  element: HTMLElement;
+  tagName: string;
+  constructor(ceClass: typeof HTMLElement, tagName: string);
+  connectedCallback(): void;
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void;
+  setProperty(name: string, value: unknown): void;
+  setAttribute(name: string, value: string): void;
+  renderAttributes(): string;
+  render(): unknown;
+}
+
 /**
  * Options supported by template render functions
  */
-declare type RenderOptions = {};
+declare type RenderOptions = {
+  /**
+   * Renderer classes for rendering of custom elements
+   */
+  elementRenderers: Array<ElementRendererConstructor>;
+};
 
 declare type InternalRenderOptions = RenderOptions & {
   includeRehydrationMetadata?: boolean;
