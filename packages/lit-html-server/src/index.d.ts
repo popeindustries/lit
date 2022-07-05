@@ -6,23 +6,10 @@ export { noChange, nothing } from 'lit-html';
  */
 export const html: (strings: TemplateStringsArray, ...values: Array<unknown>) => TemplateResult;
 /**
- * Interprets a template literal as an HTML template that can be
- * rendered as a Readable stream, string, or Buffer.
- * Includes rehydration metadata.
- */
-export const rehydratableHtml: (strings: TemplateStringsArray, ...values: Array<unknown>) => TemplateResult;
-/**
  * Interprets a template literal as a SVG template that can be
  * rendered as a Readable stream, string, or Buffer
  */
 export const svg: (strings: TemplateStringsArray, ...values: Array<unknown>) => TemplateResult;
-/**
- * Interprets a template literal as a SVG template that can be
- * rendered as a Readable stream, string, or Buffer
- * Includes rehydration metadata.
- */
-export const rehydratableSvg: (strings: TemplateStringsArray, ...values: Array<unknown>) => TemplateResult;
-
 /**
  * Renders a value, usually a lit-html TemplateResult, to a string resolving Promise
  */

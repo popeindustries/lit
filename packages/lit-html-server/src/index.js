@@ -12,7 +12,7 @@ export { noChange, nothing } from 'lit-html';
  * @param { unknown } value
  * @returns { TemplateResult }
  */
-const DEFAULT_TEMPLATE_FN = (value) => html` ${value} `;
+const DEFAULT_TEMPLATE_FN = (value) => html`${value}`;
 
 const templateCache = new Map();
 
@@ -27,20 +27,6 @@ function html(strings, ...values) {
   const template = getTemplate(strings);
 
   return new TemplateResult(template, values, false);
-}
-
-/**
- * Interprets a template literal as an HTML template that can be
- * rendered as a Readable stream, string, or Buffer.
- * Includes rehydration metadata.
- * @param { TemplateStringsArray } strings
- * @param  { ...unknown } values
- * @returns { TemplateResult }
- */
-function rehydratableHtml(strings, ...values) {
-  const template = getTemplate(strings);
-
-  return new TemplateResult(template, values, true);
 }
 
 /**
@@ -99,12 +85,4 @@ function getRenderResult(result) {
   return !isTemplateResult(result) ? DEFAULT_TEMPLATE_FN(result) : result;
 }
 
-export {
-  html,
-  rehydratableHtml,
-  renderToBuffer,
-  renderToStream,
-  renderToString,
-  html as svg,
-  rehydratableHtml as rehydratableSvg,
-};
+export { html, renderToBuffer, renderToStream, renderToString, html as svg };

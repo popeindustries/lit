@@ -1,7 +1,7 @@
-import { AsyncDirective } from 'lit-html/async-directive';
-import { DirectiveResult } from 'lit-html/directive';
+import { AsyncDirective } from 'lit-html/async-directive.js';
+import { DirectiveResult } from 'lit-html/directive.js';
 
-class AsyncReplaceDirective extends AsyncDirective {
+declare class AsyncReplaceDirective extends AsyncDirective {
   /**
    * Server render "value" asynchronously, rendering the first iterated value before completing
    */

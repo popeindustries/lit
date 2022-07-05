@@ -1,4 +1,4 @@
-import { rehydratableHtml } from '../src/index.js';
+import { html } from '../src/index.js';
 import { html as litHtml } from 'lit-html';
 import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 import { partType } from '../src/internal/parts.js';
@@ -8,7 +8,7 @@ import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
  * @param { string } template
  */
 export function getTemplates(template) {
-  return [rehydratableHtml, litHtml].map((fn) => {
+  return [html, litHtml].map((fn) => {
     const html = fn;
     return eval(template);
   });

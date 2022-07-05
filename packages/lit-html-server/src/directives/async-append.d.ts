@@ -1,7 +1,7 @@
-import { AsyncDirective } from 'lit-html/async-directive';
-import { DirectiveResult } from 'lit-html/directive';
+import { AsyncDirective } from 'lit-html/async-directive.js';
+import { DirectiveResult } from 'lit-html/directive.js';
 
-class AsyncAppendDirective extends AsyncDirective {
+declare class AsyncAppendDirective extends AsyncDirective {
   /**
    * Server render "value" asynchronously, appending items until the iterator has completed
    */

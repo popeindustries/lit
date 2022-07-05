@@ -1,7 +1,7 @@
-import { AsyncDirective } from 'lit-html/async-directive';
-import { DirectiveResult } from 'lit-html/directive';
+import { AsyncDirective } from 'lit-html/async-directive.js';
+import { DirectiveResult } from 'lit-html/directive.js';
 
-class UntilDirective extends AsyncDirective {
+declare class UntilDirective extends AsyncDirective {
   /**
    * Renders one of a series of values, including Promises, in priority order.
    * Not possible to render more than once in a server context, so primitive
