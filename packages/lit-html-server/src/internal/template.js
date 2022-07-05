@@ -2,6 +2,7 @@ import {
   AttributePart,
   BooleanAttributePart,
   ChildPart,
+  CustomElementPart,
   ElementPart,
   EventPart,
   MetadataPart,
@@ -64,7 +65,7 @@ export class Template {
    * @param { TemplateStringsArray } strings
    */
   _parse(strings) {
-    /** @type { { [name: string]: string } } */
+    /** @type { { [name: string]: string | undefined } } */
     let attributes = {};
     /** @type { string | undefined } */
     let attributeName;
@@ -78,6 +79,8 @@ export class Template {
     let nodeIndex = -1;
     let regex = RE_TAG;
     let tagName = '';
+    /** @type { RegExp | undefined } */
+    let rawTextEndRegex = undefined;
 
     for (let i = 0; i < n; i++) {
       const isFirstString = i === 0;
@@ -87,8 +90,6 @@ export class Template {
       let lastIndex = 0;
       /** @type { RegExpMatchArray | null } */
       let match;
-      /** @type { RegExp | undefined } */
-      let rawTextEndRegex;
 
       // TODO: custom-element parts
 
@@ -103,6 +104,7 @@ export class Template {
 
         lastIndex = regex.lastIndex;
 
+        // Opening/closing tag
         if (regex === RE_TAG) {
           const groups = /** @type { RegexTagGroups } */ (match.groups);
 
@@ -117,26 +119,29 @@ export class Template {
             const rawTagName = /** @type { string } */ (isDynamicTagName ? groups.dynamicTagName : groups.tagName);
             const isOpeningTag = rawTagName[0] !== '/';
 
-            attributes = {};
             hasAttributeParts = false;
             isCustomElement = isCustomElementTagName(rawTagName);
             mode = ATTRIBUTE;
             regex = RE_ATTR;
 
             if (isOpeningTag) {
+              attributes = {};
               tagName = rawTagName;
               nodeIndex++;
+
+              // Hop over raw text content when done parsing opening tag
+              if (RE_RAW_TEXT_ELEMENT.test(tagName)) {
+                rawTextEndRegex = new RegExp(`</${tagName}`, 'g');
+              }
             }
 
             if (isDynamicTagName) {
               // TODO: dev error?
             }
-            // Hop over raw text content when done parsing opening tag
-            else if (RE_RAW_TEXT_ELEMENT.test(rawTagName)) {
-              rawTextEndRegex = new RegExp(`</${rawTagName}`, 'g');
-            }
           }
-        } else if (regex === RE_ATTR) {
+        }
+        // Inside opening tag
+        else if (regex === RE_ATTR) {
           const groups = /** @type { RegexAttrGroups } */ (match.groups);
 
           // Tag close
@@ -145,6 +150,12 @@ export class Template {
             if (hasAttributeParts) {
               this.strings.push(Buffer.from(string.slice(0, lastIndex)));
               this.parts.push(new MetadataPart(Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
+              string = string.slice(lastIndex);
+              lastIndex = 0;
+            }
+            if (isCustomElement) {
+              this.strings.push(Buffer.from(string.slice(0, lastIndex)));
+              this.parts.push(new CustomElementPart(tagName, attributes));
               string = string.slice(lastIndex);
               lastIndex = 0;
             }
@@ -177,6 +188,7 @@ export class Template {
               isStatic = true;
               attributes[attributeName] = '';
             } else {
+              attributes[attributeName] = undefined;
               attributeStrings = [];
               const valueRegex = !hasQuotes
                 ? RE_UNQUOTED_ATTR_VALUE
@@ -197,6 +209,7 @@ export class Template {
                   attributeStrings.push(EMPTY_STRING_BUFFER, EMPTY_STRING_BUFFER);
                 }
               } else {
+                // Loop through all strings until closing quote
                 while (valueString !== undefined) {
                   const valueMatch = valueRegex.exec(valueString);
 
@@ -239,13 +252,20 @@ export class Template {
               }
             }
           }
-        } else if (regex === RE_COMMENT_END || regex === RE_COMMENT_ALT_END) {
+        }
+        // Comment end
+        else if (regex === RE_COMMENT_END || regex === RE_COMMENT_ALT_END) {
           mode = TEXT;
-          regex == RE_TAG;
+          regex = RE_TAG;
+        }
+        // Raw text closing tag
+        else if (regex === rawTextEndRegex) {
+          mode = TEXT;
+          regex = RE_TAG;
+          rawTextEndRegex = undefined;
         } else {
           mode = ATTRIBUTE;
           regex = RE_ATTR;
-          rawTextEndRegex = undefined;
         }
       }
 

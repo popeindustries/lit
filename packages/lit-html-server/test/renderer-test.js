@@ -4,7 +4,7 @@ import { renderToStream, renderToString } from '../src/index.js';
 import assert from 'node:assert';
 import { streamAsPromise } from './utils.js';
 
-describe('Server template render', () => {
+describe.only('Server template render', () => {
   const tests = [
     {
       title: 'plain text',
@@ -147,6 +147,11 @@ describe('Server template render', () => {
       title: 'property attribute',
       template: 'html`<div .a="${"event"}"></div>`',
       result: '<!--lit-part X7msdWIx9Mg=--><div ><!--lit-node 0--></div><!--/lit-part-->',
+    },
+    {
+      title: 'raw text',
+      template: 'html`<script ?defer="${true}">var t = true;</script>`',
+      result: '<!--lit-part IVsa+r3gBKE=--><script defer><!--lit-node 0-->var t = true;</script><!--/lit-part-->',
     },
     {
       title: 'unsafeHTML directive',

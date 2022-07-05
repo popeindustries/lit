@@ -26,7 +26,8 @@ interface TemplateResultRenderer {
 }
 
 declare enum PartType {
-  METADATA = 0,
+  METADATA = -1,
+  CUSTOMELEMENT = 0,
   ATTRIBUTE = 1,
   CHILD = 2,
   PROPERTY = 3,
@@ -39,7 +40,12 @@ interface MetadataPartType {
   readonly type: PartType;
   value: Buffer;
 }
-
+interface CustomElementPartType {
+  readonly attributes: { [name: string]: string | undefined };
+  readonly tagName: string;
+  readonly type: PartType;
+  resolveValue(value: unknown, withMetadata: boolean): unknown;
+}
 interface ChildPartType {
   readonly tagName: string;
   readonly type: PartType;
@@ -78,6 +84,7 @@ interface ElementPartType {
 }
 declare type Part =
   | MetadataPartType
+  | CustomElementPartType
   | ChildPartType
   | AttributePartType
   | PropertyPartType

@@ -109,6 +109,12 @@ describe('Template class', () => {
       result: '<div ><!--lit-node 0--></div>',
     },
     {
+      title: 'custom element',
+      template: '<my-custom hidden a="${x}"></my-custom>',
+      values: [['text']],
+      result: '<my-custom hidden a="text"><!--lit-node 0--></my-custom>',
+    },
+    {
       title: 'nested attribute metadata',
       template: '<div a="${x}">some <em>text</em> <span b="${x}">wow</span></div>',
       values: [['text'], ['here']],
@@ -129,7 +135,12 @@ describe('Template class', () => {
   for (const { title, template, result, values } of filteredTests) {
     it(`should parse template with ${title}`, () => {
       const string = templateToString(new Template(template.split('${x}')), values);
-      assert(string === result);
+      try {
+        assert(string === result);
+      } catch (err) {
+        console.log(string);
+        throw err;
+      }
     });
   }
 });

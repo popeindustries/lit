@@ -8,7 +8,8 @@ import { escape } from './escape.js';
 import { TemplateResult } from './template-result.js';
 
 export const partType = {
-  METADATA: 0,
+  METADATA: -1,
+  CUSTOMELEMENT: 0,
   ATTRIBUTE: 1,
   CHILD: 2,
   PROPERTY: 3,
@@ -16,11 +17,6 @@ export const partType = {
   EVENT: 5,
   ELEMENT: 6,
 };
-
-/**
- * A prefix value for strings that should not be escaped
- */
-const unsafePrefixString = '__unsafe-lit-html-server-string__';
 
 /**
  * A template part for hydration metadata
@@ -34,6 +30,34 @@ export class MetadataPart {
   constructor(value) {
     this.type = partType.METADATA;
     this.value = value;
+  }
+}
+
+/**
+ * A template part for custom element content
+ * @implements CustomElementPartType
+ */
+export class CustomElementPart {
+  /**
+   * Constructor
+   * @param { string } tagName
+   * @param { { [name: string]: string | undefined } } attributes
+   */
+  constructor(tagName, attributes) {
+    this.type = partType.CUSTOMELEMENT;
+    this.tagName = tagName;
+    this.attributes = attributes;
+  }
+
+  /**
+   * Retrieve resolved value given passed "value"
+   * @param { unknown } value
+   * @param { boolean } [withMetadata]
+   * @returns { unknown }
+   */
+  resolveValue(value, withMetadata = false) {
+    return '';
+    // return resolveNodeValue(value, this, withMetadata);
   }
 }
 
@@ -231,8 +255,7 @@ function resolveAttributeValue(value, part) {
 
   if (isPrimitive(value)) {
     const string = typeof value !== 'string' ? String(value) : value;
-    // Escape if not prefixed with unsafePrefixString, otherwise strip prefix
-    return Buffer.from(string.indexOf(unsafePrefixString) === 0 ? string.slice(33) : escape(string, 'attribute'));
+    return Buffer.from(escape(string, 'attribute'));
   } else if (isBuffer(value)) {
     return value;
   } else {
@@ -258,12 +281,7 @@ function resolveNodeValue(value, part, withMetadata) {
 
   if (isPrimitive(value)) {
     const string = typeof value !== 'string' ? String(value) : value;
-    // Escape if not prefixed with unsafePrefixString, otherwise strip prefix
-    value = Buffer.from(
-      string.indexOf(unsafePrefixString) === 0
-        ? string.slice(33)
-        : escape(string, part.tagName === 'script' || part.tagName === 'style' ? part.tagName : 'text'),
-    );
+    value = Buffer.from(escape(string, part.tagName === 'script' || part.tagName === 'style' ? part.tagName : 'text'));
   }
 
   if (isBuffer(value)) {
