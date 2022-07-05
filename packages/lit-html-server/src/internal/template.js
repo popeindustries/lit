@@ -32,7 +32,7 @@ const RE_CUSTOM_ELEMENT = /^[a-z][a-z0-9._\p{Emoji_Presentation}]*-[a-z0-9._\p{E
 const RE_SINGLE_QUOTED_ATTR_VALUE = /^(?<attributeValue>[^'\n\f\r]*)(?:(?<closingChar>')|$)/;
 const RE_DOUBLE_QUOTED_ATTR_VALUE = /^(?<attributeValue>[^"\n\f\r]*)(?:(?<closingChar>")|$)/;
 const RE_UNQUOTED_ATTR_VALUE = /^(?<attributeValue>[^'"=<>` \t\n\f\r]+)/;
-// const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
+const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
 
 // Parse modes:
 const TEXT = 1;
@@ -87,9 +87,10 @@ export class Template {
       let lastIndex = 0;
       /** @type { RegExpMatchArray | null } */
       let match;
+      /** @type { RegExp | undefined } */
+      let rawTextEndRegex;
 
       // TODO: custom-element parts
-      // TODO: rawTextEndRegex
 
       while (lastIndex < string.length) {
         // Start search from end of last match
@@ -128,9 +129,11 @@ export class Template {
             }
 
             if (isDynamicTagName) {
-              // TODO: dev error
-            } else {
-              // TODO: rawTextEndRegex
+              // TODO: dev error?
+            }
+            // Hop over raw text content when done parsing opening tag
+            else if (RE_RAW_TEXT_ELEMENT.test(rawTagName)) {
+              rawTextEndRegex = new RegExp(`</${rawTagName}`, 'g');
             }
           }
         } else if (regex === RE_ATTR) {
@@ -148,8 +151,7 @@ export class Template {
             attributeName = undefined;
             attributeStrings = [];
             mode = TEXT;
-            regex = RE_TAG;
-            // TODO: rawTextEndRegex
+            regex = rawTextEndRegex ?? RE_TAG;
           }
           // No attribute name, so must be `ElementAttribute`
           else if (groups.attributeName === undefined) {
@@ -243,7 +245,7 @@ export class Template {
         } else {
           mode = ATTRIBUTE;
           regex = RE_ATTR;
-          // TODO: rawTextEndRegex
+          rawTextEndRegex = undefined;
         }
       }
 
