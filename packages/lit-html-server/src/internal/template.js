@@ -1,13 +1,4 @@
-import {
-  AttributePart,
-  BooleanAttributePart,
-  ChildPart,
-  CustomElementPart,
-  ElementPart,
-  EventPart,
-  MetadataPart,
-  PropertyPart,
-} from './parts.js';
+import { AttributePart, ChildPart, CustomElementChildPart, getAttributeTypeFromName, MetadataPart } from './parts.js';
 import { Buffer } from '#buffer';
 import { EMPTY_STRING_BUFFER } from './consts.js';
 import { digestForTemplateStrings } from '#digest';
@@ -25,6 +16,7 @@ const HTML_TAGS_WITH_HYPHENS = new Set([
 ]);
 
 const RE_TAG = /<(?:(?<commentStart>!--|\/[^a-zA-Z])|(?<tagName>\/?[a-zA-Z][^>\s]*)|(?<dynamicTagName>\/?$))/g;
+const RE_TAG_END = />/g;
 const RE_ATTR =
   />|[ \t\n\f\r](?:(?<attributeName>[^\s"'>=/]+)(?:(?<spacesAndEquals>[ \t\n\f\r]*=[ \t\n\f\r]*)(?<quoteChar>["'])?)?|$)/g;
 const RE_COMMENT_END = /-->/g;
@@ -65,22 +57,17 @@ export class Template {
    * @param { TemplateStringsArray } strings
    */
   _parse(strings) {
-    /** @type { { [name: string]: string | undefined } } */
-    let attributes = {};
-    /** @type { string | undefined } */
-    let attributeName;
-    /** @type { Array<Buffer> } */
-    let attributeStrings = [];
-    let hasAttributeParts = false;
+    /** @type { AttributePart | undefined } */
+    let attributePart;
     let isCustomElement = false;
     let mode = TEXT;
     let n = strings.length;
     let nextString = strings[0];
     let nodeIndex = -1;
-    let regex = RE_TAG;
-    let tagName = '';
     /** @type { RegExp | undefined } */
     let rawTextEndRegex = undefined;
+    let regex = RE_TAG;
+    let tagName = '';
 
     for (let i = 0; i < n; i++) {
       const isFirstString = i === 0;
@@ -90,8 +77,6 @@ export class Template {
       let lastIndex = 0;
       /** @type { RegExpMatchArray | null } */
       let match;
-
-      // TODO: custom-element parts
 
       while (lastIndex < string.length) {
         // Start search from end of last match
@@ -104,8 +89,8 @@ export class Template {
 
         lastIndex = regex.lastIndex;
 
-        // Opening/closing tag
-        if (regex === RE_TAG) {
+        // Match opening/closing tag
+        if (mode === TEXT) {
           const groups = /** @type { RegexTagGroups } */ (match.groups);
 
           if (groups.commentStart === '!--') {
@@ -119,19 +104,39 @@ export class Template {
             const rawTagName = /** @type { string } */ (isDynamicTagName ? groups.dynamicTagName : groups.tagName);
             const isOpeningTag = rawTagName[0] !== '/';
 
-            hasAttributeParts = false;
             isCustomElement = isCustomElementTagName(rawTagName);
             mode = ATTRIBUTE;
             regex = RE_ATTR;
 
             if (isOpeningTag) {
-              attributes = {};
               tagName = rawTagName;
               nodeIndex++;
 
               // Hop over raw text content when done parsing opening tag
               if (RE_RAW_TEXT_ELEMENT.test(tagName)) {
                 rawTextEndRegex = new RegExp(`</${tagName}`, 'g');
+              }
+
+              // Switch to attribute parsing mode if custom-element...
+              let needsAttributeParsing = isCustomElement;
+
+              // ...or current string contains tag end (no attribute expressions)
+              if (!needsAttributeParsing) {
+                RE_TAG_END.lastIndex = lastIndex;
+                const endMatch = RE_TAG_END.exec(string);
+
+                if (endMatch === null) {
+                  needsAttributeParsing = true;
+                } else {
+                  // Skip to tag end
+                  lastIndex = RE_TAG_END.lastIndex - 1;
+                }
+              }
+
+              if (needsAttributeParsing) {
+                // attributes = {};
+                attributePart = new AttributePart(tagName);
+                this.parts.push(attributePart);
               }
             }
 
@@ -140,14 +145,15 @@ export class Template {
             }
           }
         }
-        // Inside opening tag
-        else if (regex === RE_ATTR) {
+        // Match attributes inside opening tag
+        else if (mode === ATTRIBUTE) {
+          attributePart = /** @type { AttributePart } */ (attributePart);
           const groups = /** @type { RegexAttrGroups } */ (match.groups);
 
-          // Tag close
+          // Tag end
           if (match[0] === '>') {
             // Insert metadata for attributes after close of opening tag
-            if (hasAttributeParts) {
+            if (attributePart) {
               this.strings.push(Buffer.from(string.slice(0, lastIndex)));
               this.parts.push(new MetadataPart(Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
               string = string.slice(lastIndex);
@@ -155,155 +161,133 @@ export class Template {
             }
             if (isCustomElement) {
               this.strings.push(Buffer.from(string.slice(0, lastIndex)));
-              this.parts.push(new CustomElementPart(tagName, attributes));
+              this.parts.push(new CustomElementChildPart(tagName, /* attributes */ {}));
               string = string.slice(lastIndex);
               lastIndex = 0;
             }
-            attributeName = undefined;
-            attributeStrings = [];
+            attributePart = undefined;
             mode = TEXT;
             regex = rawTextEndRegex ?? RE_TAG;
-          }
-          // No attribute name, so must be `ElementAttribute`
-          else if (groups.attributeName === undefined) {
-            attributeName = undefined;
-            attributeStrings = [];
-            hasAttributeParts = true;
-            mode = ATTRIBUTE;
-            regex = RE_ATTR;
-          }
-          // Attribute, static or dynamic
-          else {
-            attributeName = groups.attributeName;
-            mode = ATTRIBUTE;
+          } else {
+            // No attribute name, so must be `ElementAttribute`
+            if (groups.attributeName === undefined) {
+              attributePart.addAttributeData('element');
+            }
+            // All other attribute types
+            else {
+              /** @type { string | undefined } */
+              const attributeName = groups.attributeName;
 
-            // Attribute name index is current position less full matching string (not including leading space)
-            const attributeNameIndex = lastIndex - match[0].length + 1;
-            const hasQuotes = groups.quoteChar !== undefined;
-            let isStatic = false;
-            let valueString = string.slice(lastIndex);
+              // Attribute name index is current position less full matching string (not including leading space)
+              const attributeNameIndex = lastIndex - match[0].length + 1;
+              const hasQuotes = groups.quoteChar !== undefined;
+              let trim = false;
+              let valueString = string.slice(lastIndex);
 
-            // Static boolean attribute
-            if (groups.spacesAndEquals === undefined) {
-              isStatic = true;
-              attributes[attributeName] = '';
-            } else {
-              attributes[attributeName] = undefined;
-              attributeStrings = [];
-              const valueRegex = !hasQuotes
-                ? RE_UNQUOTED_ATTR_VALUE
-                : groups.quoteChar === '"'
-                ? RE_DOUBLE_QUOTED_ATTR_VALUE
-                : RE_SINGLE_QUOTED_ATTR_VALUE;
-              let j = 0;
-
-              if (!hasQuotes) {
-                const valueMatch = valueRegex.exec(valueString);
-                // @ts-ignore
-                const attributeValue = valueMatch?.groups.attributeValue ?? '';
-
-                if (attributeValue !== '') {
-                  isStatic = true;
-                  attributes[attributeName] = attributeValue;
-                } else {
-                  attributeStrings.push(EMPTY_STRING_BUFFER, EMPTY_STRING_BUFFER);
-                }
+              // Static boolean attribute if no leading spaces/equals
+              if (groups.spacesAndEquals === undefined) {
+                attributePart.addAttributeData('boolean', attributeName, '');
               } else {
-                // Loop through all strings until closing quote
-                while (valueString !== undefined) {
-                  const valueMatch = valueRegex.exec(valueString);
+                // No quotes, so multiple values not possible
+                if (!hasQuotes) {
+                  const valueMatch = RE_UNQUOTED_ATTR_VALUE.exec(valueString);
+                  // @ts-ignore
+                  const attributeValue = valueMatch?.groups.attributeValue ?? '';
 
-                  if (valueMatch === null) {
-                    break;
+                  // Static attribute if value
+                  if (attributeValue !== '') {
+                    attributePart.addAttributeData('attribute', attributeName, attributeValue);
+                  } else {
+                    attributePart.addAttributeData(getAttributeTypeFromName(attributeName), attributeName, undefined, [
+                      EMPTY_STRING_BUFFER,
+                      EMPTY_STRING_BUFFER,
+                    ]);
+                    trim = true;
                   }
+                } else {
+                  /** @type { Array<Buffer> } */
+                  const attributeStrings = [];
+                  const valueRegex =
+                    groups.quoteChar === '"' ? RE_DOUBLE_QUOTED_ATTR_VALUE : RE_SINGLE_QUOTED_ATTR_VALUE;
+                  let j = 0;
 
-                  const { attributeValue = '', closingChar } = /** @type { RegexAttrValueGroups } */ (
-                    valueMatch.groups
-                  );
+                  // Loop through all strings until closing quote
+                  while (valueString !== undefined) {
+                    const valueMatch = valueRegex.exec(valueString);
 
-                  if (closingChar !== undefined) {
-                    // Static value since closed on first pass
-                    if (j === 0) {
-                      isStatic = true;
-                      attributes[attributeName] = attributeValue;
-                    } else {
-                      attributeStrings.push(Buffer.from(attributeValue));
-                      i += j - 1;
-                      nextString = valueString.slice(valueMatch[0].length - 1);
+                    if (valueMatch === null) {
+                      break;
                     }
-                    break;
+
+                    const { attributeValue = '', closingChar } = /** @type { RegexAttrValueGroups } */ (
+                      valueMatch.groups
+                    );
+
+                    if (closingChar !== undefined) {
+                      // Static value since closed on first pass
+                      if (j === 0) {
+                        attributePart.addAttributeData('attribute', attributeName, attributeValue);
+                      } else {
+                        attributeStrings.push(Buffer.from(attributeValue));
+                        i += j - 1;
+                        nextString = valueString.slice(valueMatch[0].length - 1);
+                      }
+                      break;
+                    }
+
+                    attributeStrings.push(Buffer.from(attributeValue));
+                    valueString = strings[i + ++j];
                   }
 
-                  attributeStrings.push(Buffer.from(attributeValue));
-                  valueString = strings[i + ++j];
+                  if (attributeStrings.length > 0) {
+                    attributePart.addAttributeData(
+                      getAttributeTypeFromName(attributeName),
+                      attributeName,
+                      undefined,
+                      attributeStrings,
+                    );
+                    trim = true;
+                  }
                 }
               }
-            }
 
-            if (!isStatic) {
-              hasAttributeParts = true;
-              // Trim leading attribute characters (name, spaces, equals, quotes)
-              string = string.slice(0, attributeNameIndex);
-              lastIndex = attributeNameIndex;
-              // Trim closing quotes from start of next string
-              if (hasQuotes) {
-                // @ts-ignore
-                nextString = nextString.slice(nextString.indexOf(groups.quoteChar) + 1);
+              if (trim) {
+                // Trim leading attribute characters (name, spaces, equals, quotes)
+                string = string.slice(0, attributeNameIndex);
+                lastIndex = attributeNameIndex;
+                // Trim closing quotes from start of next string
+                if (hasQuotes) {
+                  // @ts-ignore
+                  nextString = nextString.slice(nextString.indexOf(groups.quoteChar) + 1);
+                }
               }
             }
           }
         }
-        // Comment end
-        else if (regex === RE_COMMENT_END || regex === RE_COMMENT_ALT_END) {
+        // Match comment end
+        else if (mode === COMMENT) {
           mode = TEXT;
           regex = RE_TAG;
         }
-        // Raw text closing tag
+        // Match raw text closing tag
         else if (regex === rawTextEndRegex) {
           mode = TEXT;
           regex = RE_TAG;
           rawTextEndRegex = undefined;
-        } else {
-          mode = ATTRIBUTE;
-          regex = RE_ATTR;
         }
       }
 
       this.strings.push(Buffer.from(string));
 
-      if (!isLastString) {
-        if (mode === TEXT) {
+      if (mode === TEXT) {
+        if (!isLastString) {
           this.parts.push(new ChildPart(tagName));
-        } else if (mode === ATTRIBUTE) {
-          this.parts.push(handleAttributeExpressions(attributeName ?? '', attributeStrings, tagName));
         }
+      } else if (mode === COMMENT) {
+        throw Error('parsing expressions inside comment tags is not supported!');
       }
     }
   }
-}
-
-/**
- * Create part instance for dynamic attribute values
- * @param { string } name
- * @param { Array<Buffer> } strings
- * @param { string } tagName
- */
-function handleAttributeExpressions(name, strings, tagName) {
-  if (name === '') {
-    return new ElementPart(tagName);
-  }
-
-  const prefix = name[0];
-
-  if (prefix === '.') {
-    return new PropertyPart(name.slice(1), strings, tagName);
-  } else if (prefix === '@') {
-    return new EventPart(name.slice(1), tagName);
-  } else if (prefix === '?') {
-    return new BooleanAttributePart(name.slice(1), tagName);
-  }
-
-  return new AttributePart(name, strings, tagName);
 }
 
 /**

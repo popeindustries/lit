@@ -25,75 +25,67 @@ interface TemplateResultRenderer {
   destroy: (err: Error) => void;
 }
 
-declare enum PartType {
-  METADATA = -1,
-  CUSTOMELEMENT = 0,
-  ATTRIBUTE = 1,
-  CHILD = 2,
-  PROPERTY = 3,
-  BOOLEAN = 4,
-  EVENT = 5,
-  ELEMENT = 6,
+declare type AttributeDataType = 'boolean' | 'attribute' | 'property' | 'event' | 'element';
+declare type BooleanAttributeData = {
+  type: 'boolean';
+  length: number;
+  name: string;
+  nameAsBuffer: Buffer;
+  value?: Buffer;
+};
+declare type AttributeAttributeData = {
+  type: 'attribute';
+  length: number;
+  name: string;
+  open?: Buffer;
+  close?: Buffer;
+  value?: Buffer;
+  strings?: Array<Buffer>;
+};
+declare type DefaultAttributeData = {
+  type: 'property' | 'event' | 'element';
+  length: number;
+  value: Buffer;
+};
+declare type AttributeData = BooleanAttributeData | AttributeAttributeData | DefaultAttributeData;
+declare interface PartInfo {
+  type: number;
+  tagName: string;
+  name?: string;
+  strings?: Array<string>;
 }
 
-interface MetadataPartType {
-  readonly type: PartType;
-  value: Buffer;
+declare enum PartType {
+  METADATA = 0,
+  ATTRIBUTE = 1,
+  CHILD = 2,
+  CUSTOMELEMENT = 3,
 }
-interface CustomElementPartType {
-  readonly attributes: { [name: string]: string | undefined };
+interface AttributePartType {
+  readonly length: number;
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(value: unknown, withMetadata: boolean): unknown;
+  readonly hasDynamicParts: boolean;
+  resolveValue(value: unknown): Buffer;
 }
 interface ChildPartType {
   readonly tagName: string;
   readonly type: PartType;
   resolveValue(value: unknown, withMetadata: boolean): unknown;
 }
-interface AttributePartType {
-  readonly length: number;
-  readonly name: string;
+interface CustomElementChildPartType {
+  readonly attributes: { [name: string]: string | undefined };
   readonly tagName: string;
   readonly type: PartType;
-  resolveValue(value: unknown): Buffer;
+  resolveValue(value: unknown, withMetadata: boolean): unknown;
 }
-interface PropertyPartType {
-  readonly length: number;
-  readonly name: string;
-  readonly tagName: string;
+interface MetadataPartType {
   readonly type: PartType;
   value: Buffer;
 }
-interface BooleanAttributePartType {
-  readonly name: string;
-  readonly tagName: string;
-  readonly type: PartType;
-  resolveValue(value: unknown): Buffer;
-}
-interface EventPartType {
-  readonly name: string;
-  readonly tagName: string;
-  readonly type: PartType;
-  value: Buffer;
-}
-interface ElementPartType {
-  readonly tagName: string;
-  readonly type: PartType;
-  value: Buffer;
-}
-declare type Part =
-  | MetadataPartType
-  | CustomElementPartType
-  | ChildPartType
-  | AttributePartType
-  | PropertyPartType
-  | BooleanAttributePartType
-  | ElementPartType
-  | EventPartType;
+declare type Part = MetadataPartType | CustomElementChildPartType | ChildPartType | AttributePartType;
 
 declare type ElementRendererConstructor = (new (tagName: string) => ElementRenderer) & typeof ElementRenderer;
-
 declare class ElementRenderer {
   /**
    * Should return true when given custom element class and/or tag name

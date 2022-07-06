@@ -8,56 +8,186 @@ import { escape } from './escape.js';
 import { TemplateResult } from './template-result.js';
 
 export const partType = {
-  METADATA: -1,
-  CUSTOMELEMENT: 0,
+  METADATA: 0,
   ATTRIBUTE: 1,
   CHILD: 2,
-  PROPERTY: 3,
-  BOOLEAN: 4,
-  EVENT: 5,
-  ELEMENT: 6,
+  CUSTOMELEMENT: 3,
+};
+
+const SPACE_BUFFER = Buffer.from(' ');
+const QUOTE_BUFFER = Buffer.from('"');
+const TYPE_TO_LIT_PART_TYPE = {
+  attribute: 1,
+  child: 2,
+  property: 3,
+  boolean: 4,
+  event: 5,
+  element: 6,
 };
 
 /**
- * A template part for hydration metadata
- * @implements MetadataPartType
+ * Retrieve `attributeType` from attribute `name`
+ * @param { string } name
  */
-export class MetadataPart {
-  /**
-   * Constructor
-   * @param { Buffer } value
-   */
-  constructor(value) {
-    this.type = partType.METADATA;
-    this.value = value;
+export function getAttributeTypeFromName(name) {
+  if (name === '') {
+    return 'element';
+  }
+
+  const prefix = name[0];
+
+  switch (name[0]) {
+    case '?':
+      return 'boolean';
+    case '.':
+      return 'property';
+    case '@':
+      return 'event';
+    default:
+      return 'attribute';
   }
 }
 
 /**
- * A template part for custom element content
- * @implements CustomElementPartType
+ * A dynamic template part for attributes.
+ * Unlike text nodes, attributes may contain multiple strings and parts.
+ * @implements AttributePartType
  */
-export class CustomElementPart {
+export class AttributePart {
   /**
    * Constructor
    * @param { string } tagName
-   * @param { { [name: string]: string | undefined } } attributes
    */
-  constructor(tagName, attributes) {
-    this.type = partType.CUSTOMELEMENT;
+  constructor(tagName) {
+    this.length = 0;
     this.tagName = tagName;
-    this.attributes = attributes;
+    this.type = partType.ATTRIBUTE;
+    this.hasDynamicParts = false;
+    /** @type { Array<AttributeData> } */
+    this._attributes = [];
   }
 
   /**
-   * Retrieve resolved value given passed "value"
-   * @param { unknown } value
-   * @param { boolean } [withMetadata]
-   * @returns { unknown }
+   * Add data for specific attribute
+   * @param { AttributeDataType } type
+   * @param { string } [name]
+   * @param { string } [value]
+   * @param { Array<Buffer> } [strings]
    */
-  resolveValue(value, withMetadata = false) {
-    return '';
-    // return resolveNodeValue(value, this, withMetadata);
+  addAttributeData(type, name = '', value, strings) {
+    const hasValue = value !== undefined;
+    /** @type { AttributeData } */
+    let data;
+    let length = 0;
+
+    switch (type) {
+      case 'boolean': {
+        name = name.slice(1);
+        // Zero length if static
+        length = hasValue ? 1 : 0;
+        data = {
+          type,
+          length,
+          name,
+          nameAsBuffer: Buffer.from(`${name}`),
+        };
+        if (hasValue) {
+          data.value = data.nameAsBuffer;
+        } else {
+          this.hasDynamicParts = true;
+        }
+        break;
+      }
+      case 'attribute': {
+        // Zero length if static (no `strings` if static)
+        length = strings !== undefined ? strings.length - 1 : 0;
+        data = {
+          type,
+          length,
+          name,
+          open: Buffer.from(`${name}="`),
+          close: strings !== undefined ? Buffer.from(`${strings[strings.length - 1]}"`) : QUOTE_BUFFER,
+          strings,
+        };
+        if (hasValue) {
+          data.value = Buffer.from(`${name}="${value}"`);
+        } else {
+          this.hasDynamicParts = true;
+        }
+        break;
+      }
+      default: {
+        // Property attributes can have multiple parts
+        length = strings !== undefined ? strings.length - 1 : 1;
+        data = {
+          type,
+          length,
+          value: EMPTY_STRING_BUFFER,
+        };
+        this.hasDynamicParts = true;
+      }
+    }
+
+    this.length += length;
+    this._attributes.push(data);
+  }
+
+  /**
+   * Retrieve resolved string Buffer from passed "values".
+   * Resolves to a single string, or Promise for a single string,
+   * even when responsible for multiple values.
+   * @param { Array<unknown> } values
+   * @param { InternalRenderOptions } [options]
+   * @returns { Buffer }
+   */
+  resolveValue(values, options) {
+    /** @type { Array<Buffer> } */
+    let chunks = [];
+    let valuesIndex = 0;
+
+    for (let data of this._attributes) {
+      if (data.value !== undefined) {
+        chunks.push(data.value);
+      } else {
+        // Only boolean or attribute types may have unresolved "value"
+        data = /** @type { BooleanAttributeData | AttributeAttributeData} */ (data);
+
+        if (data.type === 'boolean') {
+          const resolvedValue = resolveAttributeValue(values[valuesIndex], this.tagName, data);
+
+          // Skip if "nothing"
+          if (resolvedValue !== nothing) {
+            chunks.push(resolvedValue);
+          }
+        } else {
+          let bailed = false;
+          let pendingChunks = [/** @type { Buffer } */ (data.open)];
+
+          for (let i = 0; i < data.length; i++) {
+            const resolvedValue = resolveAttributeValue(values[valuesIndex + i], this.tagName, data);
+
+            // Bail if at least one value is "nothing"
+            if (resolvedValue === nothing) {
+              bailed = true;
+              break;
+            }
+
+            if (data.strings !== undefined) {
+              pendingChunks.push(data.strings[i], resolvedValue);
+            }
+          }
+
+          if (!bailed) {
+            pendingChunks.push(/** @type { Buffer } */ (data.close));
+            chunks.push(...pendingChunks);
+          }
+        }
+
+        valuesIndex += data.length;
+      }
+    }
+
+    return Buffer.concat(chunks);
   }
 }
 
@@ -87,170 +217,77 @@ export class ChildPart {
 }
 
 /**
- * A dynamic template part for attributes.
- * Unlike text nodes, attributes may contain multiple strings and parts.
- * @implements AttributePartType
+ * A template part for custom element content
+ * @implements CustomElementChildPartType
  */
-export class AttributePart {
+export class CustomElementChildPart {
   /**
    * Constructor
-   * @param { string } name
-   * @param { Array<Buffer> } strings
    * @param { string } tagName
-   * @param { PartType } [type]
+   * @param { { [name: string]: string | undefined } } attributes
    */
-  constructor(name, strings, tagName, type = partType.ATTRIBUTE) {
-    this.length = strings.length - 1;
-    this.name = name;
-    this.prefix = Buffer.from(`${this.name}="`);
-    this.strings = strings;
-    this.suffix = Buffer.from(`${this.strings[this.length]}"`);
+  constructor(tagName, attributes) {
+    this.type = partType.CUSTOMELEMENT;
     this.tagName = tagName;
-    this.type = type;
+    this.attributes = attributes;
   }
 
   /**
-   * Retrieve resolved string Buffer from passed "values".
-   * Resolves to a single string, or Promise for a single string,
-   * even when responsible for multiple values.
-   * @param { Array<unknown> } values
-   * @param { InternalRenderOptions } [options]
-   * @returns { Buffer }
-   */
-  resolveValue(values, options) {
-    let chunks = [this.prefix];
-    let chunkLength = this.prefix.length;
-    let pendingChunks;
-
-    for (let i = 0; i < this.length; i++) {
-      const string = this.strings[i];
-      let value = resolveAttributeValue(values[i], this);
-
-      // Bail if 'nothing'
-      if (value === nothing) {
-        return EMPTY_STRING_BUFFER;
-      }
-
-      chunks.push(string);
-      chunkLength += string.length;
-
-      if (isBuffer(value)) {
-        chunks.push(value);
-        chunkLength += value.length;
-      }
-    }
-
-    chunks.push(this.suffix);
-    chunkLength += this.suffix.length;
-
-    return Buffer.concat(chunks, chunkLength);
-  }
-}
-
-/**
- * A dynamic template part for property attributes.
- * Property attributes are prefixed with "." and have no server-side representation.
- * @implements PropertyPartType
- */
-export class PropertyPart {
-  /**
-   * Constructor
-   * @param { string } name
-   * @param { Array<Buffer> } strings
-   * @param { string } tagName
-   */
-  constructor(name, strings, tagName) {
-    this.length = strings.length - 1;
-    this.name = name;
-    this.tagName = tagName;
-    this.type = partType.PROPERTY;
-    this.value = EMPTY_STRING_BUFFER;
-  }
-}
-
-/**
- * A dynamic template part for boolean attributes.
- * Boolean attributes are prefixed with "?"
- * @implements BooleanAttributePartType
- */
-export class BooleanAttributePart {
-  /**
-   * Constructor
-   * @param { string } name
-   * @param { string } tagName
-   */
-  constructor(name, tagName) {
-    this.name = name;
-    this.tagName = tagName;
-    this.type = partType.BOOLEAN;
-
-    this.nameAsBuffer = Buffer.from(this.name);
-  }
-
-  /**
-   * Retrieve resolved string Buffer from passed "value".
+   * Retrieve resolved value given passed "value"
    * @param { unknown } value
-   * @param { InternalRenderOptions } [options]
-   * @returns { Buffer }
+   * @param { boolean } [withMetadata]
+   * @returns { unknown }
    */
-  resolveValue(value, options) {
-    if (isDirective(value)) {
-      value = resolveDirectiveValue(value, this);
+  resolveValue(value, withMetadata = false) {
+    return '';
+    // return resolveNodeValue(value, this, withMetadata);
+  }
+}
+
+/**
+ * A template part for hydration metadata
+ * @implements MetadataPartType
+ */
+export class MetadataPart {
+  /**
+   * Constructor
+   * @param { Buffer } value
+   */
+  constructor(value) {
+    this.type = partType.METADATA;
+    this.value = value;
+  }
+}
+
+/**
+ * Resolve "value" to Buffer
+ * @param { unknown } value
+ * @param { string } tagName
+ * @param { BooleanAttributeData | AttributeAttributeData } data
+ * @returns { Buffer | nothing }
+ */
+function resolveAttributeValue(value, tagName, data) {
+  if (isDirective(value)) {
+    /** @type { PartInfo } */
+    const partInfo = {
+      name: data.name,
+      tagName,
+      type: TYPE_TO_LIT_PART_TYPE[data.type],
+    };
+    if (data.type === 'attribute' && data.strings !== undefined && data.length > 1) {
+      partInfo.strings = data.strings.map((string) => string.toString());
     }
 
-    return value ? this.nameAsBuffer : EMPTY_STRING_BUFFER;
-  }
-}
-
-/**
- * A dynamic template part for event attributes.
- * Event attributes are prefixed with "@" and have no server-side representation.
- * @implements EventPartType
- */
-export class EventPart {
-  /**
-   * Constructor
-   * @param { string } name
-   * @param { string } tagName
-   */
-  constructor(name, tagName) {
-    this.name = name;
-    this.tagName = tagName;
-    this.type = partType.EVENT;
-    this.value = EMPTY_STRING_BUFFER;
-  }
-}
-
-/**
- * A dynamic template part for element bindings.
- * Element parts have no server-side representation.
- * @implements ElementPartType
- */
-export class ElementPart {
-  /**
-   * Constructor
-   * @param { string } tagName
-   */
-  constructor(tagName) {
-    this.tagName = tagName;
-    this.type = partType.ELEMENT;
-    this.value = EMPTY_STRING_BUFFER;
-  }
-}
-
-/**
- * Resolve "value" to string if possible
- * @param { unknown } value
- * @param { AttributePart } part
- * @returns { unknown }
- */
-function resolveAttributeValue(value, part) {
-  if (isDirective(value)) {
-    value = resolveDirectiveValue(value, part);
+    value = resolveDirectiveValue(value, partInfo);
   }
 
+  // Bail if "nothing"
   if (value === nothing) {
     return value;
+  }
+
+  if (data.type === 'boolean') {
+    return value ? data.nameAsBuffer : EMPTY_STRING_BUFFER;
   }
 
   if (isPrimitive(value)) {
@@ -272,7 +309,10 @@ function resolveAttributeValue(value, part) {
  */
 function resolveNodeValue(value, part, withMetadata) {
   if (isDirective(value)) {
-    value = resolveDirectiveValue(value, part);
+    value = resolveDirectiveValue(value, {
+      type: TYPE_TO_LIT_PART_TYPE['child'],
+      tagName: part.tagName,
+    });
   }
 
   if (value === nothing || value == null) {
@@ -332,19 +372,10 @@ async function* resolveAsyncIteratorValue(iterator, part, withMetadata) {
 /**
  * Resolve value of "directive"
  * @param { import('lit-html/directive.js').DirectiveResult } directiveResult
- * @param { { name?: string, tagName: string, type: PartType, strings?: Array<Buffer>, length?: number } } part
+ * @param { PartInfo } partInfo
  * @returns { unknown }
  */
-function resolveDirectiveValue(directiveResult, part) {
-  const partInfo = {
-    name: part.name,
-    tagName: part.tagName,
-    type: part.type,
-  };
-  if (part.strings !== undefined && part.length !== undefined && part.length > 1) {
-    // @ts-ignore
-    partInfo.strings = part.strings.map((string) => string.toString());
-  }
+function resolveDirectiveValue(directiveResult, partInfo) {
   // @ts-ignore
   const directive = new directiveResult._$litDirective$(partInfo);
   // @ts-ignore

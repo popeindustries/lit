@@ -1,7 +1,7 @@
 import { html } from '../src/index.js';
 import { html as litHtml } from 'lit-html';
-import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 import { partType } from '../src/internal/parts.js';
+import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 
 /**
@@ -44,10 +44,20 @@ export function streamAsPromise(stream) {
 }
 
 /**
- * @param { Template } template
- * @param { Array<unknown> } [values]
+ * @param { import('lit-html').TemplateResult } template
  */
-export function templateToString(template, values) {
+export function renderLitTemplate(template) {
+  let buffer = '';
+  for (const chunk of render(template)) {
+    buffer += chunk;
+  }
+  return buffer.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;quot;', '"').replaceAll('&quot;', '"');
+}
+
+/**
+ * @param { Template } template
+ */
+export function templateToString(template) {
   const { strings, parts } = template;
   let result = '';
   let i = 0;
@@ -55,14 +65,7 @@ export function templateToString(template, values) {
     const string = strings[i];
     const part = parts[i];
     result += string.toString();
-
-    if (values && part.type !== partType.METADATA) {
-      const value = values.shift();
-      // @ts-ignore
-      result += part.value ?? part.resolveValue(value);
-    } else {
-      result += partTypeToName(part);
-    }
+    result += partTypeToName(part);
   }
 
   result += strings[i].toString();
@@ -78,29 +81,7 @@ function partTypeToName(part) {
       return '[CHILD]';
     case partType.ATTRIBUTE:
       return '[ATTR]';
-    case partType.BOOLEAN:
-      return '[BOOL]';
-    case partType.ELEMENT:
-      return '[ELEMENT]';
-    case partType.EVENT:
-      return '[EVENT]';
     case partType.METADATA:
-      // @ts-ignore
-      return part.value.toString();
-    case partType.PROPERTY:
-      return '[PROPERTY]';
-    default:
-      return '[PART]';
+      return '[METADATA]';
   }
-}
-
-/**
- * @param { import('lit-html').TemplateResult } template
- */
-export function renderLitTemplate(template) {
-  let buffer = '';
-  for (const chunk of render(template)) {
-    buffer += chunk;
-  }
-  return buffer.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;quot;', '"').replaceAll('&quot;', '"');
 }

@@ -204,9 +204,9 @@ describe('directives', () => {
           }
         },
       );
-      const result = h`<my-static-element>${custom()}</my-static-element>`;
+      const result = h`<div>${custom()}</div>`;
       await render(result);
-      assert.equal(actualTagName, 'my-static-element');
+      assert.equal(actualTagName, 'div');
     });
     it('should give correct tagName when tag has space', async () => {
       let actualTagName = 'not-set';
@@ -221,9 +221,9 @@ describe('directives', () => {
           }
         },
       );
-      const result = h`<my-static-element >${custom()}</my-static-element >`;
+      const result = h`<div >${custom()}</div >`;
       await render(result);
-      assert.equal(actualTagName, 'my-static-element');
+      assert.equal(actualTagName, 'div');
     });
     it('should give correct tagName when tag has attribute', async () => {
       let actualTagName = 'not-set';
@@ -238,9 +238,8 @@ describe('directives', () => {
           }
         },
       );
-      const result = h`<my-static-element class="something">${custom()}</my-static-element>`;
+      const result = h`<div class="something">${custom()}</div>`;
       await render(result);
-      assert.equal(actualTagName, 'my-static-element');
     });
     it('should give correct tagName with dynamic attribute value', async () => {
       let actualTagName = 'not-set';

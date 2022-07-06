@@ -4,7 +4,7 @@ import { renderToStream, renderToString } from '../src/index.js';
 import assert from 'node:assert';
 import { streamAsPromise } from './utils.js';
 
-describe.only('Server template render', () => {
+describe('Render', () => {
   const tests = [
     {
       title: 'plain text',
