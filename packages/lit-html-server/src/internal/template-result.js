@@ -65,8 +65,7 @@ export class TemplateResult {
     const part = this.template.parts[index];
 
     switch (part.type) {
-      case partType.ATTRIBUTE:
-      case partType.PROPERTY: {
+      case partType.ATTRIBUTE: {
         const length = /** @type { AttributePartType } */ (part).length;
         let value;
         // AttributeParts can have multiple values, so slice based on length
@@ -80,12 +79,6 @@ export class TemplateResult {
         // @ts-ignore
         return part.type === partType.PROPERTY ? part.value : part.resolveValue(value, options);
       }
-      case partType.BOOLEAN: {
-        // @ts-ignore
-        const value = part.resolveValue(this.values[this.valueIndex], options);
-        this.valueIndex++;
-        return value;
-      }
       case partType.CHILD: {
         // @ts-ignore
         let value = part.resolveValue(this.values[this.valueIndex], options.includeRehydrationMetadata);
@@ -94,7 +87,7 @@ export class TemplateResult {
       }
       case partType.METADATA: {
         // @ts-ignore
-        return options?.includeRehydrationMetadata ? part.value : EMPTY_STRING_BUFFER;
+        return part.resolveValue(options?.includeRehydrationMetadata);
       }
       default:
         this.valueIndex++;

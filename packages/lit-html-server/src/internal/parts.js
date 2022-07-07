@@ -14,8 +14,9 @@ export const partType = {
   CUSTOMELEMENT: 3,
 };
 
-const SPACE_BUFFER = Buffer.from(' ');
 const QUOTE_BUFFER = Buffer.from('"');
+const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
+const SPACE_BUFFER = Buffer.from(' ');
 const TYPE_TO_LIT_PART_TYPE = {
   attribute: 1,
   child: 2,
@@ -207,7 +208,8 @@ export class ChildPart {
    * @returns { unknown }
    */
   resolveValue(value, withMetadata = false) {
-    return resolveNodeValue(value, this, withMetadata);
+    // Disable metadata if inside raw text node
+    return resolveNodeValue(value, this, RE_RAW_TEXT_ELEMENT.test(this.tagName) ? false : withMetadata);
   }
 }
 
@@ -246,11 +248,23 @@ export class CustomElementChildPart {
 export class MetadataPart {
   /**
    * Constructor
+   * @param { string } tagName
    * @param { Buffer } value
    */
-  constructor(value) {
+  constructor(tagName, value) {
     this.type = partType.METADATA;
+    this.tagName = tagName;
     this.value = value;
+  }
+
+  /**
+   * Retrieve resolved value given passed "value"
+   * @param { boolean } [withMetadata]
+   * @returns { unknown }
+   */
+  resolveValue(withMetadata = false) {
+    // Disable metadata if inside raw text node
+    return RE_RAW_TEXT_ELEMENT.test(this.tagName) ? EMPTY_STRING_BUFFER : this.value;
   }
 }
 

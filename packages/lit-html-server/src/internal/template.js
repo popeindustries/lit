@@ -25,7 +25,6 @@ const RE_CUSTOM_ELEMENT = /^[a-z][a-z0-9._\p{Emoji_Presentation}]*-[a-z0-9._\p{E
 const RE_SINGLE_QUOTED_ATTR_VALUE = /^(?<attributeValue>[^'\n\f\r]*)(?:(?<closingChar>')|$)/;
 const RE_DOUBLE_QUOTED_ATTR_VALUE = /^(?<attributeValue>[^"\n\f\r]*)(?:(?<closingChar>")|$)/;
 const RE_UNQUOTED_ATTR_VALUE = /^(?<attributeValue>[^'"=<>` \t\n\f\r]+)/;
-const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
 
 // Parse modes:
 const TEXT = 1;
@@ -65,8 +64,6 @@ export class Template {
     let n = strings.length;
     let nextString = strings[0];
     let nodeIndex = -1;
-    /** @type { RegExp | undefined } */
-    let rawTextEndRegex = undefined;
     let regex = RE_TAG;
     let tagName = '';
 
@@ -113,11 +110,6 @@ export class Template {
               tagName = rawTagName;
               nodeIndex++;
 
-              // Hop over raw text content when done parsing opening tag
-              if (RE_RAW_TEXT_ELEMENT.test(tagName)) {
-                rawTextEndRegex = new RegExp(`</${tagName}`, 'g');
-              }
-
               // Switch to attribute parsing mode if custom-element...
               let needsAttributeParsing = isCustomElement;
 
@@ -158,7 +150,7 @@ export class Template {
             // Insert metadata for attributes after close of opening tag
             if (attributePart) {
               this.strings.push(Buffer.from('>'));
-              this.parts.push(new MetadataPart(Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
+              this.parts.push(new MetadataPart(tagName, Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
               string = string.slice(lastIndex);
               lastIndex = 0;
             }
@@ -170,7 +162,7 @@ export class Template {
             }
             attributePart = undefined;
             mode = TEXT;
-            regex = rawTextEndRegex ?? RE_TAG;
+            regex = RE_TAG;
           } else if (attributePart !== undefined) {
             // No attribute name, so must be `ElementAttribute`
             if (groups.attributeName === undefined) {
@@ -266,12 +258,6 @@ export class Template {
         else if (mode === COMMENT) {
           mode = TEXT;
           regex = RE_TAG;
-        }
-        // Match raw text closing tag
-        else if (regex === rawTextEndRegex) {
-          mode = TEXT;
-          regex = RE_TAG;
-          rawTextEndRegex = undefined;
         }
       }
 

@@ -79,8 +79,10 @@ interface CustomElementChildPartType {
   resolveValue(value: unknown, withMetadata: boolean): unknown;
 }
 interface MetadataPartType {
+  readonly tagName: string;
   readonly type: PartType;
-  value: Buffer;
+  readonly value: Buffer;
+  resolveValue(withMetadata: boolean): unknown;
 }
 declare type Part = MetadataPartType | CustomElementChildPartType | ChildPartType | AttributePartType;
 

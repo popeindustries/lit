@@ -3,7 +3,7 @@ import { html as h, renderToStream, renderToString } from '../src/index.js';
 import { createAsyncIterable, streamAsPromise } from './utils.js';
 import assert from 'node:assert';
 
-describe('Render', () => {
+describe.only('Render', () => {
   const tests = [
     {
       title: 'plain text',
@@ -157,12 +157,11 @@ describe('Render', () => {
       template: h`<div .a="${'event'}"></div>`,
       result: '<!--lit-part X7msdWIx9Mg=--><div ><!--lit-node 0--></div><!--/lit-part-->',
     },
-    // {
-    //   skip: true,
-    //   title: 'raw text',
-    //   template: h`<script ?defer="${true}">var t = true;</script>`,
-    //   result: '<!--lit-part IVsa+r3gBKE=--><script defer><!--lit-node 0-->var t = true;</script><!--/lit-part-->',
-    // },
+    {
+      title: 'raw text',
+      template: h`<script ?defer="${true}">var t = ${'true'};</script>`,
+      result: '<!--lit-part QGlntsotObw=--><script defer>var t = true;</script><!--/lit-part-->',
+    },
   ];
   const only = tests.filter(({ only }) => only);
 
@@ -174,8 +173,8 @@ describe('Render', () => {
     } else {
       it(fullTitle, async () => {
         const string = await renderToString(template, { includeRehydrationMetadata: true });
-        // const stream = await streamAsPromise(renderToStream(template, { includeRehydrationMetadata: true }));
-        // assert.equal(string, stream);
+        const stream = await streamAsPromise(renderToStream(template, { includeRehydrationMetadata: true }));
+        assert.equal(string, stream);
         assert.equal(string, result);
       });
     }
