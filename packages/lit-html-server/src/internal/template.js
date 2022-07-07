@@ -135,7 +135,9 @@ export class Template {
               }
 
               if (needsAttributeParsing) {
-                this.strings.push(Buffer.from(string.slice(0, lastIndex + 1)));
+                this.strings.push(Buffer.from(string.slice(0, lastIndex)));
+                string = string.slice(lastIndex);
+                lastIndex = 0;
                 // attributes = {};
                 attributePart = new AttributePart(tagName);
                 this.parts.push(attributePart);
@@ -155,7 +157,7 @@ export class Template {
           if (match[0] === '>') {
             // Insert metadata for attributes after close of opening tag
             if (attributePart) {
-              this.strings.push(Buffer.from(string.slice(0, lastIndex)));
+              this.strings.push(Buffer.from('>'));
               this.parts.push(new MetadataPart(Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
               string = string.slice(lastIndex);
               lastIndex = 0;
@@ -178,8 +180,6 @@ export class Template {
             else {
               /** @type { string | undefined } */
               const attributeName = groups.attributeName;
-              // Attribute name index is current position less full matching string (not including leading space)
-              const attributeNameIndex = lastIndex - match[0].length + 1;
 
               // Static boolean attribute if no leading spaces/equals
               if (groups.spacesAndEquals === undefined) {
@@ -205,13 +205,12 @@ export class Template {
                       EMPTY_STRING_BUFFER,
                       EMPTY_STRING_BUFFER,
                     ]);
-                    trim = true;
                   }
                 } else {
                   /** @type { Array<Buffer> } */
                   const attributeStrings = [];
-                  const valueRegex =
-                    groups.quoteChar === '"' ? RE_DOUBLE_QUOTED_ATTR_VALUE : RE_SINGLE_QUOTED_ATTR_VALUE;
+                  const quoteChar = /** @type { string } */ (groups.quoteChar);
+                  const valueRegex = quoteChar === '"' ? RE_DOUBLE_QUOTED_ATTR_VALUE : RE_SINGLE_QUOTED_ATTR_VALUE;
                   let j = 0;
 
                   // Loop through remainint strings until we reach closing quote
@@ -221,6 +220,8 @@ export class Template {
                     if (valueMatch === null) {
                       break;
                     }
+
+                    lastIndex += valueMatch[0].length;
 
                     const { attributeValue = '', closingChar } = /** @type { RegexAttrValueGroups } */ (
                       valueMatch.groups
@@ -251,18 +252,11 @@ export class Template {
                       undefined,
                       attributeStrings,
                     );
-                    trim = true;
+                    // Trim closing quotes from start of next string
+                    // nextString = nextString.slice(nextString.indexOf(quoteChar) + 1);
                   }
-                }
-
-                if (trim) {
-                  // Trim leading attribute characters (name, spaces, equals, quotes)
-                  string = string.slice(0, attributeNameIndex);
-                  lastIndex = attributeNameIndex;
-                  // Trim closing quotes from start of next string
-                  if (groups.quoteChar !== undefined) {
-                    nextString = nextString.slice(nextString.indexOf(groups.quoteChar) + 1);
-                  }
+                  // string = '';
+                  // lastIndex = valueRegex.lastIndex;
                 }
               }
             }

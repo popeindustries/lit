@@ -3,7 +3,7 @@ import { getTemplates, renderLitTemplate } from './utils.js';
 import assert from 'node:assert';
 import { renderToString } from '../src/index.js';
 
-describe('Compatibility', () => {
+describe.skip('Compatibility', () => {
   const tests = [
     {
       title: 'plain text',

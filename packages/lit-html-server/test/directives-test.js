@@ -107,7 +107,7 @@ describe('directives', () => {
     it('not render an attribute value if undefined', async () => {
       const className = undefined;
       const result = h`<div class="${ifDefined(className)}"></div>`;
-      assert.equal(await render(result), '<div ></div>');
+      assert.equal(await render(result), '<div></div>');
     });
   });
 

@@ -81,9 +81,11 @@ export class AttributePart {
 
     switch (type) {
       case 'boolean': {
-        name = name.slice(1);
+        if (name.startsWith('?')) {
+          name = name.slice(1);
+        }
         // Zero length if static
-        length = hasValue ? 1 : 0;
+        length = hasValue ? 0 : 1;
         data = {
           type,
           length,
@@ -142,7 +144,7 @@ export class AttributePart {
 
     for (let data of this._attributes) {
       if (data.value !== undefined) {
-        chunks.push(data.value);
+        chunks.push(SPACE_BUFFER, data.value);
       } else {
         // Only boolean or attribute types may have unresolved "value"
         if (data.type === 'boolean') {
@@ -150,7 +152,7 @@ export class AttributePart {
 
           // Skip if "nothing"
           if (resolvedValue !== nothing) {
-            chunks.push(resolvedValue);
+            chunks.push(SPACE_BUFFER, resolvedValue);
           }
         } else if (data.type === 'attribute') {
           let bailed = false;
@@ -172,7 +174,7 @@ export class AttributePart {
 
           if (!bailed) {
             pendingChunks.push(/** @type { Buffer } */ (data.close));
-            chunks.push(...pendingChunks);
+            chunks.push(SPACE_BUFFER, ...pendingChunks);
           }
         }
 
