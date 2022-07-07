@@ -60,6 +60,7 @@ export class Template {
     /** @type { AttributePart | undefined } */
     let attributePart;
     let isCustomElement = false;
+    /** @type { typeof ATTRIBUTE | typeof TEXT | typeof COMMENT } */
     let mode = TEXT;
     let n = strings.length;
     let nextString = strings[0];
@@ -134,6 +135,7 @@ export class Template {
               }
 
               if (needsAttributeParsing) {
+                this.strings.push(Buffer.from(string.slice(0, lastIndex + 1)));
                 // attributes = {};
                 attributePart = new AttributePart(tagName);
                 this.parts.push(attributePart);
@@ -145,9 +147,8 @@ export class Template {
             }
           }
         }
-        // Match attributes inside opening tag
+        // Match attributes inside opening tag, or tag end for closing tag
         else if (mode === ATTRIBUTE) {
-          attributePart = /** @type { AttributePart } */ (attributePart);
           const groups = /** @type { RegexAttrGroups } */ (match.groups);
 
           // Tag end
@@ -168,7 +169,7 @@ export class Template {
             attributePart = undefined;
             mode = TEXT;
             regex = rawTextEndRegex ?? RE_TAG;
-          } else {
+          } else if (attributePart !== undefined) {
             // No attribute name, so must be `ElementAttribute`
             if (groups.attributeName === undefined) {
               attributePart.addAttributeData('element');
@@ -177,27 +178,29 @@ export class Template {
             else {
               /** @type { string | undefined } */
               const attributeName = groups.attributeName;
-
               // Attribute name index is current position less full matching string (not including leading space)
               const attributeNameIndex = lastIndex - match[0].length + 1;
-              const hasQuotes = groups.quoteChar !== undefined;
-              let trim = false;
-              let valueString = string.slice(lastIndex);
 
               // Static boolean attribute if no leading spaces/equals
               if (groups.spacesAndEquals === undefined) {
                 attributePart.addAttributeData('boolean', attributeName, '');
               } else {
+                const hasQuotes = groups.quoteChar !== undefined;
+                let trim = false;
+                let valueString = string.slice(lastIndex);
+
                 // No quotes, so multiple values not possible
                 if (!hasQuotes) {
                   const valueMatch = RE_UNQUOTED_ATTR_VALUE.exec(valueString);
                   // @ts-ignore
                   const attributeValue = valueMatch?.groups.attributeValue ?? '';
 
-                  // Static attribute if value
+                  // Static attribute part if value
                   if (attributeValue !== '') {
                     attributePart.addAttributeData('attribute', attributeName, attributeValue);
-                  } else {
+                  }
+                  // Dynamic attribute part with single value
+                  else {
                     attributePart.addAttributeData(getAttributeTypeFromName(attributeName), attributeName, undefined, [
                       EMPTY_STRING_BUFFER,
                       EMPTY_STRING_BUFFER,
@@ -211,7 +214,7 @@ export class Template {
                     groups.quoteChar === '"' ? RE_DOUBLE_QUOTED_ATTR_VALUE : RE_SINGLE_QUOTED_ATTR_VALUE;
                   let j = 0;
 
-                  // Loop through all strings until closing quote
+                  // Loop through remainint strings until we reach closing quote
                   while (valueString !== undefined) {
                     const valueMatch = valueRegex.exec(valueString);
 
@@ -224,11 +227,12 @@ export class Template {
                     );
 
                     if (closingChar !== undefined) {
-                      // Static value since closed on first pass
+                      // Static attribute part since closed on first pass
                       if (j === 0) {
                         attributePart.addAttributeData('attribute', attributeName, attributeValue);
                       } else {
                         attributeStrings.push(Buffer.from(attributeValue));
+                        // Advance to hop over next string
                         i += j - 1;
                         nextString = valueString.slice(valueMatch[0].length - 1);
                       }
@@ -239,6 +243,7 @@ export class Template {
                     valueString = strings[i + ++j];
                   }
 
+                  // Store dynamic attribute part with possible multiple values
                   if (attributeStrings.length > 0) {
                     attributePart.addAttributeData(
                       getAttributeTypeFromName(attributeName),
@@ -249,16 +254,15 @@ export class Template {
                     trim = true;
                   }
                 }
-              }
 
-              if (trim) {
-                // Trim leading attribute characters (name, spaces, equals, quotes)
-                string = string.slice(0, attributeNameIndex);
-                lastIndex = attributeNameIndex;
-                // Trim closing quotes from start of next string
-                if (hasQuotes) {
-                  // @ts-ignore
-                  nextString = nextString.slice(nextString.indexOf(groups.quoteChar) + 1);
+                if (trim) {
+                  // Trim leading attribute characters (name, spaces, equals, quotes)
+                  string = string.slice(0, attributeNameIndex);
+                  lastIndex = attributeNameIndex;
+                  // Trim closing quotes from start of next string
+                  if (groups.quoteChar !== undefined) {
+                    nextString = nextString.slice(nextString.indexOf(groups.quoteChar) + 1);
+                  }
                 }
               }
             }
@@ -277,14 +281,16 @@ export class Template {
         }
       }
 
-      this.strings.push(Buffer.from(string));
+      if (mode !== ATTRIBUTE) {
+        this.strings.push(Buffer.from(string));
 
-      if (mode === TEXT) {
-        if (!isLastString) {
-          this.parts.push(new ChildPart(tagName));
+        if (mode === TEXT) {
+          if (!isLastString) {
+            this.parts.push(new ChildPart(tagName));
+          }
+        } else if (mode === COMMENT) {
+          throw Error('parsing expressions inside comment tags is not supported!');
         }
-      } else if (mode === COMMENT) {
-        throw Error('parsing expressions inside comment tags is not supported!');
       }
     }
   }

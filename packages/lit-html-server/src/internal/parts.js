@@ -62,7 +62,6 @@ export class AttributePart {
     this.length = 0;
     this.tagName = tagName;
     this.type = partType.ATTRIBUTE;
-    this.hasDynamicParts = false;
     /** @type { Array<AttributeData> } */
     this._attributes = [];
   }
@@ -93,13 +92,11 @@ export class AttributePart {
         };
         if (hasValue) {
           data.value = data.nameAsBuffer;
-        } else {
-          this.hasDynamicParts = true;
         }
         break;
       }
       case 'attribute': {
-        // Zero length if static (no `strings` if static)
+        // Zero length if static (no `strings`)
         length = strings !== undefined ? strings.length - 1 : 0;
         data = {
           type,
@@ -111,8 +108,6 @@ export class AttributePart {
         };
         if (hasValue) {
           data.value = Buffer.from(`${name}="${value}"`);
-        } else {
-          this.hasDynamicParts = true;
         }
         break;
       }
@@ -150,8 +145,6 @@ export class AttributePart {
         chunks.push(data.value);
       } else {
         // Only boolean or attribute types may have unresolved "value"
-        data = /** @type { BooleanAttributeData | AttributeAttributeData} */ (data);
-
         if (data.type === 'boolean') {
           const resolvedValue = resolveAttributeValue(values[valuesIndex], this.tagName, data);
 
@@ -159,7 +152,7 @@ export class AttributePart {
           if (resolvedValue !== nothing) {
             chunks.push(resolvedValue);
           }
-        } else {
+        } else if (data.type === 'attribute') {
           let bailed = false;
           let pendingChunks = [/** @type { Buffer } */ (data.open)];
 

@@ -17,11 +17,11 @@ import { until } from '../src/directives/until.js';
 
 describe('directives', () => {
   describe('asyncAppend', () => {
-    it('should render an AsyncIterable value', async () => {
+    it('AsyncIterable value', async () => {
       const result = h`some ${asyncAppend(createAsyncIterable(['async', ' text']))}`;
       assert.equal(await render(result), 'some async text');
     });
-    it('should render a mapped AsyncIterable value', async () => {
+    it('mapped AsyncIterable value', async () => {
       const result = h`some ${asyncAppend(createAsyncIterable(['async', 'text']), (v, index) => {
         return `${index}-${v.toUpperCase()}`;
       })}`;
@@ -30,11 +30,11 @@ describe('directives', () => {
   });
 
   describe('asyncReplace', () => {
-    it('should render an AsyncIterable value', async () => {
+    it('AsyncIterable value', async () => {
       const result = h`some ${asyncReplace(createAsyncIterable(['async', ' text']))}`;
       assert.equal(await render(result), 'some async');
     });
-    it('should render a mapped AsyncIterable value', async () => {
+    it('mapped AsyncIterable value', async () => {
       const result = h`some ${asyncReplace(createAsyncIterable(['async', 'text']), (v, index) => {
         return `${index}-${v.toUpperCase()}`;
       })}`;
@@ -43,14 +43,14 @@ describe('directives', () => {
   });
 
   describe('cache', () => {
-    it('should render a cached value', async () => {
+    it('cached value', async () => {
       const result = h`some ${cache('text')}`;
       assert.equal(await render(result), 'some text');
     });
   });
 
   describe('classMap', () => {
-    it('should throw if not used as attribute value', async () => {
+    it('throw if not used as attribute value', async () => {
       let errored = false;
       try {
         const result = h`<div>${classMap({ red: true })}</div>`;
@@ -61,7 +61,7 @@ describe('directives', () => {
       }
       assert(errored === true);
     });
-    it('should throw if not used as "class" attribute value', async () => {
+    it('throw if not used as "class" attribute value', async () => {
       let errored = false;
       try {
         const result = h`<div color="${classMap({ red: true })}"></div>`;
@@ -72,26 +72,26 @@ describe('directives', () => {
       }
       assert(errored === true);
     });
-    it('should include class name if truthy', async () => {
+    it('include class name if truthy', async () => {
       const result = h`<div class="${classMap({ red: true })}"></div>`;
       assert.equal(await render(result), '<div class=" red "></div>');
     });
-    it('should include class names if truthy', async () => {
+    it('include class names if truthy', async () => {
       const result = h`<div class="${classMap({ red: true, blue: true })}"></div>`;
       assert.equal(await render(result), '<div class=" red blue "></div>');
     });
-    it('should ignore class names if falsey', async () => {
+    it('ignore class names if falsey', async () => {
       const result = h`<div class="${classMap({ red: false, blue: true })}"></div>`;
       assert.equal(await render(result), '<div class=" blue "></div>');
     });
   });
 
   describe('guard', () => {
-    it('should render a simple guarded value', async () => {
+    it('simple guarded value', async () => {
       const result = h`some ${guard('title', () => 'text')}`;
       assert.equal(await render(result), 'some text');
     });
-    it('should render a guarded array value', async () => {
+    it('guarded array value', async () => {
       const items = [1, 2, 3];
       const result = h`some ${guard(items, () => items.map((item) => item))}`;
       assert.equal(await render(result), 'some 123');
@@ -99,12 +99,12 @@ describe('directives', () => {
   });
 
   describe('if-defined', () => {
-    it('should render an attribute value if defined', async () => {
+    it('attribute value if defined', async () => {
       const className = 'hi';
       const result = h`<div class="${ifDefined(className)}"></div>`;
       assert.equal(await render(result), '<div class="hi"></div>');
     });
-    it('should not render an attribute value if undefined', async () => {
+    it('not render an attribute value if undefined', async () => {
       const className = undefined;
       const result = h`<div class="${ifDefined(className)}"></div>`;
       assert.equal(await render(result), '<div ></div>');
@@ -112,7 +112,7 @@ describe('directives', () => {
   });
 
   describe('rehydratable', () => {
-    it('should render a subtree with metadata', async () => {
+    it('subtree with metadata', async () => {
       const result = h`<div class="${'bye'}">${rehydratable(h`<span class="${'hi'}">hi</span>`)}</div>`;
       assert.equal(
         await render(result),
@@ -122,7 +122,7 @@ describe('directives', () => {
   });
 
   describe('repeat', () => {
-    it('should render an array of values', async () => {
+    it('array of values', async () => {
       const repeater = (i, index) => h`<li>${index}: ${i}</li>`;
       const result = h`<ul>${repeat([1, 2, 3], repeater)}</ul>`;
       assert.equal(await render(result), '<ul><li>0: 1</li><li>1: 2</li><li>2: 3</li></ul>');
@@ -130,7 +130,7 @@ describe('directives', () => {
   });
 
   describe('styleMap', () => {
-    it('should throw if not used as attribute value', async () => {
+    it('throw if not used as attribute value', async () => {
       let errored = false;
       try {
         const result = h`<div>${styleMap({ color: 'red' })}</div>`;
@@ -141,7 +141,7 @@ describe('directives', () => {
       }
       assert(errored === true);
     });
-    it('should throw if not used as "style" attribute value', async () => {
+    it('throw if not used as "style" attribute value', async () => {
       let errored = false;
       try {
         const result = h`<div class="${styleMap({ color: 'red' })}"></div>`;
@@ -152,7 +152,7 @@ describe('directives', () => {
       }
       assert(errored === true);
     });
-    it('should include style properties', async () => {
+    it('include style properties', async () => {
       const result = h`<div style="${styleMap({
         color: 'red',
         border: '1px solid black',
@@ -162,25 +162,25 @@ describe('directives', () => {
   });
 
   describe('unsafe-html', () => {
-    it('should render unescaped value', async () => {
+    it('render unescaped value', async () => {
       const result = h`<p>${unsafeHTML("hey! it's dangerous! <script>boom!</script>")}</p>`;
       assert.equal(await render(result), "<p>hey! it's dangerous! <script>boom!</script></p>");
     });
   });
 
   describe('until', () => {
-    it('should render a pending value', async () => {
+    it('pending value', async () => {
       const result = h`<p>${until(Promise.resolve('hi'), h`<span>Loading...</span>`)}</p>`;
       assert.equal(await render(result), '<p><span>Loading...</span></p>');
     });
-    it('should render a Promise value if no values pending', async () => {
+    it('Promise value if no values pending', async () => {
       const result = h`<p>${until(Promise.resolve('hi'))}</p>`;
       assert.equal(await render(result), '<p>hi</p>');
     });
   });
 
   describe('custom', () => {
-    it('should allow writing custom directives', async () => {
+    it('custom directive', async () => {
       const custom = directive(
         class extends Directive {
           render() {
@@ -191,7 +191,7 @@ describe('directives', () => {
       const result = h`<p>${custom()}</p>`;
       assert.equal(await render(result), '<p>custom&#x27;s</p>');
     });
-    it('should give correct tagName', async () => {
+    it('with correct tagName', async () => {
       let actualTagName = 'not-set';
       const custom = directive(
         class extends Directive {
@@ -208,7 +208,7 @@ describe('directives', () => {
       await render(result);
       assert.equal(actualTagName, 'div');
     });
-    it('should give correct tagName when tag has space', async () => {
+    it('with correct tagName when tag has space', async () => {
       let actualTagName = 'not-set';
       const custom = directive(
         class extends Directive {
@@ -225,7 +225,7 @@ describe('directives', () => {
       await render(result);
       assert.equal(actualTagName, 'div');
     });
-    it('should give correct tagName when tag has attribute', async () => {
+    it('with correct tagName when tag has attribute', async () => {
       let actualTagName = 'not-set';
       const custom = directive(
         class extends Directive {
@@ -241,7 +241,7 @@ describe('directives', () => {
       const result = h`<div class="something">${custom()}</div>`;
       await render(result);
     });
-    it('should give correct tagName with dynamic attribute value', async () => {
+    it('with correct tagName with dynamic attribute value', async () => {
       let actualTagName = 'not-set';
       const custom = directive(
         class extends Directive {

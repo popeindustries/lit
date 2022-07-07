@@ -65,7 +65,6 @@ interface AttributePartType {
   readonly length: number;
   readonly tagName: string;
   readonly type: PartType;
-  readonly hasDynamicParts: boolean;
   resolveValue(value: unknown): Buffer;
 }
 interface ChildPartType {

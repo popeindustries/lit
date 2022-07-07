@@ -3,7 +3,7 @@ import assert from 'assert';
 import { Template } from '../src/internal/template.js';
 import { templateToString } from './utils.js';
 
-describe('template parsing', () => {
+describe('Parse', () => {
   const tests = [
     {
       title: 'child value',
@@ -31,18 +31,23 @@ describe('template parsing', () => {
       result: '<div [ATTR]>[METADATA]some text [CHILD]</div>',
     },
     {
-      title: 'quoted attribute and extra whitespace',
+      title: 'quoted attribute with extra whitespace',
       template: '<div a = " ${x} " ></div>',
       result: '<div [ATTR] >[METADATA]</div>',
     },
     {
-      title: 'quoted attribute and extra strings',
+      title: 'quoted attribute with extra strings',
       template: '<div a="some ${x} here"></div>',
       result: '<div [ATTR]>[METADATA]</div>',
     },
     {
-      title: 'quoted attribute and multiple strings/values',
+      title: 'quoted attribute with multiple strings/values',
       template: '<div a=" look ${x} in ${x} "></div>',
+      result: '<div [ATTR]>[METADATA]</div>',
+    },
+    {
+      title: 'static attribute and quoted attribute with multiple strings/values',
+      template: '<div a="text" b=" look ${x} in ${x} "></div>',
       result: '<div [ATTR]>[METADATA]</div>',
     },
     {
