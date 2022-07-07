@@ -1,4 +1,4 @@
-import { AttributePart, ChildPart, CustomElementChildPart, getAttributeTypeFromName, MetadataPart } from './parts.js';
+import { AttributePart, ChildPart, CustomElementPart, getAttributeTypeFromName, MetadataPart } from './parts.js';
 import { Buffer } from '#buffer';
 import { EMPTY_STRING_BUFFER } from './consts.js';
 import { digestForTemplateStrings } from '#digest';
@@ -110,28 +110,24 @@ export class Template {
               tagName = rawTagName;
               nodeIndex++;
 
-              // Switch to attribute parsing mode if custom-element...
-              let needsAttributeParsing = isCustomElement;
-
-              // ...or current string contains tag end (no attribute expressions)
-              if (!needsAttributeParsing) {
+              if (isCustomElement) {
+                attributePart = new CustomElementPart(tagName);
+              } else {
+                // If tag end ('>') is in the same string, we can skip attribute parsing
                 RE_TAG_END.lastIndex = lastIndex;
-                const endMatch = RE_TAG_END.exec(string);
-
-                if (endMatch === null) {
-                  needsAttributeParsing = true;
-                } else {
+                if (RE_TAG_END.exec(string) !== null) {
                   // Skip to tag end
                   lastIndex = RE_TAG_END.lastIndex - 1;
+                } else {
+                  attributePart = new AttributePart(tagName);
                 }
               }
 
-              if (needsAttributeParsing) {
+              if (attributePart !== undefined) {
+                // Commit opening tag name string
                 this.strings.push(Buffer.from(string.slice(0, lastIndex)));
                 string = string.slice(lastIndex);
                 lastIndex = 0;
-                // attributes = {};
-                attributePart = new AttributePart(tagName, isCustomElement);
                 this.parts.push(attributePart);
               }
             }
@@ -147,16 +143,14 @@ export class Template {
 
           // Tag end
           if (match[0] === '>') {
-            // Insert metadata for attributes after close of opening tag
-            if (attributePart) {
-              this.strings.push(Buffer.from('>'));
-              this.parts.push(new MetadataPart(tagName, Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
+            // Only "true" for opening tag
+            if (isCustomElement) {
               string = string.slice(lastIndex);
               lastIndex = 0;
-            }
-            if (isCustomElement) {
-              this.strings.push(Buffer.from(string.slice(0, lastIndex)));
-              this.parts.push(new CustomElementChildPart(tagName, /* attributes */ {}));
+            } else if (attributePart !== undefined) {
+              // Insert metadata for attributes after close of opening tag
+              this.strings.push(Buffer.from('>'));
+              this.parts.push(new MetadataPart(tagName, Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
               string = string.slice(lastIndex);
               lastIndex = 0;
             }

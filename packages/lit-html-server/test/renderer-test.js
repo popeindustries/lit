@@ -3,9 +3,9 @@ import { html as h, renderToStream, renderToString } from '../src/index.js';
 import { createAsyncIterable, streamAsPromise } from './utils.js';
 import assert from 'node:assert';
 
-describe('Render', () => {
+describe.only('Render', () => {
   const tests = [
-    {
+    /* {
       title: 'plain text',
       template: h`<div>text</div>`,
       result: '<!--lit-part pxc8m9UUJbo=--><div>text</div><!--/lit-part-->',
@@ -161,6 +161,11 @@ describe('Render', () => {
       title: 'raw text',
       template: h`<script ?defer="${true}">var t = ${'true'};</script>`,
       result: '<!--lit-part QGlntsotObw=--><script defer>var t = true;</script><!--/lit-part-->',
+    }, */
+    {
+      title: 'custom element with static attributes',
+      template: h`<my-el a="text"></my-el>`,
+      result: '',
     },
   ];
   const only = tests.filter(({ only }) => only);
@@ -173,8 +178,8 @@ describe('Render', () => {
     } else {
       it(fullTitle, async () => {
         const string = await renderToString(template, { includeRehydrationMetadata: true });
-        const stream = await streamAsPromise(renderToStream(template, { includeRehydrationMetadata: true }));
-        assert.equal(string, stream);
+        // const stream = await streamAsPromise(renderToStream(template, { includeRehydrationMetadata: true }));
+        // assert.equal(string, stream);
         assert.equal(string, result);
       });
     }

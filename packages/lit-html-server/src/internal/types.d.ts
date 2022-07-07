@@ -63,7 +63,6 @@ declare enum PartType {
   CUSTOMELEMENT = 3,
 }
 interface AttributePartType {
-  readonly isCustomElement: boolean;
   readonly length: number;
   readonly tagName: string;
   readonly type: PartType.ATTRIBUTE;
@@ -73,21 +72,21 @@ interface AttributePartType {
 interface ChildPartType {
   readonly tagName: string;
   readonly type: PartType.CHILD;
-  resolveValue(value: unknown, withMetadata: boolean): unknown;
+  resolveValue(value: unknown, options: InternalRenderOptions): unknown;
 }
-interface CustomElementChildPartType {
-  readonly attributes: { [name: string]: string | undefined };
+interface CustomElementPartType {
+  readonly length: number;
   readonly tagName: string;
   readonly type: PartType.CUSTOMELEMENT;
-  resolveValue(value: unknown, withMetadata: boolean): unknown;
+  resolveValue(values: Array<unknown>, options: InternalRenderOptions): unknown;
 }
 interface MetadataPartType {
   readonly tagName: string;
   readonly type: PartType.METADATA;
   readonly value: Buffer;
-  resolveValue(withMetadata: boolean): unknown;
+  resolveValue(options: InternalRenderOptions): unknown;
 }
-declare type Part = MetadataPartType | CustomElementChildPartType | ChildPartType | AttributePartType;
+declare type Part = MetadataPartType | CustomElementPartType | ChildPartType | AttributePartType;
 
 declare type ElementRendererConstructor = (new (tagName: string) => ElementRenderer) & typeof ElementRenderer;
 declare class ElementRenderer {

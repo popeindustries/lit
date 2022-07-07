@@ -146,35 +146,35 @@ describe('Parts', () => {
   describe('AttributePart', () => {
     it('should resolve a string value', () => {
       const part = new AttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      assert(part.resolveValue(['text']).toString() === 'a="text"');
+      assert(part._resolveValue(['text']).toString() === 'a="text"');
     });
     it('should resolve a number value', () => {
       const part = new AttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      assert(part.resolveValue([1]).toString() === 'a="1"');
+      assert(part._resolveValue([1]).toString() === 'a="1"');
     });
     it('should resolve a boolean value', () => {
       const part = new AttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      assert(part.resolveValue([true]).toString() === 'a="true"');
+      assert(part._resolveValue([true]).toString() === 'a="true"');
     });
     it('should resolve a null value', () => {
       const part = new AttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      assert(part.resolveValue([null]).toString() === 'a="null"');
+      assert(part._resolveValue([null]).toString() === 'a="null"');
     });
     it('should resolve an undefined value', () => {
       const part = new AttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      assert(part.resolveValue([undefined]).toString() === 'a="undefined"');
+      assert(part._resolveValue([undefined]).toString() === 'a="undefined"');
     });
     it('should resolve multiple values', () => {
       const part = new AttributePart('a', [Buffer.from('b'), Buffer.from('d'), Buffer.from('')], 'div');
-      assert(part.resolveValue(['c', 'e']).toString() === 'a="bcde"');
+      assert(part._resolveValue(['c', 'e']).toString() === 'a="bcde"');
     });
     it('should resolve an array value', () => {
       const part = new AttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      assert(part.resolveValue([[1, 2, 3]]).toString() === 'a="1,2,3"');
+      assert(part._resolveValue([[1, 2, 3]]).toString() === 'a="1,2,3"');
     });
     it('should resolve a deeply nested array value', () => {
       const part = new AttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      assert(part.resolveValue([[[1], 2, [3, [4, 5]]]]).toString() === 'a="1,2,3,4,5"');
+      assert(part._resolveValue([[[1], 2, [3, [4, 5]]]]).toString() === 'a="1,2,3,4,5"');
     });
     it('should resolve a directive value', () => {
       const d = directive(
@@ -185,7 +185,7 @@ describe('Parts', () => {
         },
       );
       const part = new AttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      assert(part.resolveValue([d()]).toString() === 'a="directive"');
+      assert(part._resolveValue([d()]).toString() === 'a="directive"');
     });
     it('should resolve a directive value returning "nothing"', () => {
       const d = directive(
@@ -196,7 +196,7 @@ describe('Parts', () => {
         },
       );
       const part = new AttributePart('a', [Buffer.from(''), Buffer.from('')], 'div');
-      assert(part.resolveValue([d()]).toString() === '');
+      assert(part._resolveValue([d()]).toString() === '');
     });
   });
 

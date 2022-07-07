@@ -46,9 +46,9 @@ export function isChildPart(part) {
 /**
  * Determine if "part" is a CustomElementChildPart
  * @param { Part } part
- * @returns { part is CustomElementChildPartType }
+ * @returns { part is CustomElementPartType }
  */
-export function isCustomElementChildPart(part) {
+export function isCustomElementPart(part) {
   return part.type === partType.CUSTOMELEMENT;
 }
 
@@ -93,15 +93,13 @@ export class AttributePart {
   /**
    * Constructor
    * @param { string } tagName
-   * @param { boolean } isCustomElement
    */
-  constructor(tagName, isCustomElement) {
-    this.isCustomElement = isCustomElement;
+  constructor(tagName) {
     this.length = 0;
     this.tagName = tagName;
     this.type = partType.ATTRIBUTE;
     /** @type { Array<AttributeData> } */
-    this._attributes = [];
+    this._parts = [];
   }
 
   /**
@@ -161,7 +159,7 @@ export class AttributePart {
     }
 
     this.length += length;
-    this._attributes.push(data);
+    this._parts.push(data);
   }
 
   /**
@@ -171,7 +169,7 @@ export class AttributePart {
    * @returns { Buffer }
    */
   resolveValueAsBuffer(values) {
-    return /** @type { Buffer } */ (this.resolveValue(values, true));
+    return /** @type { Buffer } */ (this._resolveValue(values, true));
   }
 
   /**
@@ -181,7 +179,7 @@ export class AttributePart {
    * @returns { Record<string, string> }
    */
   resolveValueAsRecord(values) {
-    return /** @type { Record<string, string> } */ (this.resolveValue(values, false));
+    return /** @type { Record<string, string> } */ (this._resolveValue(values, false));
   }
 
   /**
@@ -189,14 +187,14 @@ export class AttributePart {
    * @param { boolean } asBuffer
    * @returns { Buffer | Record<string, string> }
    */
-  resolveValue(values, asBuffer) {
+  _resolveValue(values, asBuffer) {
     /** @type { Record<string, string> } */
     const attributes = {};
     /** @type { Array<Buffer> } */
     const buffer = [];
     let valuesIndex = 0;
 
-    for (let data of this._attributes) {
+    for (let data of this._parts) {
       if (asBuffer && data.resolvedBuffer !== undefined) {
         buffer.push(SPACE_BUFFER, data.resolvedBuffer);
       } else if (data.value !== undefined) {
@@ -272,40 +270,51 @@ export class ChildPart {
   /**
    * Retrieve resolved value given passed "value"
    * @param { unknown } value
-   * @param { boolean } [withMetadata]
+   * @param { InternalRenderOptions } options
    * @returns { unknown }
    */
-  resolveValue(value, withMetadata = false) {
+  resolveValue(value, options) {
     // Disable metadata if inside raw text node
-    return resolveNodeValue(value, this, RE_RAW_TEXT_ELEMENT.test(this.tagName) || !withMetadata ? false : true);
+    return resolveNodeValue(
+      value,
+      this,
+      RE_RAW_TEXT_ELEMENT.test(this.tagName) || !options.includeRehydrationMetadata ? false : true,
+    );
   }
 }
 
 /**
- * A template part for custom element content
- * @implements CustomElementChildPartType
+ * A template part for custom element content.
+ * Responsible for all attributes, metadata, and tag content
+ * @implements CustomElementPartType
  */
-export class CustomElementChildPart {
+export class CustomElementPart extends AttributePart {
   /**
    * Constructor
    * @param { string } tagName
-   * @param { { [name: string]: string | undefined } } attributes
    */
-  constructor(tagName, attributes) {
+  constructor(tagName) {
+    super(tagName);
     this.type = partType.CUSTOMELEMENT;
     this.tagName = tagName;
-    this.attributes = attributes;
   }
 
   /**
    * Retrieve resolved value given passed "value"
-   * @param { unknown } value
-   * @param { boolean } [withMetadata]
+   * @param { Array<unknown> } values
+   * @param { InternalRenderOptions } options
    * @returns { unknown }
    */
-  resolveValue(value, withMetadata = false) {
-    return '';
-    // return resolveNodeValue(value, this, withMetadata);
+  resolveValue(values, options) {
+    const attributes = this.resolveValueAsRecord(values);
+    // TODO:
+    // 1. create CE instance
+    // 2. call connected callback
+    // 3. set attributes/properties
+    // 4. render CE content
+    // 5. resolve attributes buffer
+    // 6. create MetadataPart
+    return Buffer.from('>');
   }
 }
 
@@ -327,12 +336,14 @@ export class MetadataPart {
 
   /**
    * Retrieve resolved value given passed "value"
-   * @param { boolean } [withMetadata]
+   * @param { InternalRenderOptions } options
    * @returns { unknown }
    */
-  resolveValue(withMetadata = false) {
+  resolveValue(options) {
     // Disable metadata if inside raw text node
-    return RE_RAW_TEXT_ELEMENT.test(this.tagName) || !withMetadata ? EMPTY_STRING_BUFFER : this.value;
+    return RE_RAW_TEXT_ELEMENT.test(this.tagName) || !options.includeRehydrationMetadata
+      ? EMPTY_STRING_BUFFER
+      : this.value;
   }
 }
 

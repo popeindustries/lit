@@ -1,4 +1,4 @@
-import { isAttributePart, isChildPart, isCustomElementChildPart, isMetadataPart, partType } from './parts.js';
+import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart, partType } from './parts.js';
 import { META_CLOSE } from './consts.js';
 import { Buffer } from '#buffer';
 
@@ -63,30 +63,22 @@ export class TemplateResult {
     }
 
     const part = this.template.parts[index];
+    const isCustomElement = isCustomElementPart(part);
 
-    if (isAttributePart(part)) {
+    if (isAttributePart(part) || isCustomElement) {
       const length = part.length;
-      let value;
       // AttributeParts can have multiple values, so slice based on length
       // (strings in-between values are already handled by the instance)
-      if (length > 1) {
-        value = this.values.slice(this.valueIndex, this.valueIndex + length);
-      } else {
-        value = [this.values[this.valueIndex]];
-      }
+      const values = this.values.slice(this.valueIndex, this.valueIndex + length);
+      const value = isCustomElement ? part.resolveValue(values, options) : part.resolveValueAsBuffer(values);
       this.valueIndex += length;
-
-      // if (!part.isCustomElement)
-      return part.resolveValueAsBuffer(value);
+      return value;
     } else if (isChildPart(part)) {
-      let value = part.resolveValue(this.values[this.valueIndex], options.includeRehydrationMetadata ?? false);
+      const value = part.resolveValue(this.values[this.valueIndex], options);
       this.valueIndex++;
       return value;
-    } else if (isCustomElementChildPart(part)) {
-      // part
-      return;
     } else if (isMetadataPart(part)) {
-      return part.resolveValue(options.includeRehydrationMetadata ?? false);
+      return part.resolveValue(options);
     } else {
       this.valueIndex++;
       throw Error(`unknown part: ${part}`);
