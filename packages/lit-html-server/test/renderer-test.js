@@ -3,7 +3,7 @@ import { html as h, renderToStream, renderToString } from '../src/index.js';
 import { createAsyncIterable, streamAsPromise } from './utils.js';
 import assert from 'node:assert';
 
-describe.only('Render', () => {
+describe('Render', () => {
   const tests = [
     {
       title: 'plain text',

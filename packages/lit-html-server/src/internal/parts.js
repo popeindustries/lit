@@ -209,7 +209,7 @@ export class ChildPart {
    */
   resolveValue(value, withMetadata = false) {
     // Disable metadata if inside raw text node
-    return resolveNodeValue(value, this, RE_RAW_TEXT_ELEMENT.test(this.tagName) ? false : withMetadata);
+    return resolveNodeValue(value, this, RE_RAW_TEXT_ELEMENT.test(this.tagName) || !withMetadata ? false : true);
   }
 }
 
@@ -264,7 +264,7 @@ export class MetadataPart {
    */
   resolveValue(withMetadata = false) {
     // Disable metadata if inside raw text node
-    return RE_RAW_TEXT_ELEMENT.test(this.tagName) ? EMPTY_STRING_BUFFER : this.value;
+    return RE_RAW_TEXT_ELEMENT.test(this.tagName) || !withMetadata ? EMPTY_STRING_BUFFER : this.value;
   }
 }
 
