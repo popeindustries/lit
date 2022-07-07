@@ -7,6 +7,9 @@ module.exports = {
     mocha: true,
     jasmine: true,
   },
+  global: {
+    globalThis: true,
+  },
   parser: '@typescript-eslint/parser',
   plugins: ['prettier', '@typescript-eslint'],
   extends: [

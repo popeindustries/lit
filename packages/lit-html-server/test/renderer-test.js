@@ -154,7 +154,7 @@ describe('Render', () => {
     },
     {
       title: 'property attribute',
-      template: h`<div .a="${'event'}"></div>`,
+      template: h`<div .a="${'prop'}"></div>`,
       result: '<!--lit-part X7msdWIx9Mg=--><div ><!--lit-node 0--></div><!--/lit-part-->',
     },
     {

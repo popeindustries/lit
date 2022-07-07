@@ -14,7 +14,6 @@ export const partType = {
   CUSTOMELEMENT: 3,
 };
 
-const QUOTE_BUFFER = Buffer.from('"');
 const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
 const SPACE_BUFFER = Buffer.from(' ');
 const TYPE_TO_LIT_PART_TYPE = {
@@ -25,6 +24,42 @@ const TYPE_TO_LIT_PART_TYPE = {
   event: 5,
   element: 6,
 };
+
+/**
+ * Determine if "part" is an AttributePart
+ * @param { Part } part
+ * @returns { part is AttributePartType }
+ */
+export function isAttributePart(part) {
+  return part.type === partType.ATTRIBUTE;
+}
+
+/**
+ * Determine if "part" is a ChildPart
+ * @param { Part } part
+ * @returns { part is ChildPartType }
+ */
+export function isChildPart(part) {
+  return part.type === partType.CHILD;
+}
+
+/**
+ * Determine if "part" is a CustomElementChildPart
+ * @param { Part } part
+ * @returns { part is CustomElementChildPartType }
+ */
+export function isCustomElementChildPart(part) {
+  return part.type === partType.CUSTOMELEMENT;
+}
+
+/**
+ * Determine if "part" is a MetadataPart
+ * @param { Part } part
+ * @returns { part is MetadataPartType }
+ */
+export function isMetadataPart(part) {
+  return part.type === partType.METADATA;
+}
 
 /**
  * Retrieve `attributeType` from attribute `name`
@@ -58,8 +93,10 @@ export class AttributePart {
   /**
    * Constructor
    * @param { string } tagName
+   * @param { boolean } isCustomElement
    */
-  constructor(tagName) {
+  constructor(tagName, isCustomElement) {
+    this.isCustomElement = isCustomElement;
     this.length = 0;
     this.tagName = tagName;
     this.type = partType.ATTRIBUTE;
@@ -72,7 +109,7 @@ export class AttributePart {
    * @param { AttributeDataType } type
    * @param { string } [name]
    * @param { string } [value]
-   * @param { Array<Buffer> } [strings]
+   * @param { Array<string> } [strings]
    */
   addAttributeData(type, name = '', value, strings) {
     const hasValue = value !== undefined;
@@ -82,47 +119,44 @@ export class AttributePart {
 
     switch (type) {
       case 'boolean': {
-        if (name.startsWith('?')) {
-          name = name.slice(1);
-        }
         // Zero length if static
         length = hasValue ? 0 : 1;
         data = {
           type,
           length,
           name,
-          nameAsBuffer: Buffer.from(`${name}`),
         };
         if (hasValue) {
-          data.value = data.nameAsBuffer;
+          const parsedName = name.startsWith('?') ? name.slice(1) : name;
+          data.value = parsedName;
+          data.resolvedBuffer = Buffer.from(parsedName);
         }
         break;
       }
-      case 'attribute': {
+      case 'attribute':
+      case 'property': {
         // Zero length if static (no `strings`)
         length = strings !== undefined ? strings.length - 1 : 0;
         data = {
           type,
           length,
           name,
-          open: Buffer.from(`${name}="`),
-          close: strings !== undefined ? Buffer.from(`${strings[strings.length - 1]}"`) : QUOTE_BUFFER,
           strings,
         };
         if (hasValue) {
-          data.value = Buffer.from(`${name}="${value}"`);
+          data.value = value;
+          data.resolvedBuffer = data.type === 'attribute' ? Buffer.from(`${name}="${value}"`) : EMPTY_STRING_BUFFER;
         }
         break;
       }
       default: {
-        // Property attributes can have multiple parts
-        length = strings !== undefined ? strings.length - 1 : 1;
         data = {
           type,
-          length,
-          value: EMPTY_STRING_BUFFER,
+          length: 1,
+          name,
+          value: '',
+          resolvedBuffer: EMPTY_STRING_BUFFER,
         };
-        this.hasDynamicParts = true;
       }
     }
 
@@ -132,50 +166,84 @@ export class AttributePart {
 
   /**
    * Retrieve resolved string Buffer from passed "values".
-   * Resolves to a single string, or Promise for a single string,
-   * even when responsible for multiple values.
+   * Resolves to a single string even when responsible for multiple values.
    * @param { Array<unknown> } values
-   * @param { InternalRenderOptions } [options]
    * @returns { Buffer }
    */
-  resolveValue(values, options) {
+  resolveValueAsBuffer(values) {
+    return /** @type { Buffer } */ (this.resolveValue(values, true));
+  }
+
+  /**
+   * Retrieve resolved string Buffer from passed "values".
+   * Resolves to a single string even when responsible for multiple values.
+   * @param { Array<unknown> } values
+   * @returns { Record<string, string> }
+   */
+  resolveValueAsRecord(values) {
+    return /** @type { Record<string, string> } */ (this.resolveValue(values, false));
+  }
+
+  /**
+   * @param { Array<unknown> } values
+   * @param { boolean } asBuffer
+   * @returns { Buffer | Record<string, string> }
+   */
+  resolveValue(values, asBuffer) {
+    /** @type { Record<string, string> } */
+    const attributes = {};
     /** @type { Array<Buffer> } */
-    let chunks = [];
+    const buffer = [];
     let valuesIndex = 0;
 
     for (let data of this._attributes) {
-      if (data.value !== undefined) {
-        chunks.push(SPACE_BUFFER, data.value);
+      if (asBuffer && data.resolvedBuffer !== undefined) {
+        buffer.push(SPACE_BUFFER, data.resolvedBuffer);
+      } else if (data.value !== undefined) {
+        attributes[data.name] = data.value;
       } else {
         // Only boolean or attribute types may have unresolved "value"
         if (data.type === 'boolean') {
-          const resolvedValue = resolveAttributeValue(values[valuesIndex], this.tagName, data);
+          const partValue = resolveAttributeValue(values[valuesIndex], this.tagName, data);
 
           // Skip if "nothing"
-          if (resolvedValue !== nothing) {
-            chunks.push(SPACE_BUFFER, resolvedValue);
+          if (partValue !== nothing) {
+            if (asBuffer) {
+              buffer.push(SPACE_BUFFER, Buffer.from(partValue));
+            } else {
+              attributes[data.name] = partValue;
+            }
           }
-        } else if (data.type === 'attribute') {
+        } else if (data.type === 'attribute' || data.type === 'property') {
+          let resolvedValue = '';
+          const strings = /** @type { Array<string> } */ (data.strings);
           let bailed = false;
-          let pendingChunks = [/** @type { Buffer } */ (data.open)];
 
           for (let i = 0; i < data.length; i++) {
-            const resolvedValue = resolveAttributeValue(values[valuesIndex + i], this.tagName, data);
+            const partValue = resolveAttributeValue(values[valuesIndex + i], this.tagName, data);
 
             // Bail if at least one value is "nothing"
-            if (resolvedValue === nothing) {
+            if (partValue === nothing) {
               bailed = true;
               break;
             }
 
-            if (data.strings !== undefined) {
-              pendingChunks.push(data.strings[i], resolvedValue);
-            }
+            resolvedValue += strings[i] + partValue;
           }
 
           if (!bailed) {
-            pendingChunks.push(/** @type { Buffer } */ (data.close));
-            chunks.push(SPACE_BUFFER, ...pendingChunks);
+            resolvedValue += strings[strings.length - 1];
+
+            if (asBuffer) {
+              if (data.type === 'attribute') {
+                resolvedValue = `${data.name}="${resolvedValue}"`;
+              } else if (data.type === 'property') {
+                resolvedValue = '';
+              }
+              buffer.push(SPACE_BUFFER, Buffer.from(resolvedValue));
+            } else {
+              attributes[data.name] = resolvedValue;
+            }
           }
         }
 
@@ -183,7 +251,7 @@ export class AttributePart {
       }
     }
 
-    return Buffer.concat(chunks);
+    return asBuffer ? Buffer.concat(buffer) : attributes;
   }
 }
 
@@ -272,8 +340,8 @@ export class MetadataPart {
  * Resolve "value" to Buffer
  * @param { unknown } value
  * @param { string } tagName
- * @param { BooleanAttributeData | AttributeAttributeData } data
- * @returns { Buffer | nothing }
+ * @param { AttributeData } data
+ * @returns { string | nothing }
  */
 function resolveAttributeValue(value, tagName, data) {
   if (isDirective(value)) {
@@ -296,16 +364,17 @@ function resolveAttributeValue(value, tagName, data) {
   }
 
   if (data.type === 'boolean') {
-    return value ? data.nameAsBuffer : EMPTY_STRING_BUFFER;
+    const resolvedName = data.name.startsWith('?') ? data.name.slice(1) : data.name;
+    return value ? resolvedName : '';
   }
 
   if (isPrimitive(value)) {
     const string = typeof value !== 'string' ? String(value) : value;
-    return Buffer.from(escape(string, 'attribute'));
+    return escape(string, 'attribute');
   } else if (isBuffer(value)) {
-    return value;
+    return value.toString();
   } else {
-    return Buffer.from(String(value));
+    return String(value);
   }
 }
 

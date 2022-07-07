@@ -30,24 +30,25 @@ declare type BooleanAttributeData = {
   type: 'boolean';
   length: number;
   name: string;
-  nameAsBuffer: Buffer;
-  value?: Buffer;
+  value?: string;
+  resolvedBuffer?: Buffer;
 };
-declare type AttributeAttributeData = {
-  type: 'attribute';
+declare type AttributeOrPropertyAttributeData = {
+  type: 'attribute' | 'property';
   length: number;
   name: string;
-  open?: Buffer;
-  close?: Buffer;
-  value?: Buffer;
-  strings?: Array<Buffer>;
+  strings?: Array<string>;
+  value?: string;
+  resolvedBuffer?: Buffer;
 };
 declare type DefaultAttributeData = {
-  type: 'property' | 'event' | 'element';
+  type: 'event' | 'element';
   length: number;
-  value: Buffer;
+  name: string;
+  value: string;
+  resolvedBuffer: Buffer;
 };
-declare type AttributeData = BooleanAttributeData | AttributeAttributeData | DefaultAttributeData;
+declare type AttributeData = BooleanAttributeData | AttributeOrPropertyAttributeData | DefaultAttributeData;
 declare interface PartInfo {
   type: number;
   tagName: string;
@@ -62,25 +63,27 @@ declare enum PartType {
   CUSTOMELEMENT = 3,
 }
 interface AttributePartType {
+  readonly isCustomElement: boolean;
   readonly length: number;
   readonly tagName: string;
-  readonly type: PartType;
-  resolveValue(value: unknown): Buffer;
+  readonly type: PartType.ATTRIBUTE;
+  resolveValueAsBuffer(value: Array<unknown>): Buffer;
+  resolveValueAsRecord(value: Array<unknown>): Record<string, string>;
 }
 interface ChildPartType {
   readonly tagName: string;
-  readonly type: PartType;
+  readonly type: PartType.CHILD;
   resolveValue(value: unknown, withMetadata: boolean): unknown;
 }
 interface CustomElementChildPartType {
   readonly attributes: { [name: string]: string | undefined };
   readonly tagName: string;
-  readonly type: PartType;
+  readonly type: PartType.CUSTOMELEMENT;
   resolveValue(value: unknown, withMetadata: boolean): unknown;
 }
 interface MetadataPartType {
   readonly tagName: string;
-  readonly type: PartType;
+  readonly type: PartType.METADATA;
   readonly value: Buffer;
   resolveValue(withMetadata: boolean): unknown;
 }

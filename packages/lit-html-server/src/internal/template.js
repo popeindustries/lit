@@ -131,7 +131,7 @@ export class Template {
                 string = string.slice(lastIndex);
                 lastIndex = 0;
                 // attributes = {};
-                attributePart = new AttributePart(tagName);
+                attributePart = new AttributePart(tagName, isCustomElement);
                 this.parts.push(attributePart);
               }
             }
@@ -178,7 +178,6 @@ export class Template {
                 attributePart.addAttributeData('boolean', attributeName, '');
               } else {
                 const hasQuotes = groups.quoteChar !== undefined;
-                let trim = false;
                 let valueString = string.slice(lastIndex);
 
                 // No quotes, so multiple values not possible
@@ -194,12 +193,12 @@ export class Template {
                   // Dynamic attribute part with single value
                   else {
                     attributePart.addAttributeData(getAttributeTypeFromName(attributeName), attributeName, undefined, [
-                      EMPTY_STRING_BUFFER,
-                      EMPTY_STRING_BUFFER,
+                      '',
+                      '',
                     ]);
                   }
                 } else {
-                  /** @type { Array<Buffer> } */
+                  /** @type { Array<string> } */
                   const attributeStrings = [];
                   const quoteChar = /** @type { string } */ (groups.quoteChar);
                   const valueRegex = quoteChar === '"' ? RE_DOUBLE_QUOTED_ATTR_VALUE : RE_SINGLE_QUOTED_ATTR_VALUE;
@@ -224,7 +223,7 @@ export class Template {
                       if (j === 0) {
                         attributePart.addAttributeData('attribute', attributeName, attributeValue);
                       } else {
-                        attributeStrings.push(Buffer.from(attributeValue));
+                        attributeStrings.push(attributeValue);
                         // Advance to hop over next string
                         i += j - 1;
                         nextString = valueString.slice(valueMatch[0].length - 1);
@@ -232,7 +231,7 @@ export class Template {
                       break;
                     }
 
-                    attributeStrings.push(Buffer.from(attributeValue));
+                    attributeStrings.push(attributeValue);
                     valueString = strings[i + ++j];
                   }
 
@@ -244,11 +243,7 @@ export class Template {
                       undefined,
                       attributeStrings,
                     );
-                    // Trim closing quotes from start of next string
-                    // nextString = nextString.slice(nextString.indexOf(quoteChar) + 1);
                   }
-                  // string = '';
-                  // lastIndex = valueRegex.lastIndex;
                 }
               }
             }

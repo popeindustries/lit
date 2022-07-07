@@ -1,6 +1,6 @@
-import { EMPTY_STRING_BUFFER, META_CLOSE } from './consts.js';
+import { isAttributePart, isChildPart, isCustomElementChildPart, isMetadataPart, partType } from './parts.js';
+import { META_CLOSE } from './consts.js';
 import { Buffer } from '#buffer';
-import { partType } from './parts.js';
 
 let id = 0;
 
@@ -64,35 +64,32 @@ export class TemplateResult {
 
     const part = this.template.parts[index];
 
-    switch (part.type) {
-      case partType.ATTRIBUTE: {
-        const length = /** @type { AttributePartType } */ (part).length;
-        let value;
-        // AttributeParts can have multiple values, so slice based on length
-        // (strings in-between values are already handled by the instance)
-        if (length > 1) {
-          value = this.values.slice(this.valueIndex, this.valueIndex + length);
-        } else {
-          value = [this.values[this.valueIndex]];
-        }
-        this.valueIndex += length;
-        // @ts-ignore
-        return part.type === partType.PROPERTY ? part.value : part.resolveValue(value, options);
+    if (isAttributePart(part)) {
+      const length = part.length;
+      let value;
+      // AttributeParts can have multiple values, so slice based on length
+      // (strings in-between values are already handled by the instance)
+      if (length > 1) {
+        value = this.values.slice(this.valueIndex, this.valueIndex + length);
+      } else {
+        value = [this.values[this.valueIndex]];
       }
-      case partType.CHILD: {
-        // @ts-ignore
-        let value = part.resolveValue(this.values[this.valueIndex], options.includeRehydrationMetadata);
-        this.valueIndex++;
-        return value;
-      }
-      case partType.METADATA: {
-        // @ts-ignore
-        return part.resolveValue(options?.includeRehydrationMetadata);
-      }
-      default:
-        this.valueIndex++;
-        // @ts-ignore
-        return part.value;
+      this.valueIndex += length;
+
+      // if (!part.isCustomElement)
+      return part.resolveValueAsBuffer(value);
+    } else if (isChildPart(part)) {
+      let value = part.resolveValue(this.values[this.valueIndex], options.includeRehydrationMetadata ?? false);
+      this.valueIndex++;
+      return value;
+    } else if (isCustomElementChildPart(part)) {
+      // part
+      return;
+    } else if (isMetadataPart(part)) {
+      return part.resolveValue(options.includeRehydrationMetadata ?? false);
+    } else {
+      this.valueIndex++;
+      throw Error(`unknown part: ${part}`);
     }
   }
 }
