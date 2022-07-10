@@ -6,6 +6,7 @@ import { Buffer } from '#buffer';
 import { digestForTemplateStrings } from '#digest';
 import { escape } from './escape.js';
 import { TemplateResult } from './template-result.js';
+import { getElementRenderer } from './element-renderer.js';
 
 export const partType = {
   METADATA: 0,
@@ -126,7 +127,7 @@ export class AttributePart {
         };
         if (hasValue) {
           const parsedName = name.startsWith('?') ? name.slice(1) : name;
-          data.value = parsedName;
+          data.value = '';
           data.resolvedBuffer = Buffer.from(parsedName);
         }
         break;
@@ -185,10 +186,10 @@ export class AttributePart {
   /**
    * @param { Array<unknown> } values
    * @param { boolean } asBuffer
-   * @returns { Buffer | Record<string, string> }
+   * @returns { Buffer | Record<string, unknown> }
    */
   _resolveValue(values, asBuffer) {
-    /** @type { Record<string, string> } */
+    /** @type { Record<string, unknown > } */
     const attributes = {};
     /** @type { Array<Buffer> } */
     const buffer = [];
@@ -209,15 +210,29 @@ export class AttributePart {
             if (asBuffer) {
               buffer.push(SPACE_BUFFER, Buffer.from(partValue));
             } else {
+              attributes[data.name] = '';
+            }
+          }
+        }
+        // Handle single property
+        else if (data.type === 'property' && data.length === 1) {
+          // Skip if serialising
+          if (!asBuffer) {
+            const partValue = resolvePropertyValue(values[valuesIndex], this.tagName, data);
+
+            if (partValue !== nothing) {
               attributes[data.name] = partValue;
             }
           }
-        } else if (data.type === 'attribute' || data.type === 'property') {
+        }
+        // Handle attributes and properties with multiple parts
+        else if (data.type === 'attribute' || data.type === 'property') {
           let resolvedValue = '';
           const strings = /** @type { Array<string> } */ (data.strings);
+          const n = data.length;
           let bailed = false;
 
-          for (let i = 0; i < data.length; i++) {
+          for (let i = 0; i < n; i++) {
             const partValue = resolveAttributeValue(values[valuesIndex + i], this.tagName, data);
 
             // Bail if at least one value is "nothing"
@@ -235,8 +250,6 @@ export class AttributePart {
             if (asBuffer) {
               if (data.type === 'attribute') {
                 resolvedValue = `${data.name}="${resolvedValue}"`;
-              } else if (data.type === 'property') {
-                resolvedValue = '';
               }
               buffer.push(SPACE_BUFFER, Buffer.from(resolvedValue));
             } else {
@@ -277,8 +290,9 @@ export class ChildPart {
     // Disable metadata if inside raw text node
     return resolveNodeValue(
       value,
-      this,
+      this.tagName,
       RE_RAW_TEXT_ELEMENT.test(this.tagName) || !options.includeRehydrationMetadata ? false : true,
+      true,
     );
   }
 }
@@ -292,11 +306,16 @@ export class CustomElementPart extends AttributePart {
   /**
    * Constructor
    * @param { string } tagName
+   * @param { number } nodeIndex
    */
-  constructor(tagName) {
+  constructor(tagName, nodeIndex) {
     super(tagName);
-    this.type = partType.CUSTOMELEMENT;
+    /** @type { typeof HTMLElement | undefined } */
+    this.ceClass = customElements.get(tagName);
+    this.nodeIndex = nodeIndex;
     this.tagName = tagName;
+    this.type = partType.CUSTOMELEMENT;
+    this._metadata = new MetadataPart(tagName, Buffer.from(`<!--lit-node ${nodeIndex}-->`));
   }
 
   /**
@@ -306,15 +325,32 @@ export class CustomElementPart extends AttributePart {
    * @returns { unknown }
    */
   resolveValue(values, options) {
-    const attributes = this.resolveValueAsRecord(values);
-    // TODO:
-    // 1. create CE instance
-    // 2. call connected callback
-    // 3. set attributes/properties
-    // 4. render CE content
-    // 5. resolve attributes buffer
-    // 6. create MetadataPart
-    return Buffer.from('>');
+    // Create renderer (and element instanace)
+    const renderer = getElementRenderer(options, this.tagName, this.ceClass);
+    renderer.connectedCallback();
+
+    // Resolve template attributes and props
+    const props = this.resolveValueAsRecord(values);
+
+    for (const name in props) {
+      if (name.startsWith('.')) {
+        renderer.setProperty(name.slice(1), props[name]);
+      } else if (name.startsWith('?')) {
+        renderer.setAttribute(name.slice(1), props[name]);
+      } else {
+        renderer.setAttribute(name, props[name]);
+      }
+    }
+
+    const resolvedAttributes = Buffer.from(`${renderer.renderAttributes()}>`);
+    const resolvedContent = resolveNodeValue(
+      renderer.render(),
+      this.tagName,
+      options.includeRehydrationMetadata ?? false,
+      false,
+    );
+
+    return [resolvedAttributes, this._metadata.resolveValue(options), resolvedContent];
   }
 }
 
@@ -377,9 +413,7 @@ function resolveAttributeValue(value, tagName, data) {
   if (data.type === 'boolean') {
     const resolvedName = data.name.startsWith('?') ? data.name.slice(1) : data.name;
     return value ? resolvedName : '';
-  }
-
-  if (isPrimitive(value)) {
+  } else if (isPrimitive(value)) {
     const string = typeof value !== 'string' ? String(value) : value;
     return escape(string, 'attribute');
   } else if (isBuffer(value)) {
@@ -390,17 +424,43 @@ function resolveAttributeValue(value, tagName, data) {
 }
 
 /**
- * Resolve "value" to string Buffer if possible
+ * Resolve "value" to Buffer
  * @param { unknown } value
- * @param { ChildPart } part
- * @param { boolean } withMetadata
+ * @param { string } tagName
+ * @param { AttributeOrPropertyAttributeData } data
  * @returns { unknown }
  */
-function resolveNodeValue(value, part, withMetadata) {
+function resolvePropertyValue(value, tagName, data) {
+  if (isDirective(value)) {
+    /** @type { PartInfo } */
+    const partInfo = {
+      name: data.name,
+      tagName,
+      type: TYPE_TO_LIT_PART_TYPE[data.type],
+    };
+    if (data.strings !== undefined && data.length > 1) {
+      partInfo.strings = data.strings.map((string) => string.toString());
+    }
+
+    value = resolveDirectiveValue(value, partInfo);
+  }
+
+  return value;
+}
+
+/**
+ * Resolve "value" to string Buffer if possible
+ * @param { unknown } value
+ * @param { string } tagName
+ * @param { boolean } withMetadata
+ * @param { boolean } [escaped]
+ * @returns { unknown }
+ */
+function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
   if (isDirective(value)) {
     value = resolveDirectiveValue(value, {
       type: TYPE_TO_LIT_PART_TYPE['child'],
-      tagName: part.tagName,
+      tagName,
     });
   }
 
@@ -409,8 +469,11 @@ function resolveNodeValue(value, part, withMetadata) {
   }
 
   if (isPrimitive(value)) {
-    const string = typeof value !== 'string' ? String(value) : value;
-    value = Buffer.from(escape(string, part.tagName === 'script' || part.tagName === 'style' ? part.tagName : 'text'));
+    let string = typeof value !== 'string' ? String(value) : value;
+    if (escaped) {
+      string = escape(string, tagName === 'script' || tagName === 'style' ? tagName : 'text');
+    }
+    value = Buffer.from(string);
   }
 
   if (isBuffer(value)) {
@@ -418,7 +481,7 @@ function resolveNodeValue(value, part, withMetadata) {
   } else if (isTemplateResult(value)) {
     return value;
   } else if (isPromise(value)) {
-    return value.then((value) => resolveNodeValue(value, part, withMetadata));
+    return value.then((value) => resolveNodeValue(value, tagName, withMetadata, escaped));
   } else if (isSyncIterator(value)) {
     if (!isArray(value)) {
       value = Array.from(value);
@@ -426,7 +489,7 @@ function resolveNodeValue(value, part, withMetadata) {
     /** @type { Array<unknown> } */
     const collection = withMetadata ? [META_OPEN] : [];
     for (let val of /** @type { Array<unknown> } */ (value)) {
-      val = resolveNodeValue(val, part, withMetadata);
+      val = resolveNodeValue(val, tagName, withMetadata, escaped);
       // Flatten
       if (isArray(val)) {
         collection.push(...val);
@@ -439,7 +502,7 @@ function resolveNodeValue(value, part, withMetadata) {
     }
     return collection;
   } else if (isAsyncIterator(value)) {
-    return resolveAsyncIteratorValue(value, part, withMetadata);
+    return resolveAsyncIteratorValue(value, tagName, withMetadata, escaped);
   } else {
     throw Error(`unknown NodePart value: ${value}`);
   }
@@ -448,13 +511,14 @@ function resolveNodeValue(value, part, withMetadata) {
 /**
  * Resolve values of async "iterator"
  * @param { AsyncIterable<unknown> } iterator
- * @param { ChildPart } part
+ * @param { string } tagName
  * @param { boolean } withMetadata
+ * @param { boolean } escaped
  * @returns { AsyncGenerator<unknown> }
  */
-async function* resolveAsyncIteratorValue(iterator, part, withMetadata) {
+async function* resolveAsyncIteratorValue(iterator, tagName, withMetadata, escaped) {
   for await (const value of iterator) {
-    yield resolveNodeValue(value, part, withMetadata);
+    yield resolveNodeValue(value, tagName, withMetadata, escaped);
   }
 }
 

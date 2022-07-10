@@ -4,31 +4,31 @@ const RE_VALID_NAME = /^[a-z][a-z0-9._-]*-[a-z0-9._-]*$/;
 
 if (typeof globalThis.window === 'undefined') {
   class Element {
-    _attributes = {};
-    _hasShadowDOM = false;
+    __attributes__ = {};
+    innerHTML = '';
+    shadowRoot = null;
 
     get attributes() {
-      return Object.keys(this._attributes);
+      const result = [];
+      for (const name in this.__attributes__) {
+        result.push({ name, value: this.__attributes__[name] });
+      }
+      return result;
     }
 
-    attachShadow(init) {
-      const shadowRoot = { host: this };
-
-      // TODO: mode closed?
-      if (init && init.mode === 'open') {
-        this._hasShadowDOM = true;
-      }
-
+    attachShadow(options = { mode: 'open' }) {
+      const shadowRoot = { host: this, innerHTML: '', mode: options.mode };
+      this.shadowRoot = shadowRoot;
       return shadowRoot;
     }
 
     getAttribute(name) {
-      const value = this._attributes[name];
+      const value = this.__attributes__[name];
       return value === undefined ? null : value;
     }
 
     setAttribute(name, value) {
-      this._attributes[name] = String(value);
+      this.__attributes__[name] = String(value);
     }
   }
 
@@ -53,7 +53,7 @@ if (typeof globalThis.window === 'undefined') {
       } else if (this._registry.has(name)) {
         throw Error(`a constructor has already been registered with that name: ${name}`);
       } else if (Array.from(this._registry.values()).includes(constructor)) {
-        throw Error(`the constructor has already been registered under another name`);
+        throw Error(`the constructor has already been registered under another name: ${constructor}`);
       }
 
       // Trigger getter

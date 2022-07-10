@@ -111,7 +111,7 @@ export class Template {
               nodeIndex++;
 
               if (isCustomElement) {
-                attributePart = new CustomElementPart(tagName);
+                attributePart = new CustomElementPart(tagName, nodeIndex);
               } else {
                 // If tag end ('>') is in the same string, we can skip attribute parsing
                 RE_TAG_END.lastIndex = lastIndex;

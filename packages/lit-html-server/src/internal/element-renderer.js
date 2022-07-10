@@ -5,9 +5,9 @@ import { escape } from './escape.js';
  * @param { string } tagName
  * @param { typeof HTMLElement | undefined } ceClass
  */
-export function getElementRenderer({ elementRenderers }, tagName, ceClass = customElements.get(tagName)) {
+export function getElementRenderer({ elementRenderers = [] }, tagName, ceClass = customElements.get(tagName)) {
   if (ceClass === undefined) {
-    console.warn(`Custom element ${tagName} was not registered.`);
+    console.warn(`Custom element "${tagName}" was not registered.`);
   } else {
     for (const renderer of elementRenderers) {
       if (renderer.matchesClass(ceClass, tagName)) {
@@ -39,7 +39,8 @@ export class ElementRenderer {
   }
 
   connectedCallback() {
-    // Abstract
+    // @ts-ignore
+    this.element.connectedCallback?.();
   }
 
   /**
@@ -78,7 +79,7 @@ export class ElementRenderer {
       if (value === '' || value === undefined || value === null) {
         attributes += ` ${name}`;
       } else {
-        attributes += ` ${name}="${escape(value)}"`;
+        attributes += ` ${name}="${escape(value, 'attribute')}"`;
       }
     }
 
@@ -86,6 +87,12 @@ export class ElementRenderer {
   }
 
   render() {
-    return '';
+    const { innerHTML, shadowRoot } = this.element;
+
+    if (shadowRoot !== null) {
+      return `<template shadowroot="${shadowRoot.mode}">${shadowRoot.innerHTML}</template>`;
+    }
+
+    return innerHTML;
   }
 }

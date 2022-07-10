@@ -98,7 +98,7 @@ describe('Parse', () => {
     {
       title: 'custom element with static attribute',
       template: '<my-el a="text"></my-el>',
-      result: '<my-el[ATTR]>[METADATA][CUSTOM-ELEMENT]</my-el>',
+      result: '<my-el[CUSTOM-ELEMENT]</my-el>',
     },
   ];
 

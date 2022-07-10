@@ -76,6 +76,7 @@ interface ChildPartType {
 }
 interface CustomElementPartType {
   readonly length: number;
+  readonly nodeIndex: number;
   readonly tagName: string;
   readonly type: PartType.CUSTOMELEMENT;
   resolveValue(values: Array<unknown>, options: InternalRenderOptions): unknown;

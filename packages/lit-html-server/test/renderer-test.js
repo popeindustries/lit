@@ -3,9 +3,13 @@ import { html as h, renderToStream, renderToString } from '../src/index.js';
 import { createAsyncIterable, streamAsPromise } from './utils.js';
 import assert from 'node:assert';
 
-describe.only('Render', () => {
+describe('Render', () => {
+  beforeEach(() => {
+    customElements._registry.clear();
+  });
+
   const tests = [
-    /* {
+    {
       title: 'plain text',
       template: h`<div>text</div>`,
       result: '<!--lit-part pxc8m9UUJbo=--><div>text</div><!--/lit-part-->',
@@ -155,28 +159,111 @@ describe.only('Render', () => {
     {
       title: 'property attribute',
       template: h`<div .a="${'prop'}"></div>`,
-      result: '<!--lit-part X7msdWIx9Mg=--><div ><!--lit-node 0--></div><!--/lit-part-->',
+      result: '<!--lit-part X7msdWIx9Mg=--><div><!--lit-node 0--></div><!--/lit-part-->',
     },
     {
       title: 'raw text',
       template: h`<script ?defer="${true}">var t = ${'true'};</script>`,
       result: '<!--lit-part QGlntsotObw=--><script defer>var t = true;</script><!--/lit-part-->',
-    }, */
+    },
     {
       title: 'custom element with static attributes',
-      template: h`<my-el a="text"></my-el>`,
-      result: '',
+      template: h`<my-el a="text" b></my-el>`,
+      result:
+        '<!--lit-part RFW6pSjk80E=--><my-el a="text" b><!--lit-node 0--><!--lit-part--><!--/lit-part--></my-el><!--/lit-part-->',
+    },
+    {
+      title: 'custom element with static and dynamic attributes',
+      template: h`<my-el a="text" ?b=${true} .c=${{ c: true }}></my-el>`,
+      result:
+        '<!--lit-part 5ElCYNqBmr4=--><my-el a="text" b><!--lit-node 0--><!--lit-part--><!--/lit-part--></my-el><!--/lit-part-->',
+    },
+    {
+      title: 'custom element with property reflection',
+      template: () => {
+        class MyEl extends HTMLElement {
+          set a(value) {
+            this.setAttribute('a', value);
+          }
+        }
+        customElements.define('my-el', MyEl);
+        return h`<my-el .a=${'a'}></my-el>`;
+      },
+      result:
+        '<!--lit-part V4/fxcqoz/0=--><my-el a="a"><!--lit-node 0--><!--lit-part--><!--/lit-part--></my-el><!--/lit-part-->',
+    },
+    {
+      title: 'custom element with attribute set during connectedCallback',
+      template: () => {
+        class MyEl extends HTMLElement {
+          connectedCallback() {
+            this.setAttribute('a', 'a');
+          }
+        }
+        customElements.define('my-el', MyEl);
+        return h`<my-el></my-el>`;
+      },
+      result:
+        '<!--lit-part 9t1WSFm5xNQ=--><my-el a="a"><!--lit-node 0--><!--lit-part--><!--/lit-part--></my-el><!--/lit-part-->',
+    },
+    {
+      title: 'custom element with innerHTML set during construction',
+      template: () => {
+        class MyEl extends HTMLElement {
+          constructor() {
+            super();
+            this.innerHTML = 'text';
+          }
+        }
+        customElements.define('my-el', MyEl);
+        return h`<my-el></my-el>`;
+      },
+      result:
+        '<!--lit-part 9t1WSFm5xNQ=--><my-el><!--lit-node 0--><!--lit-part-->text<!--/lit-part--></my-el><!--/lit-part-->',
+    },
+    {
+      title: 'custom element with innerHTML set during connectedCallback',
+      template: () => {
+        class MyEl extends HTMLElement {
+          connectedCallback() {
+            this.innerHTML = 'text';
+          }
+        }
+        customElements.define('my-el', MyEl);
+        return h`<my-el></my-el>`;
+      },
+      result:
+        '<!--lit-part 9t1WSFm5xNQ=--><my-el><!--lit-node 0--><!--lit-part-->text<!--/lit-part--></my-el><!--/lit-part-->',
+    },
+    {
+      title: 'custom element with shadowDOM innerHTML set during construction',
+      template: () => {
+        class MyEl extends HTMLElement {
+          constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            shadow.innerHTML = 'text';
+          }
+        }
+        customElements.define('my-el', MyEl);
+        return h`<my-el></my-el>`;
+      },
+      result:
+        '<!--lit-part 9t1WSFm5xNQ=--><my-el><!--lit-node 0--><!--lit-part--><template shadowroot="open">text</template><!--/lit-part--></my-el><!--/lit-part-->',
     },
   ];
   const only = tests.filter(({ only }) => only);
 
-  for (const { title, template, result, skip } of only.length ? only : tests) {
+  for (let { title, template, result, skip } of only.length ? only : tests) {
     const fullTitle = `${title}`;
 
     if (skip) {
       it.skip(fullTitle);
     } else {
       it(fullTitle, async () => {
+        if (typeof template === 'function') {
+          template = template();
+        }
         const string = await renderToString(template, { includeRehydrationMetadata: true });
         // const stream = await streamAsPromise(renderToStream(template, { includeRehydrationMetadata: true }));
         // assert.equal(string, stream);
