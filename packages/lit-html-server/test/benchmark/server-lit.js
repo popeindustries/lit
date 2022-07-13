@@ -2,7 +2,7 @@ import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 import { Readable } from 'stream';
 import everything from './the-everything-bagel-template.js';
 import http from 'http';
-import { html as litHtml } from 'lit';
+import { html as litHtml } from 'lit-html';
 
 const html = String.raw;
 

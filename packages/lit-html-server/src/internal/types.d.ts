@@ -30,6 +30,7 @@ declare type BooleanAttributeData = {
   type: 'boolean';
   length: number;
   name: string;
+  nameBuffer: Buffer;
   value?: string;
   resolvedBuffer?: Buffer;
 };
@@ -90,15 +91,20 @@ interface MetadataPartType {
 declare type Part = MetadataPartType | CustomElementPartType | ChildPartType | AttributePartType;
 
 declare type ElementRendererConstructor = (new (tagName: string) => ElementRenderer) & typeof ElementRenderer;
-declare class ElementRenderer {
+
+/**
+ * Base class renderer for rendering custom elements.
+ * Extend to handle custom render logic if your custom elements do not render to `innerHTML`
+ */
+declare class ElementRenderer<ElementType extends HTMLElement = HTMLElement> {
   /**
    * Should return true when given custom element class and/or tag name
    * should be handled by this renderer.
    */
   static matchesClass(ceClass: typeof HTMLElement, tagName: string): boolean;
-  element: HTMLElement;
+  element: ElementType;
   tagName: string;
-  constructor(ceClass: typeof HTMLElement, tagName: string);
+  constructor(tagName: string);
   connectedCallback(): void;
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void;
   setProperty(name: string, value: unknown): void;
@@ -114,7 +120,7 @@ declare type RenderOptions = {
   /**
    * Renderer classes for rendering of custom elements
    */
-  elementRenderers: Array<ElementRendererConstructor>;
+  elementRenderers?: Array<ElementRendererConstructor>;
 };
 
 declare type InternalRenderOptions = RenderOptions & {

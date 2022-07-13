@@ -1,19 +1,10 @@
+import { CustomElement, Renderer } from './custom-element.js';
 import { html, renderToStream } from '../../index.js';
 import everything from './the-everything-bagel-template.js';
 import http from 'http';
+import { rehydratable } from '../../directives/rehydratable.js';
 
-http
-  .createServer((req, res) => {
-    const data = {
-      title: new Date().toISOString(),
-      isTrue: Math.random() > 0.5,
-      number: Math.random() * 100,
-    };
-    res.writeHead(200);
-    const stream = renderToStream(template(data));
-    stream.pipe(res);
-  })
-  .listen(3000);
+customElements.define('custom-element', CustomElement);
 
 /**
  * @param { { title: string, isTrue: boolean, number: number } } data
@@ -28,8 +19,21 @@ function template(data) {
         <title>${data.title}</title>
       </head>
       <body>
-        ${everything(html, data)}
+        ${rehydratable(everything(html, data))}
       </body>
     </html>
   `;
 }
+
+http
+  .createServer((req, res) => {
+    const data = {
+      title: new Date().toISOString(),
+      isTrue: Math.random() > 0.5,
+      number: Math.random() * 100,
+    };
+    res.writeHead(200);
+    const stream = renderToStream(template(data), { elementRenderers: [Renderer] });
+    stream.pipe(res);
+  })
+  .listen(3000);

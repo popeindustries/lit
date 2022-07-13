@@ -3,7 +3,7 @@ import { escape } from './escape.js';
 /**
  * @param { RenderOptions } options
  * @param { string } tagName
- * @param { typeof HTMLElement | undefined } ceClass
+ * @param { typeof HTMLElement } [ceClass]
  */
 export function getElementRenderer({ elementRenderers = [] }, tagName, ceClass = customElements.get(tagName)) {
   if (ceClass === undefined) {
@@ -11,14 +11,17 @@ export function getElementRenderer({ elementRenderers = [] }, tagName, ceClass =
   } else {
     for (const renderer of elementRenderers) {
       if (renderer.matchesClass(ceClass, tagName)) {
-        return new renderer(ceClass, tagName);
+        return new renderer(tagName);
       }
     }
   }
 
-  return new ElementRenderer(ceClass ?? HTMLElement, tagName);
+  return new ElementRenderer(tagName);
 }
 
+/**
+ * @template { HTMLElement } [ElementType = HTMLElement]
+ */
 export class ElementRenderer {
   /**
    * @param { typeof HTMLElement } ceClass
@@ -29,13 +32,12 @@ export class ElementRenderer {
   }
 
   /**
-   * @param { typeof HTMLElement } ceClass
    * @param { string } tagName
    */
-  constructor(ceClass, tagName) {
+  constructor(tagName) {
     this.tagName = tagName;
-    /** @type { HTMLElement } */
-    this.element = new ceClass();
+    const ceClass = customElements.get(tagName) ?? HTMLElement;
+    this.element = /** @type { ElementType } */ (/** @type { unknown } */ (new ceClass()));
   }
 
   connectedCallback() {

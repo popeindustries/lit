@@ -118,17 +118,18 @@ export class AttributePart {
 
     switch (type) {
       case 'boolean': {
+        const unprefixedName = name.startsWith('?') ? name.slice(1) : name;
         // Zero length if static
         length = hasValue ? 0 : 1;
         data = {
           type,
           length,
           name,
+          nameBuffer: Buffer.from(unprefixedName),
         };
         if (hasValue) {
-          const parsedName = name.startsWith('?') ? name.slice(1) : name;
           data.value = '';
-          data.resolvedBuffer = Buffer.from(parsedName);
+          data.resolvedBuffer = data.nameBuffer;
         }
         break;
       }
@@ -208,7 +209,7 @@ export class AttributePart {
           // Skip if "nothing"
           if (partValue !== nothing) {
             if (asBuffer) {
-              buffer.push(SPACE_BUFFER, Buffer.from(partValue));
+              buffer.push(SPACE_BUFFER, data.nameBuffer);
             } else {
               attributes[data.name] = '';
             }
@@ -257,9 +258,9 @@ export class AttributePart {
             }
           }
         }
-
-        valuesIndex += data.length;
       }
+
+      valuesIndex += data.length;
     }
 
     return asBuffer ? Buffer.concat(buffer) : attributes;
@@ -411,8 +412,7 @@ function resolveAttributeValue(value, tagName, data) {
   }
 
   if (data.type === 'boolean') {
-    const resolvedName = data.name.startsWith('?') ? data.name.slice(1) : data.name;
-    return value ? resolvedName : '';
+    return value ? '' : nothing;
   } else if (isPrimitive(value)) {
     const string = typeof value !== 'string' ? String(value) : value;
     return escape(string, 'attribute');

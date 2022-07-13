@@ -1,7 +1,9 @@
-import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
-import { html, renderToString } from '../../src/index.js';
+import { CustomElement, Renderer } from './custom-element.js';
+import { html, renderToString } from '../../index.js';
 import everything from './the-everything-bagel-template.js';
 import { html as litHtml } from 'lit-html';
+import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
+import { rehydratable } from '../../directives/rehydratable.js';
 
 const data = {
   title: 'title',
@@ -18,5 +20,6 @@ if (process.argv[2] === 'ssr') {
     buffer.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;quot;', '"').replaceAll('&quot;', '"'),
   );
 } else {
-  renderToString(everything(html, data), { includeRehydrationMetadata: true }).then(console.log);
+  customElements.define('custom-element', CustomElement);
+  renderToString(html`${rehydratable(everything(html, data))}`, { elementRenderers: [Renderer] }).then(console.log);
 }

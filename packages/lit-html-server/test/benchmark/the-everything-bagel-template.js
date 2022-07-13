@@ -1,6 +1,6 @@
 import './custom-element.js';
-import { classMap } from 'lit/directives/class-map.js';
-import { ref } from 'lit/directives/ref.js';
+import { classMap } from 'lit-html/directives/class-map.js';
+import { ref } from 'lit-html/directives/ref.js';
 
 /**
  * @param { Function } html
@@ -42,11 +42,18 @@ export default function everything(html, data) {
       <p .prop="${data.title}" ?visible="${data.isTrue}">
         Third Paragraph: Lorem ipsum dolor sit amet,${nestedTemplate(html, data)}
       </p>
-      <button ${ref((el) => console.log(el))} @click=${() => console.log('click')}>Button: Lorem ipsum!</button>
+      <button
+        ${ref((el) => console.log(el))}
+        @click=${function onClick() {
+          console.log('click');
+        }}
+      >
+        Button: Lorem ipsum!
+      </button>
       <div .prop=${data.isTrue}><span>Div: Lorem ipsum</span></div>
+      <custom-element ?negative="${!data.isTrue}"></custom-element>
     </main>
   `;
-  // <custom-element ?negative="${data.isTrue}"></custom-element>
 }
 
 /**

@@ -1,4 +1,5 @@
 import './dom-shim.js'; // Needs to be bundled as "external" in order to shim before lit-html imports
+import { ElementRenderer } from './internal/element-renderer.js';
 import { isTemplateResult } from './internal/is.js';
 import { promiseTemplateRenderer } from './internal/promise-template-renderer.js';
 import { streamTemplateRenderer } from '#template-renderer';
@@ -85,4 +86,4 @@ function getRenderResult(result) {
   return !isTemplateResult(result) ? DEFAULT_TEMPLATE_FN(result) : result;
 }
 
-export { html, renderToBuffer, renderToStream, renderToString, html as svg };
+export { ElementRenderer, html, renderToBuffer, renderToStream, renderToString, html as svg };
