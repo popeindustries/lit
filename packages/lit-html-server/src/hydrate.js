@@ -1,5 +1,5 @@
-import { noChange, _$LH } from 'lit-html';
 import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/directive-helpers.js';
+import { noChange, render, _$LH } from 'lit-html';
 import { digestForTemplateStrings } from './internal/browser-digest.js';
 import { PartType } from 'lit-html/directive.js';
 
@@ -23,8 +23,9 @@ export function hydrateOrRender(value, container, options = {}) {
 
     // @ts-expect-error - internal property
     if (partOwnerNode['_$litPart$'] !== undefined) {
-      // TODO: call render instead?
-      throw Error('already hydrated');
+      // Already hydrated, so render instead
+      render(value, container, options);
+      return;
     }
 
     // Since `container` can have more than one rehydratable template,
@@ -85,7 +86,8 @@ export function hydrateOrRender(value, container, options = {}) {
     partOwnerNode['_$litPart$'] = rootPart;
   } catch (err) {
     console.error(err);
-    // TODO: call render instead?
+    throw err;
+    // TODO: remove elements and call render instead?
   }
 }
 

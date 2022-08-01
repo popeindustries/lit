@@ -178,7 +178,9 @@ export class AttributePart {
 
     for (let data of this._parts) {
       if (data.resolvedBuffer !== undefined) {
-        buffer.push(SPACE_BUFFER, data.resolvedBuffer);
+        if (data.resolvedBuffer !== EMPTY_STRING_BUFFER) {
+          buffer.push(SPACE_BUFFER, data.resolvedBuffer);
+        }
       } else {
         // Only boolean or attribute types may have unresolved "value"
         if (data.type === 'boolean') {

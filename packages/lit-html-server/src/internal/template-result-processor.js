@@ -137,11 +137,6 @@ function getTemplateResultChunk(result, stack, options) {
 
   let chunk = result.readChunk(options);
 
-  // Skip empty strings
-  if (isBuffer(chunk) && chunk.length === 0) {
-    chunk = result.readChunk(options);
-  }
-
   // Finished reading, dispose
   if (chunk === null) {
     // Disable hydration metadata when finished with subtree

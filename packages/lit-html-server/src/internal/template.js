@@ -68,7 +68,6 @@ export class Template {
     let tagName = '';
 
     for (let i = 0; i < n; i++) {
-      const isFirstString = i === 0;
       const isLastString = i === n - 1;
       let string = nextString;
       nextString = strings[i + 1] ?? '';
@@ -198,7 +197,7 @@ export class Template {
                   const valueRegex = quoteChar === '"' ? RE_DOUBLE_QUOTED_ATTR_VALUE : RE_SINGLE_QUOTED_ATTR_VALUE;
                   let j = 0;
 
-                  // Loop through remainint strings until we reach closing quote
+                  // Loop through remaining strings until we reach closing quote
                   while (valueString !== undefined) {
                     const valueMatch = valueRegex.exec(valueString);
 
