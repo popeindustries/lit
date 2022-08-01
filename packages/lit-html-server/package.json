@@ -53,10 +53,10 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "lit-html": "^2.2.6"
+    "lit-html": "^2.2.7"
   },
   "devDependencies": {
-    "@lit-labs/ssr": "2.2.1",
+    "@lit-labs/ssr": "2.2.2",
     "autocannon": "^7.9.0",
     "send": "^0.18.0"
   },
