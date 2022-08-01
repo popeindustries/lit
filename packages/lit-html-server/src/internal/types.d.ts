@@ -67,8 +67,7 @@ interface AttributePartType {
   readonly length: number;
   readonly tagName: string;
   readonly type: PartType.ATTRIBUTE;
-  resolveValueAsBuffer(value: Array<unknown>): Buffer;
-  resolveValueAsRecord(value: Array<unknown>): Record<string, string>;
+  resolveValue(values: Array<unknown>, options: InternalRenderOptions): unknown;
 }
 interface ChildPartType {
   readonly tagName: string;

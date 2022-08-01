@@ -168,39 +168,17 @@ export class AttributePart {
    * Retrieve resolved string Buffer from passed "values".
    * Resolves to a single string even when responsible for multiple values.
    * @param { Array<unknown> } values
-   * @returns { Buffer }
+   * @param { InternalRenderOptions } options
+   * @returns { unknown }
    */
-  resolveValueAsBuffer(values) {
-    return /** @type { Buffer } */ (this._resolveValue(values, true));
-  }
-
-  /**
-   * Retrieve resolved string Buffer from passed "values".
-   * Resolves to a single string even when responsible for multiple values.
-   * @param { Array<unknown> } values
-   * @returns { Record<string, string> }
-   */
-  resolveValueAsRecord(values) {
-    return /** @type { Record<string, string> } */ (this._resolveValue(values, false));
-  }
-
-  /**
-   * @param { Array<unknown> } values
-   * @param { boolean } asBuffer
-   * @returns { Buffer | Record<string, unknown> }
-   */
-  _resolveValue(values, asBuffer) {
-    /** @type { Record<string, unknown > } */
-    const attributes = {};
+  resolveValue(values, options) {
     /** @type { Array<Buffer> } */
     const buffer = [];
     let valuesIndex = 0;
 
     for (let data of this._parts) {
-      if (asBuffer && data.resolvedBuffer !== undefined) {
+      if (data.resolvedBuffer !== undefined) {
         buffer.push(SPACE_BUFFER, data.resolvedBuffer);
-      } else if (data.value !== undefined) {
-        attributes[data.name] = data.value;
       } else {
         // Only boolean or attribute types may have unresolved "value"
         if (data.type === 'boolean') {
@@ -208,26 +186,9 @@ export class AttributePart {
 
           // Skip if "nothing"
           if (partValue !== nothing) {
-            if (asBuffer) {
-              buffer.push(SPACE_BUFFER, data.nameBuffer);
-            } else {
-              attributes[data.name] = '';
-            }
+            buffer.push(SPACE_BUFFER, data.nameBuffer);
           }
-        }
-        // Handle single property
-        else if (data.type === 'property' && data.length === 1) {
-          // Skip if serialising
-          if (!asBuffer) {
-            const partValue = resolvePropertyValue(values[valuesIndex], this.tagName, data);
-
-            if (partValue !== nothing) {
-              attributes[data.name] = partValue;
-            }
-          }
-        }
-        // Handle attributes and properties with multiple parts
-        else if (data.type === 'attribute' || data.type === 'property') {
+        } else if (data.type === 'attribute') {
           let resolvedValue = '';
           const strings = /** @type { Array<string> } */ (data.strings);
           const n = data.length;
@@ -247,15 +208,8 @@ export class AttributePart {
 
           if (!bailed) {
             resolvedValue += strings[strings.length - 1];
-
-            if (asBuffer) {
-              if (data.type === 'attribute') {
-                resolvedValue = `${data.name}="${resolvedValue}"`;
-              }
-              buffer.push(SPACE_BUFFER, Buffer.from(resolvedValue));
-            } else {
-              attributes[data.name] = resolvedValue;
-            }
+            resolvedValue = `${data.name}="${resolvedValue}"`;
+            buffer.push(SPACE_BUFFER, Buffer.from(resolvedValue));
           }
         }
       }
@@ -263,7 +217,7 @@ export class AttributePart {
       valuesIndex += data.length;
     }
 
-    return asBuffer ? Buffer.concat(buffer) : attributes;
+    return Buffer.concat(buffer);
   }
 }
 
@@ -330,17 +284,55 @@ export class CustomElementPart extends AttributePart {
     const renderer = getElementRenderer(options, this.tagName, this.ceClass);
     renderer.connectedCallback();
 
-    // Resolve template attributes and props
-    const props = this.resolveValueAsRecord(values);
+    let valuesIndex = 0;
 
-    for (const name in props) {
-      if (name.startsWith('.')) {
-        renderer.setProperty(name.slice(1), props[name]);
-      } else if (name.startsWith('?')) {
-        renderer.setAttribute(name.slice(1), props[name]);
+    for (let data of this._parts) {
+      if (data.value !== undefined) {
+        setRendererPropertyOrAttribute(renderer, data.name, data.value);
       } else {
-        renderer.setAttribute(name, props[name]);
+        if (data.type === 'boolean') {
+          const partValue = resolveAttributeValue(values[valuesIndex], this.tagName, data);
+
+          // Skip if "nothing"
+          if (partValue !== nothing) {
+            setRendererPropertyOrAttribute(renderer, data.name, '');
+          }
+        }
+        // Handle single property
+        else if (data.type === 'property' && data.length === 1) {
+          const partValue = resolvePropertyValue(values[valuesIndex], this.tagName, data);
+
+          if (partValue !== nothing) {
+            setRendererPropertyOrAttribute(renderer, data.name, partValue);
+          }
+        }
+        // Handle attributes and properties with multiple parts
+        else if (data.type === 'attribute' || data.type === 'property') {
+          let resolvedValue = '';
+          const strings = /** @type { Array<string> } */ (data.strings);
+          const n = data.length;
+          let bailed = false;
+
+          for (let i = 0; i < n; i++) {
+            const partValue = resolveAttributeValue(values[valuesIndex + i], this.tagName, data);
+
+            // Bail if at least one value is "nothing"
+            if (partValue === nothing) {
+              bailed = true;
+              break;
+            }
+
+            resolvedValue += strings[i] + partValue;
+          }
+
+          if (!bailed) {
+            resolvedValue += strings[strings.length - 1];
+            setRendererPropertyOrAttribute(renderer, data.name, resolvedValue);
+          }
+        }
       }
+
+      valuesIndex += data.length;
     }
 
     const resolvedAttributes = Buffer.from(`${renderer.renderAttributes()}>`);
@@ -550,5 +542,23 @@ function resolveDirectiveValue(directiveResult, partInfo) {
     return new TemplateResult(template, []);
   } else {
     return result;
+  }
+}
+
+/**
+ * Set property or attribute on "renderer"
+ * @param { ElementRenderer } renderer
+ * @param { string } name
+ * @param { unknown } value
+ */
+function setRendererPropertyOrAttribute(renderer, name, value) {
+  if (name.startsWith('.')) {
+    renderer.setProperty(name.slice(1), value);
+  } else if (name.startsWith('?')) {
+    // @ts-ignore - is string
+    renderer.setAttribute(name.slice(1), value);
+  } else {
+    // @ts-ignore - is string
+    renderer.setAttribute(name, value);
   }
 }

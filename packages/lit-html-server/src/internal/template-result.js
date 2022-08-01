@@ -1,4 +1,4 @@
-import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart, partType } from './parts.js';
+import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart } from './parts.js';
 import { META_CLOSE } from './consts.js';
 import { Buffer } from '#buffer';
 
@@ -70,7 +70,7 @@ export class TemplateResult {
       // AttributeParts can have multiple values, so slice based on length
       // (strings in-between values are already handled by the instance)
       const values = this.values.slice(this.valueIndex, this.valueIndex + length);
-      const value = isCustomElement ? part.resolveValue(values, options) : part.resolveValueAsBuffer(values);
+      const value = part.resolveValue(values, options);
       this.valueIndex += length;
       return value;
     } else if (isChildPart(part)) {

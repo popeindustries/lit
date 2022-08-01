@@ -56,7 +56,7 @@ export class Template {
    * @param { TemplateStringsArray } strings
    */
   _parse(strings) {
-    /** @type { AttributePart | undefined } */
+    /** @type { AttributePart | CustomElementPart | undefined } */
     let attributePart;
     let isCustomElement = false;
     /** @type { typeof ATTRIBUTE | typeof TEXT | typeof COMMENT } */
