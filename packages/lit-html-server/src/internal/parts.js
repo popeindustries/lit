@@ -320,7 +320,7 @@ export class CustomElementPart extends AttributePart {
   }
 
   /**
-   * Retrieve resolved value given passed "value"
+   * Retrieve resolved value given passed "values"
    * @param { Array<unknown> } values
    * @param { InternalRenderOptions } options
    * @returns { unknown }

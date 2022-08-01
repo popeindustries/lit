@@ -16,12 +16,9 @@ export function getElementRenderer({ elementRenderers = [] }, tagName, ceClass =
     }
   }
 
-  return new ElementRenderer(tagName);
+  return new DefaultElementRenderer(tagName);
 }
 
-/**
- * @template { HTMLElement } [ElementType = HTMLElement]
- */
 export class ElementRenderer {
   /**
    * @param { typeof HTMLElement } ceClass
@@ -36,8 +33,8 @@ export class ElementRenderer {
    */
   constructor(tagName) {
     this.tagName = tagName;
-    const ceClass = customElements.get(tagName) ?? HTMLElement;
-    this.element = /** @type { ElementType } */ (/** @type { unknown } */ (new ceClass()));
+    /** @type { HTMLElement } */
+    this.element;
   }
 
   connectedCallback() {
@@ -96,5 +93,16 @@ export class ElementRenderer {
     }
 
     return innerHTML;
+  }
+}
+
+class DefaultElementRenderer extends ElementRenderer {
+  /**
+   * @param { string } tagName
+   */
+  constructor(tagName) {
+    super(tagName);
+    const ceClass = customElements.get(tagName) ?? HTMLElement;
+    this.element = /** @type { HTMLElement } */ (new ceClass());
   }
 }

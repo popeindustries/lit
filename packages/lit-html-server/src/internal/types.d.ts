@@ -96,13 +96,13 @@ declare type ElementRendererConstructor = (new (tagName: string) => ElementRende
  * Base class renderer for rendering custom elements.
  * Extend to handle custom render logic if your custom elements do not render to `innerHTML`
  */
-declare class ElementRenderer<ElementType extends HTMLElement = HTMLElement> {
+declare class ElementRenderer {
   /**
    * Should return true when given custom element class and/or tag name
    * should be handled by this renderer.
    */
   static matchesClass(ceClass: typeof HTMLElement, tagName: string): boolean;
-  element: ElementType;
+  element: HTMLElement;
   tagName: string;
   constructor(tagName: string);
   connectedCallback(): void;

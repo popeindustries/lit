@@ -28,6 +28,7 @@ export class CustomElement extends HTMLElement {
       this.negative = newValue === '';
     }
   }
+
   render() {
     return html`
       <p ?negative="${this.negative}">Hello! This component is ${this.negative ? 'negative' : 'positive'}</p>
@@ -35,9 +36,6 @@ export class CustomElement extends HTMLElement {
   }
 }
 
-/**
- * @extends { ElementRenderer<CustomElement> }
- */
 export class Renderer extends ElementRenderer {
   /**
    * @param { typeof HTMLElement } ceClass
@@ -45,6 +43,15 @@ export class Renderer extends ElementRenderer {
    */
   static matchesClass(ceClass, tagName) {
     return tagName === 'custom-element';
+  }
+
+  /**
+   * @param { string } tagName
+   */
+  constructor(tagName) {
+    super(tagName);
+    const ceClass = /** @type { CustomElementConstructor } */ (customElements.get(tagName));
+    this.element = /** @type { CustomElement } */ (new ceClass());
   }
 
   /**

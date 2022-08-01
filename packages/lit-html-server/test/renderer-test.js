@@ -144,7 +144,7 @@ describe('Render', () => {
     {
       title: 'falsey boolean attribute',
       template: h`<div ?a="${false}"></div>`,
-      result: '<!--lit-part X7msddNbKag=--><div ><!--lit-node 0--></div><!--/lit-part-->',
+      result: '<!--lit-part X7msddNbKag=--><div><!--lit-node 0--></div><!--/lit-part-->',
     },
     {
       title: 'element attribute',
