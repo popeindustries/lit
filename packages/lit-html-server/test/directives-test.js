@@ -9,7 +9,7 @@ import { classMap } from 'lit-html/directives/class-map.js';
 import { createAsyncIterable } from './utils.js';
 import { guard } from 'lit-html/directives/guard.js';
 import { ifDefined } from 'lit-html/directives/if-defined.js';
-import { rehydratable } from '../src/directives/rehydratable.js';
+import { hydratable } from '../src/directives/hydratable.js';
 import { repeat } from 'lit-html/directives/repeat.js';
 import { styleMap } from 'lit-html/directives/style-map.js';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
@@ -111,9 +111,9 @@ describe('directives', () => {
     });
   });
 
-  describe('rehydratable', () => {
+  describe('hydratable', () => {
     it('subtree with metadata', async () => {
-      const result = h`<div class="${'bye'}">${rehydratable(h`<span class="${'hi'}">hi</span>`)}</div>`;
+      const result = h`<div class="${'bye'}">${hydratable(h`<span class="${'hi'}">hi</span>`)}</div>`;
       assert.equal(
         await render(result),
         '<div class="bye"><!--lit-part rtM8orPci6o=--><span class="hi"><!--lit-node 0-->hi</span><!--/lit-part--></div>',

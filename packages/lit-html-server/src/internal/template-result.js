@@ -12,14 +12,14 @@ export class TemplateResult {
    * Constructor
    * @param { Template } template
    * @param { Array<unknown> } values
-   * @param { boolean } [rehydratable]
+   * @param { boolean } [hydratable]
    */
-  constructor(template, values, rehydratable = false) {
+  constructor(template, values, hydratable = false) {
     this.id = id++;
     this.index = 0;
     this.maxIndex = template.strings.length + template.parts.length - 1;
     this.metadata = Buffer.from(`<!--lit-part ${template.digest}-->`);
-    this.rehydratable = rehydratable;
+    this.hydratable = hydratable;
     this.template = template;
     this.valueIndex = 0;
     this.values = values;
@@ -35,7 +35,7 @@ export class TemplateResult {
     const isString = this.index % 2 === 0;
     const isFirstString = this.index === 0;
     const isLastString = this.index === this.maxIndex;
-    const withMetadata = options?.includeRehydrationMetadata;
+    const withMetadata = options?.includeHydrationMetadata;
 
     // Finished
     if (!isString && this.index >= this.maxIndex) {

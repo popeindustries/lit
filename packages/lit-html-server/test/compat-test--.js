@@ -136,7 +136,7 @@ describe.skip('Compatibility', () => {
     } else {
       it(fullTitle, async () => {
         const [h, l] = getTemplates(template);
-        const string = await renderToString(h, { includeRehydrationMetadata: true });
+        const string = await renderToString(h, { includeHydrationMetadata: true });
         const lit = renderLitTemplate(l);
         try {
           assert.equal(string, result);

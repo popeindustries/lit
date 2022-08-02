@@ -1,6 +1,6 @@
 import { Directive, DirectiveResult } from 'lit-html/directive.js';
 
-declare class RehydratableDirective extends Directive {
+declare class HydratableDirective extends Directive {
   /**
    * Server renders an html subtree with rehydration metadata.
    * On the client, pass the same `value: TemplateResult` to `hydrateOrRender()`
@@ -9,6 +9,6 @@ declare class RehydratableDirective extends Directive {
   render(value: TemplateResult | Promise<TemplateResult>): TemplateResult | Promise<TemplateResult>;
 }
 
-export function rehydratable(value: TemplateResult): DirectiveResult<typeof RehydratableDirective>;
+export function hydratable(value: TemplateResult): DirectiveResult<typeof HydratableDirective>;
 
-export type { RehydratableDirective };
+export type { HydratableDirective };

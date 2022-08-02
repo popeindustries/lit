@@ -3,7 +3,7 @@
  */
 declare type TemplateResult = {
   id: number;
-  rehydratable: boolean;
+  hydratable: boolean;
   template: Template;
   values: Array<unknown>;
   readChunk(options?: InternalRenderOptions): unknown;
@@ -123,7 +123,7 @@ declare type RenderOptions = {
 };
 
 declare type InternalRenderOptions = RenderOptions & {
-  includeRehydrationMetadata?: boolean;
+  includeHydrationMetadata?: boolean;
   hydrationRoot?: number;
 };
 

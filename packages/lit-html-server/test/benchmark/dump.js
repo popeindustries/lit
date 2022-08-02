@@ -3,7 +3,7 @@ import { html, renderToString } from '../../index.js';
 import everything from './the-everything-bagel-template.js';
 import { html as litHtml } from 'lit-html';
 import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
-import { rehydratable } from '../../directives/rehydratable.js';
+import { hydratable } from '../../directives/hydratable.js';
 
 const data = {
   title: 'title',
@@ -21,5 +21,5 @@ if (process.argv[2] === 'ssr') {
   );
 } else {
   customElements.define('custom-element', CustomElement);
-  renderToString(html`${rehydratable(everything(html, data))}`, { elementRenderers: [Renderer] }).then(console.log);
+  renderToString(html`${hydratable(everything(html, data))}`, { elementRenderers: [Renderer] }).then(console.log);
 }

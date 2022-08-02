@@ -17,12 +17,12 @@ describe('hydrate', () => {
     container.remove();
   });
 
-  for (let { title, template, result, skip } of only.length ? only : tests) {
+  for (let { title, template, metadata, result, skip } of only.length ? only : tests) {
     const fullTitle = `${title}`;
 
     if (skip) {
       it.skip(fullTitle);
-    } else {
+    } else if (metadata) {
       it(fullTitle, async () => {
         if (typeof template === 'function') {
           template = template();
@@ -30,8 +30,8 @@ describe('hydrate', () => {
         container.innerHTML = result;
         // Evaluate template with lit-html's `html` tag
         template = eval(template);
-        // Hydrate once, then render
         hydrateOrRender(template, container);
+        // Hydrate once, then render
         hydrateOrRender(template, container);
         const rendered = container.innerHTML.replace(/=""/g, '');
         if (rendered !== result) {
@@ -40,4 +40,17 @@ describe('hydrate', () => {
       });
     }
   }
+
+  it('hydration error clears nodes and renders', () => {
+    container.innerHTML = `<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part--><!--lit-part-->1<!--/lit-part--><!--lit-part-->2<!--/lit-part--><!--lit-part-->3<!--/lit-part--><!--/lit-part--></div><!--/lit-part-->`;
+    const template = html`<div>${[1, 2]}</div>`;
+    hydrateOrRender(template, container);
+    const rendered = container.innerHTML;
+    if (
+      !rendered.startsWith('<!----><div><!--?lit$') &&
+      !rendered.endsWith('--><!---->1<!----><!---->2<!----></div>')
+    ) {
+      throw Error(`unexpected rendered output: ${rendered}`);
+    }
+  });
 });

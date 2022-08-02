@@ -248,7 +248,7 @@ export class ChildPart {
     return resolveNodeValue(
       value,
       this.tagName,
-      RE_RAW_TEXT_ELEMENT.test(this.tagName) || !options.includeRehydrationMetadata ? false : true,
+      RE_RAW_TEXT_ELEMENT.test(this.tagName) || !options.includeHydrationMetadata ? false : true,
       true,
     );
   }
@@ -339,14 +339,14 @@ export class CustomElementPart extends AttributePart {
 
     const resolvedAttributes = Buffer.from(`${renderer.renderAttributes()}>`);
 
-    if (!options.includeRehydrationMetadata || renderer.element.hasAttribute('render:client')) {
+    if (!options.includeHydrationMetadata || renderer.element.hasAttribute('render:client')) {
       return [resolvedAttributes];
     }
 
     const resolvedContent = resolveNodeValue(
       renderer.render(),
       this.tagName,
-      options.includeRehydrationMetadata ?? false,
+      options.includeHydrationMetadata ?? false,
       false,
     );
 
@@ -377,7 +377,7 @@ export class MetadataPart {
    */
   resolveValue(options) {
     // Disable metadata if inside raw text node
-    return RE_RAW_TEXT_ELEMENT.test(this.tagName) || !options.includeRehydrationMetadata
+    return RE_RAW_TEXT_ELEMENT.test(this.tagName) || !options.includeHydrationMetadata
       ? EMPTY_STRING_BUFFER
       : this.value;
   }

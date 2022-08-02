@@ -1,6 +1,6 @@
 import { directive, Directive, PartType } from 'lit-html/directive.js';
 
-class RehydratableDirective extends Directive {
+class HydratableDirective extends Directive {
   /**
    * Constructor
    * @param { import('lit-html/directive.js').PartInfo } partInfo
@@ -14,24 +14,24 @@ class RehydratableDirective extends Directive {
   }
 
   /**
-   * Server renders an html subtree with rehydration metadata.
+   * Server renders an html subtree with hydration metadata.
    * On the client, pass the same `TemplateResult` resolved by `value` to `hydrateOrRender()`
-   * to rehydrate the server-rendered DOM into an active lit-html template.
+   * to hydrate the server-rendered DOM into an active lit-html template.
    * @param { TemplateResult | Promise<TemplateResult> } value
    */
   render(value) {
     if (isPromise(value)) {
       return value.then((result) => {
-        result.rehydratable = true;
+        result.hydratable = true;
         return result;
       });
     }
-    value.rehydratable = true;
+    value.hydratable = true;
     return value;
   }
 }
 
-export const rehydratable = directive(RehydratableDirective);
+export const hydratable = directive(HydratableDirective);
 
 /**
  * Determine if "promise" is a Promise instance

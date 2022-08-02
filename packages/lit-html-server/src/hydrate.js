@@ -1,3 +1,11 @@
+/**
+ * A modified version of `lit-html/experimental-hydrate.js` with the following changes:
+ * - allow multiple hydratable subtrees in same container
+ * - proxy subsequent calls to `hydrateOrRender` to lit-html's `render`
+ * - clear markup and perform clean render on rehydration error
+ * - ignore `<!--lit-node n-->` node-index validation
+ */
+
 import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/directive-helpers.js';
 import { noChange, render, _$LH } from 'lit-html';
 import { digestForTemplateStrings } from './internal/browser-digest.js';
@@ -12,31 +20,38 @@ const {
 } = _$LH;
 
 /**
- * Hydrate existing server-rendered markup.
+ * Hydrate or render existing server-rendered markup.
+ * Can be called multiple times, automatically hydrating on first call,
+ * and efficiently updating via `render` thereafter.
  * @param { unknown } value
  * @param { HTMLElement | DocumentFragment } container
  * @param { ClientRenderOptions } [options]
  */
 export function hydrateOrRender(value, container, options = {}) {
+  const partOwnerNode = options.renderBefore ?? container;
+
+  // @ts-expect-error - internal property
+  if (partOwnerNode['_$litPart$'] !== undefined) {
+    // Already hydrated, so render instead
+    render(value, container, options);
+    return;
+  }
+
+  /** @type { Comment | null } */
+  let openingComment = null;
+  /** @type { Comment | null } */
+  let closingComment = null;
+
   try {
-    const partOwnerNode = options.renderBefore ?? container;
-
-    // @ts-expect-error - internal property
-    if (partOwnerNode['_$litPart$'] !== undefined) {
-      // Already hydrated, so render instead
-      render(value, container, options);
-      return;
-    }
-
-    // Since `container` can have more than one rehydratable template,
-    // find nearest closing and opening *sibling* comments to isolate rehydratable elements.
-    // Start from last `container` child or `renderBefore` node if specified
+    // Since `container` can have more than one hydratable template,
+    // find nearest closing and opening *sibling* comments to isolate hydratable elements.
+    // Start from last `container` child or `renderBefore` node if specified.
     const startNode = /** @type { Node } */ (options.renderBefore ?? container.lastChild);
-    const [openingComment, closingComment] = findEnclosingCommentNodes(startNode);
+    [openingComment, closingComment] = findEnclosingCommentNodes(startNode);
 
     let active = false;
-    /** @param { Node } node */
-    const acceptFn = (node) => {
+    // Walk comment nodes, skipping those outside of our opening/closing comment tags
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_COMMENT, (node) => {
       if (node === closingComment) {
         active = false;
         return NodeFilter.FILTER_ACCEPT;
@@ -44,11 +59,8 @@ export function hydrateOrRender(value, container, options = {}) {
         active = true;
         return NodeFilter.FILTER_ACCEPT;
       }
-
       return NodeFilter.FILTER_SKIP;
-    };
-
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_COMMENT, acceptFn);
+    });
     /** @type { ClientChildPart | undefined } */
     let rootPart = undefined;
     /** @type { ClientChildPart | undefined } */
@@ -85,9 +97,23 @@ export function hydrateOrRender(value, container, options = {}) {
     // @ts-expect-error - internal property
     partOwnerNode['_$litPart$'] = rootPart;
   } catch (err) {
-    console.error(err);
-    throw err;
-    // TODO: remove elements and call render instead?
+    if (openingComment !== null && closingComment !== null) {
+      console.error(
+        `hydration failed due to the following error:\n  ${err}\nClearing nodes and performing clean render`,
+      );
+
+      /** @type { Node | null } */
+      let node = closingComment;
+      while (node && node !== openingComment) {
+        /** @type { Node | null } */
+        const previousSibling = node.previousSibling;
+        partOwnerNode.removeChild(node);
+        node = previousSibling;
+      }
+      partOwnerNode.removeChild(openingComment);
+    }
+
+    render(value, container, options);
   }
 }
 
@@ -96,29 +122,29 @@ export function hydrateOrRender(value, container, options = {}) {
  * @returns { [Comment, Comment] }
  */
 function findEnclosingCommentNodes(startNode) {
-  /** @type { Comment | undefined } */
-  let closingComment;
-  /** @type { Comment | undefined } */
-  let openingComment;
+  /** @type { Comment | null } */
+  let closingComment = null;
+  /** @type { Comment | null } */
+  let openingComment = null;
   /** @type { Node | null } */
-  let previous = startNode;
+  let node = startNode;
 
-  while (previous != null) {
+  while (node != null) {
     // Comment
-    if (previous.nodeType === 8) {
-      const comment = /** @type { Comment } */ (previous);
+    if (node.nodeType === 8) {
+      const comment = /** @type { Comment } */ (node);
 
-      if (closingComment === undefined) {
+      if (closingComment === null && comment.data === '/lit-part') {
         closingComment = comment;
-      } else {
+      } else if (comment.data.startsWith('lit-part')) {
         openingComment = comment;
         break;
       }
     }
-    previous = previous.previousSibling;
+    node = node.previousSibling;
   }
 
-  if (openingComment === undefined || closingComment === undefined) {
+  if (openingComment === null || closingComment === null) {
     throw Error(`unable to find enclosing comment nodes in ${startNode.parentElement}`);
   }
 
@@ -126,7 +152,6 @@ function findEnclosingCommentNodes(startNode) {
 }
 
 /**
- *
  * @param { unknown } value
  * @param { Comment } marker
  * @param { Array<ClientChildPartState> } stack
@@ -153,7 +178,7 @@ function openChildPart(value, marker, stack, options) {
       if (result.done) {
         value = undefined;
         state.done = true;
-        throw Error('Unhandled shorter than expected iterable');
+        throw Error('shorter than expected iterable');
       } else {
         value = result.value;
       }
@@ -176,7 +201,7 @@ function openChildPart(value, marker, stack, options) {
     const markerWithDigest = `lit-part ${digestForTemplateStrings(value.strings)}`;
 
     if (marker.data !== markerWithDigest) {
-      throw Error('Hydration value mismatch: Unexpected TemplateResult rendered to part');
+      throw Error('unexpected TemplateResult rendered to part');
     }
 
     // @ts-expect-error - internal method
@@ -210,7 +235,6 @@ function openChildPart(value, marker, stack, options) {
 }
 
 /**
- *
  * @param { Comment } marker
  * @param { ClientChildPart | undefined } part
  * @param { Array<ClientChildPartState> } stack
@@ -239,7 +263,6 @@ function closeChildPart(marker, part, stack) {
 }
 
 /**
- *
  * @param { Comment } comment
  * @param { Array<ClientChildPartState> } stack
  * @param { ClientRenderOptions } [options]

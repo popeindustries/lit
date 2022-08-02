@@ -2,7 +2,7 @@ import { CustomElement, Renderer } from './custom-element.js';
 import { html, renderToStream } from '../../index.js';
 import everything from './the-everything-bagel-template.js';
 import http from 'http';
-import { rehydratable } from '../../directives/rehydratable.js';
+import { hydratable } from '../../directives/hydratable.js';
 
 customElements.define('custom-element', CustomElement);
 
@@ -19,7 +19,7 @@ function template(data) {
         <title>${data.title}</title>
       </head>
       <body>
-        ${rehydratable(everything(html, data))}
+        ${hydratable(everything(html, data))}
       </body>
     </html>
   `;

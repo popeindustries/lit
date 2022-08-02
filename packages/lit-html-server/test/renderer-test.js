@@ -11,7 +11,7 @@ describe.only('Render', () => {
 
   const only = tests.filter(({ only }) => only);
 
-  for (let { title, template, result, skip } of only.length ? only : tests) {
+  for (let { title, template, metadata, result, skip } of only.length ? only : tests) {
     const fullTitle = `${title}`;
 
     if (skip) {
@@ -23,8 +23,8 @@ describe.only('Render', () => {
         }
         // Evaluate template with lit-html-server's `html` tag
         template = eval(template);
-        const string = await renderToString(template, { includeRehydrationMetadata: true });
-        const stream = await streamAsPromise(renderToStream(template, { includeRehydrationMetadata: true }));
+        const string = await renderToString(template, { includeHydrationMetadata: metadata });
+        const stream = await streamAsPromise(renderToStream(template, { includeHydrationMetadata: metadata }));
         assert.equal(string, stream);
         assert.equal(string, result);
       });
