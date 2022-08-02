@@ -338,6 +338,11 @@ export class CustomElementPart extends AttributePart {
     }
 
     const resolvedAttributes = Buffer.from(`${renderer.renderAttributes()}>`);
+
+    if (!options.includeRehydrationMetadata || renderer.element.hasAttribute('render:client')) {
+      return [resolvedAttributes];
+    }
+
     const resolvedContent = resolveNodeValue(
       renderer.render(),
       this.tagName,

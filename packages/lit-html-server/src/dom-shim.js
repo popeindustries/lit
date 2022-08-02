@@ -30,6 +30,10 @@ if (typeof globalThis.window === 'undefined') {
     setAttribute(name, value) {
       this.__attributes__[name] = String(value);
     }
+
+    hasAttribute(name) {
+      return name in this.__attributes__;
+    }
   }
 
   class HTMLElement extends Element {}

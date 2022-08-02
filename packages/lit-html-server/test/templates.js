@@ -198,7 +198,6 @@ export const tests = [
       '<!--lit-part mcimSba/om0=--><my-el2 a="a"><!--lit-node 0--><!--lit-part--><!--/lit-part--></my-el2><!--/lit-part-->',
   },
   {
-    only: true,
     title: 'custom element with innerHTML set during construction',
     template: () => {
       class MyEl extends HTMLElement {
@@ -242,5 +241,20 @@ export const tests = [
     },
     result:
       '<!--lit-part Ph5bNbG/om0=--><my-el5><!--lit-node 0--><!--lit-part--><template shadowroot="open">text</template><!--/lit-part--></my-el5><!--/lit-part-->',
+  },
+  {
+    title: 'custom element with "render:client" attribute',
+    template: () => {
+      class MyEl extends HTMLElement {
+        constructor() {
+          super();
+          this.innerHTML = 'text';
+        }
+      }
+      customElements.define('my-el6', MyEl);
+      return 'html`<my-el6 ?render:client=${true}><span slot="my-text">some text</span></my-el6>`';
+    },
+    result:
+      '<!--lit-part l8hegyhGWbE=--><my-el6 render:client><span slot="my-text">some text</span></my-el6><!--/lit-part-->',
   },
 ];

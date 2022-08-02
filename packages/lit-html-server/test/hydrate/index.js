@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { html, render } from 'lit-html';
-import { hydrateOrRender } from '@popeindustries/lit-html-server/hydrate.js';
+import { hydrateOrRender } from '../../src/hydrate.js';
 import { tests } from '../templates.js';
 
 describe('hydrate', () => {
