@@ -116,7 +116,7 @@ describe('directives', () => {
       const result = h`<div class="${'bye'}">${hydratable(h`<span class="${'hi'}">hi</span>`)}</div>`;
       assert.equal(
         await render(result),
-        '<div class="bye"><!--lit-part rtM8orPci6o=--><span class="hi"><!--lit-node 0-->hi</span><!--/lit-part--></div>',
+        '<div class="bye"><!--lit-child rtM8orPci6o=--><span class="hi"><!--lit-attr 0-->hi</span><!--/lit-child--></div>',
       );
     });
   });

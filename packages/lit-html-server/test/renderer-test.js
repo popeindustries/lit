@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { html, renderToStream, renderToString } from '../src/index.js';
-import { createAsyncIterable, streamAsPromise } from './utils.js';
 import assert from 'node:assert';
+import { streamAsPromise } from './utils.js';
 import { tests } from './tests.js';
 
 describe.only('Render', () => {
@@ -18,11 +18,7 @@ describe.only('Render', () => {
       it.skip(fullTitle);
     } else {
       it(fullTitle, async () => {
-        if (typeof template === 'function') {
-          template = template(html);
-        }
-        // Evaluate template with lit-html-server's `html` tag
-        template = eval(template);
+        template = template(html);
         const string = await renderToString(template, { includeHydrationMetadata: metadata });
         const stream = await streamAsPromise(renderToStream(template, { includeHydrationMetadata: metadata }));
         assert.equal(string, stream);

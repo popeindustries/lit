@@ -1,5 +1,5 @@
 import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart } from './parts.js';
-import { META_CLOSE } from './consts.js';
+import { META_CHILD_CLOSE } from './consts.js';
 import { Buffer } from '#buffer';
 
 let id = 0;
@@ -12,14 +12,15 @@ export class TemplateResult {
    * Constructor
    * @param { Template } template
    * @param { Array<unknown> } values
+   * @param { boolean } [root]
    * @param { boolean } [hydratable]
    */
-  constructor(template, values, hydratable = false) {
+  constructor(template, values, root = false, hydratable = false) {
+    this.hydratable = hydratable;
     this.id = id++;
     this.index = 0;
+    this.root = root;
     this.maxIndex = template.strings.length + template.parts.length - 1;
-    this.metadata = Buffer.from(`<!--lit-part ${template.digest}-->`);
-    this.hydratable = hydratable;
     this.template = template;
     this.valueIndex = 0;
     this.values = values;
@@ -52,10 +53,13 @@ export class TemplateResult {
 
       if (withMetadata) {
         if (isFirstString) {
-          string = Buffer.concat([this.metadata, string]);
+          string = Buffer.concat([
+            Buffer.from(`<!--lit${this.root ? '' : '-child'} ${this.template.digest}-->`),
+            string,
+          ]);
         }
         if (isLastString) {
-          string = Buffer.concat([string, META_CLOSE]);
+          string = Buffer.concat([string, META_CHILD_CLOSE]);
         }
       }
 

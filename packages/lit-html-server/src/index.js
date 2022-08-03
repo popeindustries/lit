@@ -82,8 +82,11 @@ function renderToBuffer(result, options) {
  * @returns { TemplateResult }
  */
 function getRenderResult(result) {
-  // @ts-ignore
-  return !isTemplateResult(result) ? DEFAULT_TEMPLATE_FN(result) : result;
+  const templateResult = !isTemplateResult(result)
+    ? DEFAULT_TEMPLATE_FN(result)
+    : /** @type { TemplateResult } */ (result);
+  templateResult.root = true;
+  return templateResult;
 }
 
 export { ElementRenderer, html, renderToBuffer, renderToStream, renderToString, html as svg };

@@ -88,12 +88,12 @@ export class ElementRenderer {
   }
 
   render() {
-    const { innerHTML, render, shadowRoot } = this.element;
+    const { innerHTML, shadowRoot } = this.element;
     /** @type { unknown } */
     let content = shadowRoot !== null ? shadowRoot.innerHTML : innerHTML;
 
-    if (content === '' && render !== undefined) {
-      content = render();
+    if (content === '' && this.element.render !== undefined) {
+      content = this.element.render();
     }
 
     if (shadowRoot !== null) {

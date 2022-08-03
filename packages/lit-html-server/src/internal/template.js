@@ -148,7 +148,7 @@ export class Template {
             } else if (attributePart !== undefined) {
               // Insert metadata for attributes after close of opening tag
               this.strings.push(Buffer.from('>'));
-              this.parts.push(new MetadataPart(tagName, Buffer.from(`<!--lit-node ${nodeIndex}-->`)));
+              this.parts.push(new MetadataPart(tagName, Buffer.from(`<!--lit-attr-->`)));
               string = string.slice(lastIndex);
               lastIndex = 0;
             }

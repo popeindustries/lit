@@ -3,7 +3,7 @@
  * - allow multiple hydratable subtrees in same container
  * - proxy subsequent calls to `hydrateOrRender` to lit-html's `render`
  * - clear markup and perform clean render on rehydration error
- * - ignore `<!--lit-node n-->` node-index validation
+ * - ignore `<!--lit-attr n-->` node-index validation
  */
 
 import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/directive-helpers.js';
@@ -74,15 +74,15 @@ export function hydrateOrRender(value, container, options = {}) {
     while ((marker = walker.nextNode()) !== null) {
       const markerText = marker.data;
 
-      if (markerText.startsWith('lit-part')) {
+      if (markerText.startsWith('lit-child')) {
         if (stack.length === 0 && rootPart !== undefined) {
           throw Error('must be only one root part per container');
         }
         currentChildPart = openChildPart(value, marker, stack, options);
         rootPart ??= currentChildPart;
-      } else if (markerText.startsWith('lit-node')) {
+      } else if (markerText.startsWith('lit-attr')) {
         createAttributeParts(marker, stack, options);
-      } else if (markerText.startsWith('/lit-part')) {
+      } else if (markerText.startsWith('/lit-child')) {
         if (stack.length === 1 && currentChildPart !== rootPart) {
           throw Error('internal error');
         }
@@ -133,9 +133,9 @@ function findEnclosingCommentNodes(startNode) {
     if (node.nodeType === 8) {
       const comment = /** @type { Comment } */ (node);
 
-      if (closingComment === null && comment.data === '/lit-part') {
+      if (closingComment === null && comment.data === '/lit-child') {
         closingComment = comment;
-      } else if (comment.data.startsWith('lit-part')) {
+      } else if (comment.data.startsWith('lit-child')) {
         openingComment = comment;
         break;
       }
@@ -189,7 +189,7 @@ function openChildPart(value, marker, stack, options) {
   }
 
   value = resolveDirective(part, value);
-
+  console.log(value, isPrimitive(value));
   if (value === noChange) {
     stack.push({ part, type: 'leaf' });
   } else if (isPrimitive(value)) {
@@ -197,7 +197,7 @@ function openChildPart(value, marker, stack, options) {
     stack.push({ part, type: 'leaf' });
     // TODO: primitive instead of TemplateResult. Error?
   } else if (isTemplateResult(value)) {
-    const markerWithDigest = `lit-part ${digestForTemplateStrings(value.strings)}`;
+    const markerWithDigest = `lit-child ${digestForTemplateStrings(value.strings)}`;
 
     if (marker.data !== markerWithDigest) {
       throw Error('unexpected TemplateResult rendered to part');

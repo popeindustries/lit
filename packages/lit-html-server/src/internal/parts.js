@@ -1,4 +1,4 @@
-import { EMPTY_STRING_BUFFER, META_CLOSE, META_OPEN } from './consts.js';
+import { EMPTY_STRING_BUFFER, META_ATTR, META_CHILD_CLOSE, META_CHILD_OPEN } from './consts.js';
 import { isArray, isAsyncIterator, isBuffer, isObject, isPrimitive, isPromise, isSyncIterator } from './is.js';
 import { isDirective, isTemplateResult } from './is.js';
 import { noChange, nothing } from 'lit-html';
@@ -272,7 +272,6 @@ export class CustomElementPart extends AttributePart {
     this.nodeIndex = nodeIndex;
     this.tagName = tagName;
     this.type = partType.CUSTOMELEMENT;
-    this._metadata = new MetadataPart(tagName, Buffer.from(`<!--lit-node ${nodeIndex}-->`));
   }
 
   /**
@@ -287,6 +286,8 @@ export class CustomElementPart extends AttributePart {
     renderer.connectedCallback();
 
     let valuesIndex = 0;
+
+    renderer.setAttribute('hydrate:defer', '');
 
     for (let data of this._parts) {
       if (data.value !== undefined) {
@@ -341,10 +342,13 @@ export class CustomElementPart extends AttributePart {
     /** @type { Array<unknown> } */
     const result = [resolvedAttributes];
 
+    // Only render content if hydrating and server rendering hasn't been disabled via `render:client` attribute
     if (options.includeHydrationMetadata && !renderer.element.hasAttribute('render:client')) {
-      result.push(this._metadata.resolveValue(options));
+      result.push(META_ATTR);
 
       const renderedContent = renderer.render();
+
+      // TODO: throw if not TemplateResult?
 
       if (renderedContent) {
         result.push(resolveNodeValue(renderedContent, this.tagName, options.includeHydrationMetadata ?? false, false));
@@ -480,7 +484,7 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
   }
 
   if (isBuffer(value)) {
-    return withMetadata ? [META_OPEN, value, META_CLOSE] : value;
+    return withMetadata ? [META_CHILD_OPEN, value, META_CHILD_CLOSE] : value;
   } else if (isTemplateResult(value)) {
     return value;
   } else if (isPromise(value)) {
@@ -497,7 +501,7 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
       value = Array.from(value);
     }
     /** @type { Array<unknown> } */
-    const collection = withMetadata ? [META_OPEN] : [];
+    const collection = withMetadata ? [META_CHILD_OPEN] : [];
     for (let val of /** @type { Array<unknown> } */ (value)) {
       val = resolveNodeValue(val, tagName, withMetadata, escaped);
       // Flatten
@@ -508,7 +512,7 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
       }
     }
     if (withMetadata) {
-      collection.push(META_CLOSE);
+      collection.push(META_CHILD_CLOSE);
     }
     return collection;
   } else if (isAsyncIterator(value)) {
