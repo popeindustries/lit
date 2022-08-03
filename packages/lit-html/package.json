@@ -1,7 +1,7 @@
 {
-  "name": "@popeindustries/lit-html-server",
-  "version": "4.0.0-beta.1",
-  "description": "Render lit-html templates on the server",
+  "name": "@popeindustries/lit-html",
+  "version": "5.0.0-beta.1",
+  "description": "Seamlessly render lit-html templates on the server and in the browser",
   "author": "Alexander Pope <alex@pope.industries>",
   "keywords": [
     "html template",
@@ -23,24 +23,6 @@
     "./hydrate.js": "./hydrate.js",
     "./directives/*": "./directives/*"
   },
-  "imports": {
-    "#buffer": {
-      "browser": "./src/internal/browser-buffer.js",
-      "node": "./src/internal/buffer.js"
-    },
-    "#digest": {
-      "browser": "./src/internal/browser-digest.js",
-      "node": "./src/internal/digest.js"
-    },
-    "#stream": {
-      "browser": "./src/internal/browser-stream.js",
-      "node": "./src/internal/stream.js"
-    },
-    "#template-renderer": {
-      "browser": "./src/internal/browser-stream-template-renderer.js",
-      "node": "./src/internal/node-stream-template-renderer.js"
-    }
-  },
   "files": [
     "directives",
     "*.d.ts",
@@ -53,6 +35,7 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
+    "@popeindustries/lit-html-server": "workspace:*",
     "lit-html": "^2.2.7"
   },
   "devDependencies": {
@@ -63,9 +46,7 @@
   "scripts": {
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f",
-    "perf": "node test/benchmark/perf.js",
-    "test": "pnpm run build && pnpm run lint && pnpm run test:unit && pnpm run test:browser",
-    "test:unit": "NODE_ENV=test mocha --require './src/dom-shim.js' --reporter spec --timeout 2000 'test/*-test.js'",
+    "test": "pnpm run build && pnpm run lint && pnpm run test:browser",
     "test:browser": "node ./test/browser/cli.js"
   }
 }

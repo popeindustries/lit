@@ -2,7 +2,7 @@
 import { html, renderToStream, renderToString } from '../src/index.js';
 import { createAsyncIterable, streamAsPromise } from './utils.js';
 import assert from 'node:assert';
-import { tests } from './templates.js';
+import { tests } from './tests.js';
 
 describe.only('Render', () => {
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe.only('Render', () => {
     } else {
       it(fullTitle, async () => {
         if (typeof template === 'function') {
-          template = template();
+          template = template(html);
         }
         // Evaluate template with lit-html-server's `html` tag
         template = eval(template);

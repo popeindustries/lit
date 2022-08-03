@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { html, render } from 'lit-html';
 import { hydrateOrRender } from '../../src/hydrate.js';
-import { tests } from '../templates.js';
+import { tests } from '../tests.js';
 
 describe('hydrate', () => {
   const only = tests.filter(({ only }) => only);
@@ -25,7 +25,7 @@ describe('hydrate', () => {
     } else if (metadata) {
       it(fullTitle, async () => {
         if (typeof template === 'function') {
-          template = template();
+          template = template(html);
         }
         container.innerHTML = result;
         // Evaluate template with lit-html's `html` tag
@@ -41,7 +41,7 @@ describe('hydrate', () => {
     }
   }
 
-  it('hydration error clears nodes and renders', () => {
+  it.skip('hydration error clears nodes and renders', () => {
     container.innerHTML = `<!--lit-part AEmR7W+R0Ak=--><div><!--lit-part--><!--lit-part-->1<!--/lit-part--><!--lit-part-->2<!--/lit-part--><!--lit-part-->3<!--/lit-part--><!--/lit-part--></div><!--/lit-part-->`;
     const template = html`<div>${[1, 2]}</div>`;
     hydrateOrRender(template, container);

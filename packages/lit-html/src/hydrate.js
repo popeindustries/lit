@@ -8,7 +8,6 @@
 
 import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/directive-helpers.js';
 import { noChange, render, _$LH } from 'lit-html';
-import { digestForTemplateStrings } from './internal/browser-digest.js';
 import { PartType } from 'lit-html/directive.js';
 
 const {
@@ -158,7 +157,6 @@ function findEnclosingCommentNodes(startNode) {
  * @param { ClientRenderOptions } [options]
  */
 function openChildPart(value, marker, stack, options) {
-  console.log({ value, marker: marker.data });
   let part;
 
   if (stack.length === 0) {
@@ -323,7 +321,23 @@ function createAttributeParts(comment, stack, options) {
       state.templatePartIndex++;
     }
   } else {
-    console.log({ state, node });
     throw Error('internal error');
   }
+}
+
+/**
+ * Generate hash from template "strings".
+ * @see https://github.com/lit/lit/blob/72877fd1de43ccdd579778d5df407e960cb64b03/packages/lit-html/src/experimental-hydrate.ts#L423
+ * @param { TemplateStringsArray } strings
+ */
+function digestForTemplateStrings(strings) {
+  const digestSize = 2;
+  const hashes = new Uint32Array(digestSize).fill(5381);
+
+  for (const s of strings) {
+    for (let i = 0; i < s.length; i++) {
+      hashes[i % digestSize] = (hashes[i % digestSize] * 33) ^ s.charCodeAt(i);
+    }
+  }
+  return btoa(String.fromCharCode(...new Uint8Array(hashes.buffer)));
 }

@@ -338,19 +338,20 @@ export class CustomElementPart extends AttributePart {
     }
 
     const resolvedAttributes = Buffer.from(`${renderer.renderAttributes()}>`);
+    /** @type { Array<unknown> } */
+    const result = [resolvedAttributes];
 
-    if (!options.includeHydrationMetadata || renderer.element.hasAttribute('render:client')) {
-      return [resolvedAttributes];
+    if (options.includeHydrationMetadata && !renderer.element.hasAttribute('render:client')) {
+      result.push(this._metadata.resolveValue(options));
+
+      const renderedContent = renderer.render();
+
+      if (renderedContent) {
+        result.push(resolveNodeValue(renderedContent, this.tagName, options.includeHydrationMetadata ?? false, false));
+      }
     }
 
-    const resolvedContent = resolveNodeValue(
-      renderer.render(),
-      this.tagName,
-      options.includeHydrationMetadata ?? false,
-      false,
-    );
-
-    return [resolvedAttributes, this._metadata.resolveValue(options), resolvedContent];
+    return result;
   }
 }
 

@@ -1,6 +1,5 @@
 import { AttributePart, ChildPart, CustomElementPart, getAttributeTypeFromName, MetadataPart } from './parts.js';
 import { Buffer } from '#buffer';
-import { EMPTY_STRING_BUFFER } from './consts.js';
 import { digestForTemplateStrings } from '#digest';
 
 // https://html.spec.whatwg.org/multipage/scripting.html#valid-custom-element-name

@@ -1,4 +1,6 @@
 import { escape } from './escape.js';
+import { html } from '../index.js';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 
 /**
  * @param { RenderOptions } options
@@ -33,7 +35,7 @@ export class ElementRenderer {
    */
   constructor(tagName) {
     this.tagName = tagName;
-    /** @type { HTMLElement } */
+    /** @type { HTMLElement & { render?(): unknown } } */
     this.element;
   }
 
@@ -86,13 +88,19 @@ export class ElementRenderer {
   }
 
   render() {
-    const { innerHTML, shadowRoot } = this.element;
+    const { innerHTML, render, shadowRoot } = this.element;
+    /** @type { unknown } */
+    let content = shadowRoot !== null ? shadowRoot.innerHTML : innerHTML;
 
-    if (shadowRoot !== null) {
-      return `<template shadowroot="${shadowRoot.mode}">${shadowRoot.innerHTML}</template>`;
+    if (content === '' && render !== undefined) {
+      content = render();
     }
 
-    return innerHTML;
+    if (shadowRoot !== null) {
+      return [`<template shadowroot="${shadowRoot.mode}">`, content, '</template>'];
+    }
+
+    return content;
   }
 }
 
