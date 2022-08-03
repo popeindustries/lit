@@ -134,9 +134,9 @@ function findEnclosingCommentNodes(startNode) {
     if (node.nodeType === 8) {
       const comment = /** @type { Comment } */ (node);
 
-      if (closingComment === null && comment.data === '/lit-child') {
+      if (closingComment === null && comment.data === '/lit') {
         closingComment = comment;
-      } else if (comment.data.startsWith('lit-child')) {
+      } else if (comment.data.startsWith('lit ')) {
         openingComment = comment;
         break;
       }

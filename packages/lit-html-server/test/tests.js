@@ -317,6 +317,6 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit-child PIqcLvCjzXU=--><my-el7 hydrate:defer a><!--lit-attr 0--><!--lit-ce 0--><!--lit-child Zzpy/eJ8XLk=--><div a><!--lit-attr 0-->my <my-el8 hydrate:defer><!--lit-attr 1--><!--lit-ce 1--><!--lit-child kcY7myOR0f4=--><div>text <!--lit-child-->has &quot;a&quot;<!--/lit-child--></div><!--/lit-child--><!--/lit-ce 1--></my-el8></div><!--/lit-child--><!--/lit-ce 0--></my-el7><!--/lit-child-->',
+      '<!--lit PIqcLvCjzXU=--><my-el7 hydrate:defer a><!--lit-attr--><!--lit Zzpy/eJ8XLk=--><div a><!--lit-attr-->my <my-el8 hydrate:defer><!--lit-attr--><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></my-el8></div><!--/lit--></my-el7><!--/lit-->',
   },
 ];

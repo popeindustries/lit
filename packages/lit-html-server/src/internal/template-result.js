@@ -1,5 +1,5 @@
 import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart } from './parts.js';
-import { META_CHILD_CLOSE } from './consts.js';
+import { META_CHILD_CLOSE, META_CLOSE } from './consts.js';
 import { Buffer } from '#buffer';
 
 let id = 0;
@@ -59,7 +59,7 @@ export class TemplateResult {
           ]);
         }
         if (isLastString) {
-          string = Buffer.concat([string, META_CHILD_CLOSE]);
+          string = Buffer.concat([string, this.root ? META_CLOSE : META_CHILD_CLOSE]);
         }
       }
 

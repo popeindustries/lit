@@ -88,19 +88,17 @@ export class ElementRenderer {
   }
 
   render() {
-    const { innerHTML, shadowRoot } = this.element;
-    /** @type { unknown } */
-    let content = shadowRoot !== null ? shadowRoot.innerHTML : innerHTML;
+    const { shadowRoot } = this.element;
 
-    if (content === '' && this.element.render !== undefined) {
-      content = this.element.render();
+    if (this.element.render !== undefined) {
+      const content = this.element.render();
+      return shadowRoot !== null ? html`<template shadowroot="open">${content}</template>` : content;
     }
 
-    if (shadowRoot !== null) {
-      return [`<template shadowroot="${shadowRoot.mode}">`, content, '</template>'];
-    }
+    /** @type { string } */
+    const content = shadowRoot?.innerHTML ?? this.element.innerHTML;
 
-    return content;
+    return unsafeHTML(shadowRoot !== null ? `<template shadowroot="open">${content}</template>` : content);
   }
 }
 

@@ -348,11 +348,14 @@ export class CustomElementPart extends AttributePart {
 
       const renderedContent = renderer.render();
 
-      // TODO: throw if not TemplateResult?
-
-      if (renderedContent) {
-        result.push(resolveNodeValue(renderedContent, this.tagName, options.includeHydrationMetadata ?? false, false));
+      if (!isTemplateResult(renderedContent)) {
+        throw Error(
+          `expected TemplateResult from call to "${this.tagName}" render(), but recieved: ${renderedContent}`,
+        );
       }
+
+      renderedContent.root = true;
+      result.push(resolveNodeValue(renderedContent, this.tagName, options.includeHydrationMetadata ?? false));
     }
 
     return result;
@@ -492,7 +495,7 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
     // or we are not generating hydratable markup
     if (!valueIsDirective && withMetadata) {
       throw Error(
-        `lit-html does not support interpolation of Promises, and these will not be rendered correctly in the browser. Use the "until" directive instead.`,
+        `expected TemplateResult from call to "${this.tagName}" render(), but recieved: ${renderedContent}``lit-html does not support interpolation of Promises, and these will not be rendered correctly in the browser. Use the "until" directive instead.`,
       );
     }
     return value.then((value) => resolveNodeValue(value, tagName, withMetadata, escaped));
@@ -520,12 +523,14 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
     // or we are not generating hydratable markup
     if (!valueIsDirective && withMetadata) {
       throw Error(
-        `lit-html does not support interpolation of AsyncIterators, and these will not be rendered correctly in the browser. Use the "async-*" directives instead.`,
+        `expected TemplateResult from call to "${this.tagName}" render(), but recieved: ${renderedContent}``lit-html does not support interpolation of AsyncIterators, and these will not be rendered correctly in the browser. Use the "async-*" directives instead.`,
       );
     }
     return resolveAsyncIteratorValue(value, tagName, withMetadata, escaped);
   } else {
-    throw Error(`unknown NodePart value: ${value}`);
+    throw Error(
+      `expected TemplateResult from call to "${this.tagName}" render(), but recieved: ${renderedContent}``unknown NodePart value: ${value}`,
+    );
   }
 }
 
