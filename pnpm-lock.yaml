@@ -52,6 +52,7 @@ importers:
   packages/lit-html-server:
     specifiers:
       '@lit-labs/ssr': 2.2.2
+      '@popeindustries/lit-html': workspace:*
       autocannon: ^7.9.0
       lit-html: ^2.2.7
       send: ^0.18.0
@@ -59,6 +60,7 @@ importers:
       lit-html: 2.2.7
     devDependencies:
       '@lit-labs/ssr': 2.2.2
+      '@popeindustries/lit-html': link:../lit-html
       autocannon: 7.9.0
       send: 0.18.0
 

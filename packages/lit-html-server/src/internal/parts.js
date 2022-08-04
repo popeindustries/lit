@@ -495,7 +495,7 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
     // or we are not generating hydratable markup
     if (!valueIsDirective && withMetadata) {
       throw Error(
-        `expected TemplateResult from call to "${this.tagName}" render(), but recieved: ${renderedContent}``lit-html does not support interpolation of Promises, and these will not be rendered correctly in the browser. Use the "until" directive instead.`,
+        `lit-html does not support interpolation of Promises, and these will not be rendered correctly in the browser. Use the "until" directive instead.`,
       );
     }
     return value.then((value) => resolveNodeValue(value, tagName, withMetadata, escaped));
@@ -523,14 +523,12 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
     // or we are not generating hydratable markup
     if (!valueIsDirective && withMetadata) {
       throw Error(
-        `expected TemplateResult from call to "${this.tagName}" render(), but recieved: ${renderedContent}``lit-html does not support interpolation of AsyncIterators, and these will not be rendered correctly in the browser. Use the "async-*" directives instead.`,
+        `lit-html does not support interpolation of AsyncIterators, and these will not be rendered correctly in the browser. Use the "async-*" directives instead.`,
       );
     }
     return resolveAsyncIteratorValue(value, tagName, withMetadata, escaped);
   } else {
-    throw Error(
-      `expected TemplateResult from call to "${this.tagName}" render(), but recieved: ${renderedContent}``unknown NodePart value: ${value}`,
-    );
+    throw Error(`unknown NodePart value: ${value}`);
   }
 }
 

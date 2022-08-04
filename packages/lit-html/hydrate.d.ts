@@ -1,7 +1,16 @@
-declare type ClientRenderOptions = Partial<import('lit-html').RenderOptions>;
-declare type ClientChildPart = InstanceType<typeof import('lit-html')['_$LH']['_ChildPart']>;
+/**
+ * Hydrate existing server-rendered markup.
+ */
+export function hydrateOrRender(
+  value: unknown,
+  container: HTMLElement | DocumentFragment,
+  options?: ClientRenderOptions,
+): void;
+
 declare type ClientTemplateInstance = InstanceType<typeof import('lit-html')['_$LH']['_TemplateInstance']>;
-declare type ClientChildPartState =
+export type ClientRenderOptions = Partial<import('lit-html').RenderOptions>;
+export type ClientChildPart = InstanceType<typeof import('lit-html')['_$LH']['_ChildPart']>;
+export type ClientChildPartState =
   | {
       type: 'leaf';
       part: ClientChildPart;

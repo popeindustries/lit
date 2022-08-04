@@ -35,7 +35,7 @@ export class ElementRenderer {
    */
   constructor(tagName) {
     this.tagName = tagName;
-    /** @type { HTMLElement & { render?(): unknown } } */
+    /** @type { HTMLElement & { render?(): TemplateResult } } */
     this.element;
   }
 
@@ -87,6 +87,9 @@ export class ElementRenderer {
     return attributes;
   }
 
+  /**
+   * @returns { TemplateResult | null }
+   */
   render() {
     const { shadowRoot } = this.element;
 
@@ -95,10 +98,7 @@ export class ElementRenderer {
       return shadowRoot !== null ? html`<template shadowroot="open">${content}</template>` : content;
     }
 
-    /** @type { string } */
-    const content = shadowRoot?.innerHTML ?? this.element.innerHTML;
-
-    return unsafeHTML(shadowRoot !== null ? `<template shadowroot="open">${content}</template>` : content);
+    return null;
   }
 }
 

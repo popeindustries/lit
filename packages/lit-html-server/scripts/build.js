@@ -14,17 +14,6 @@ await esbuild.build({
 
 await esbuild.build({
   bundle: true,
-  entryPoints: ['./src/hydrate.js'],
-  external: ['lit-html', 'lit-html/*'],
-  format: 'esm',
-  format: 'esm',
-  target: 'es2020',
-  platform: 'browser',
-  outfile: 'hydrate.js',
-});
-
-await esbuild.build({
-  bundle: true,
   entryPoints: ['./src/index.js'],
   external: ['lit-html', 'lit-html/*'],
   format: 'esm',
@@ -54,15 +43,8 @@ await esbuild.build({
 const types = fs
   .readFileSync(path.resolve('src/internal/types.d.ts'), 'utf8')
   .replace(/(declare) (interface|type|enum|namespace|function|class)/g, 'export $2');
-const typesHydrate = fs
-  .readFileSync(path.resolve('src/internal/types-hydrate.d.ts'), 'utf8')
-  .replace(/(declare) (interface|type|enum|namespace|function|class)/g, 'export $2');
 
 fs.writeFileSync(path.resolve('index.d.ts'), `${types}\n${fs.readFileSync(path.resolve('src/index.d.ts'), 'utf8')}`);
-fs.writeFileSync(
-  path.resolve('hydrate.d.ts'),
-  `${typesHydrate}\n${fs.readFileSync(path.resolve('src/hydrate.d.ts'), 'utf8')}`,
-);
 
 fs.copyFileSync(path.resolve('src/dom-shim.js'), path.resolve('dom-shim.js'));
 

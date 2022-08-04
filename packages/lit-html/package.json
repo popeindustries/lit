@@ -21,6 +21,7 @@
       "node": "./index.js"
     },
     "./hydrate.js": "./hydrate.js",
+    "./partial-hydration-mixin.js": "./partial-hydration-mixin.js",
     "./directives/*": "./directives/*"
   },
   "files": [

@@ -18,7 +18,7 @@ describe.only('Render', () => {
       it.skip(fullTitle);
     } else {
       it(fullTitle, async () => {
-        template = template(html);
+        template = template(html, () => '');
         const string = await renderToString(template, { includeHydrationMetadata: metadata });
         const stream = await streamAsPromise(renderToStream(template, { includeHydrationMetadata: metadata }));
         assert.equal(string, stream);

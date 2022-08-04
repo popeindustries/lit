@@ -1,4 +1,7 @@
 // @ts-nocheck
+
+import { PartialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
+
 export const tests = [
   {
     title: 'plain text',
@@ -300,23 +303,35 @@ export const tests = [
   {
     only: true,
     title: 'nested custom elements with...',
-    template: (h) => {
-      class MyEl extends HTMLElement {
-        render() {
-          return h`<div ?a="${this.hasAttribute('a')}">my <my-el8 .a="${this.hasAttribute('a')}"></my-el8></div>`;
+    template: (h, hydrateOrRender) => {
+      class Base extends HTMLElement {
+        connectedCallback() {
+          console.log(`connected: ${this.tagName}`);
+          hydrateOrRender(this.render(), this, { host: this });
         }
       }
-      class MyElNested extends HTMLElement {
+      class MyEl7 extends PartialHydrationMixin(Base) {
         render() {
+          console.log('render', this.tagName, this.hasAttribute('a'));
+          return h`<div>hi</div>`;
+          // return h`<div ?a="${this.hasAttribute('a')}">my <my-el8 .a="${this.hasAttribute('a')}"></my-el8></div>`;
+        }
+      }
+      class MyEl8 extends PartialHydrationMixin(Base) {
+        a = null;
+        render() {
+          console.log('render', this.tagName, this.a);
           return h`<div>text ${this.a ? h`has "a"` : h`missing "a"`}</div>`;
         }
       }
-      customElements.define('my-el8', MyElNested);
-      customElements.define('my-el7', MyEl);
-      return h`<my-el7 ?a="${true}"></my-el7>`;
+      customElements.define('my-el8', MyEl8);
+      customElements.define('my-el7', MyEl7);
+      return h`<h1 ?a="${true}">Title</h1><my-el8 .a="${true}"></my-el8><div b="${'b'}">${'some more text'}</div>`;
+      // return h`<h1>Title</h1><my-el7 ?a="${true}"></my-el7><div b="${'b'}">${'some more text'}</div>`;
     },
     metadata: true,
     result:
-      '<!--lit PIqcLvCjzXU=--><my-el7 hydrate:defer a><!--lit-attr--><!--lit Zzpy/eJ8XLk=--><div a><!--lit-attr-->my <my-el8 hydrate:defer><!--lit-attr--><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></my-el8></div><!--/lit--></my-el7><!--/lit-->',
+      '<!--lit 6oufIKsa/iI=--><h1 a><!--lit-attr 1-->Title</h1><my-el8 hydrate:defer><!--lit-attr--><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></my-el8><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
+    // '<!--lit lJKtXaezMNE=--><h1>Title</h1><my-el7 hydrate:defer a><!--lit-attr--><!--lit Zzpy/eJ8XLk=--><div a><!--lit-attr-->my <my-el8 hydrate:defer><!--lit-attr--><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></my-el8></div><!--/lit--></my-el7><div b="b"><!--lit-attr--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
   },
 ];

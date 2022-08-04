@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { html, render } from 'lit-html';
-import { hydrateOrRender } from '../../src/hydrate.js';
-import { tests } from '../tests.js';
+import { hydrateOrRender } from '../hydrate.js';
+import { tests } from '../../lit-html-server/test/tests.js';
 
 describe('hydrate', () => {
   const only = tests.filter(({ only }) => only);
@@ -10,11 +10,11 @@ describe('hydrate', () => {
 
   beforeEach(() => {
     container = document.createElement('div');
-    container.hidden = true;
+    // container.hidden = true;
     document.body.appendChild(container);
   });
   afterEach(() => {
-    container.remove();
+    // container.remove();
   });
 
   for (let { title, template, metadata, result, skip } of only.length ? only : tests) {
@@ -24,7 +24,7 @@ describe('hydrate', () => {
       it.skip(fullTitle);
     } else if (metadata) {
       it(fullTitle, async () => {
-        template = template(html);
+        template = template(html, hydrateOrRender);
         container.innerHTML = result;
         // Hydrate once, then render
         hydrateOrRender(template, container);

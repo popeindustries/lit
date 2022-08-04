@@ -6,6 +6,12 @@
  * - ignore `<!--lit-attr n-->` node-index validation
  */
 
+/**
+ * @typedef { import('./hydrate.d.js').ClientChildPart } ClientChildPart
+ * @typedef { import('./hydrate.d.js').ClientChildPartState } ClientChildPartState
+ * @typedef { import('./hydrate.d.js').ClientRenderOptions } ClientRenderOptions
+ */
+
 import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/directive-helpers.js';
 import { noChange, render, _$LH } from 'lit-html';
 import { PartType } from 'lit-html/directive.js';
@@ -17,6 +23,8 @@ const {
   _resolveDirective: resolveDirective,
   _TemplateInstance: TemplateInstance,
 } = _$LH;
+
+const RE_CHILD_MARKER = /^lit |^lit-child/;
 
 /**
  * Hydrate or render existing server-rendered markup.
@@ -49,16 +57,36 @@ export function hydrateOrRender(value, container, options = {}) {
     [openingComment, closingComment] = findEnclosingCommentNodes(startNode);
 
     let active = false;
+    /** @type { HTMLElement | null } */
+    let nestedTreeParent = null;
     // Walk comment nodes, skipping those outside of our opening/closing comment tags
     const walker = document.createTreeWalker(container, NodeFilter.SHOW_COMMENT, (node) => {
-      if (node === closingComment) {
-        active = false;
-        return NodeFilter.FILTER_ACCEPT;
-      } else if (active || node === openingComment) {
+      const markerText = /** @type { Comment } */ (node).data;
+
+      // Begin walking when opening comment found
+      if (node === openingComment) {
         active = true;
         return NodeFilter.FILTER_ACCEPT;
       }
-      return NodeFilter.FILTER_SKIP;
+      // Disable walking if we encounter a nested root
+      else if (active && markerText.startsWith('lit ')) {
+        active = false;
+        nestedTreeParent = node.parentElement;
+        return NodeFilter.FILTER_SKIP;
+      }
+      // Re-enable walking when end of nested root found
+      else if (!active && markerText === '/lit' && node.parentElement === nestedTreeParent) {
+        active = true;
+        nestedTreeParent = null;
+        return NodeFilter.FILTER_SKIP;
+      }
+      // Stop walking when closing comment found
+      else if (node === closingComment) {
+        active = false;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+
+      return active ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
     });
     /** @type { ClientChildPart | undefined } */
     let rootPart = undefined;
@@ -74,7 +102,7 @@ export function hydrateOrRender(value, container, options = {}) {
     while ((marker = walker.nextNode()) !== null) {
       const markerText = marker.data;
 
-      if (markerText.startsWith('lit-child')) {
+      if (RE_CHILD_MARKER.test(markerText)) {
         if (stack.length === 0 && rootPart !== undefined) {
           throw Error('must be only one root part per container');
         }
@@ -133,9 +161,9 @@ function findEnclosingCommentNodes(startNode) {
     if (node.nodeType === 8) {
       const comment = /** @type { Comment } */ (node);
 
-      if (closingComment === null && comment.data === '/lit-child') {
+      if (closingComment === null && comment.data === '/lit') {
         closingComment = comment;
-      } else if (comment.data.startsWith('lit-child')) {
+      } else if (comment.data.startsWith('lit ')) {
         openingComment = comment;
         break;
       }
@@ -189,7 +217,7 @@ function openChildPart(value, marker, stack, options) {
   }
 
   value = resolveDirective(part, value);
-  console.log(value, isPrimitive(value));
+
   if (value === noChange) {
     stack.push({ part, type: 'leaf' });
   } else if (isPrimitive(value)) {
@@ -197,9 +225,8 @@ function openChildPart(value, marker, stack, options) {
     stack.push({ part, type: 'leaf' });
     // TODO: primitive instead of TemplateResult. Error?
   } else if (isTemplateResult(value)) {
-    const markerWithDigest = `lit-child ${digestForTemplateStrings(value.strings)}`;
-
-    if (marker.data !== markerWithDigest) {
+    if (!marker.data.includes(digestForTemplateStrings(value.strings))) {
+      console.log(marker.data, value);
       throw Error('unexpected TemplateResult rendered to part');
     }
 
@@ -267,16 +294,16 @@ function closeChildPart(marker, part, stack) {
  * @param { ClientRenderOptions } [options]
  */
 function createAttributeParts(comment, stack, options) {
+  console.log(comment.data, 'comment parent:', comment.parentElement?.tagName);
   const node = comment.previousElementSibling ?? comment.parentElement;
 
   if (node === null) {
     throw Error('could not find node for attribute parts');
   }
 
-  // TODO: remove `defer-hydration` attribute?
-
   const state = stack[stack.length - 1];
 
+  console.log(stack);
   if (state.type === 'template-instance') {
     const { instance } = state;
 
@@ -291,6 +318,7 @@ function createAttributeParts(comment, stack, options) {
         break;
       }
 
+      console.log(templatePart);
       if (templatePart.type === PartType.ATTRIBUTE) {
         const instancePart = new templatePart.ctor(
           node,
@@ -302,6 +330,7 @@ function createAttributeParts(comment, stack, options) {
         const value = isSingleExpression(instancePart)
           ? state.result.values[state.instancePartIndex]
           : state.result.values;
+        console.log({ value, instancePart, node });
         const noCommit = !(instancePart.type === PartType.EVENT || instancePart.type === PartType.PROPERTY);
 
         instancePart._$setValue(value, instancePart, state.instancePartIndex, noCommit);
@@ -320,6 +349,8 @@ function createAttributeParts(comment, stack, options) {
 
       state.templatePartIndex++;
     }
+
+    node.removeAttribute('hydrate:defer');
   } else {
     throw Error('internal error');
   }

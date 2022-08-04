@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@lit-labs/ssr": "2.2.2",
+    "@popeindustries/lit-html": "workspace:*",
     "autocannon": "^7.9.0",
     "send": "^0.18.0"
   },
