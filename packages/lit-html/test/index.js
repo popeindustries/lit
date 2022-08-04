@@ -10,11 +10,11 @@ describe('hydrate', () => {
 
   beforeEach(() => {
     container = document.createElement('div');
-    // container.hidden = true;
+    container.hidden = true;
     document.body.appendChild(container);
   });
   afterEach(() => {
-    // container.remove();
+    container.remove();
   });
 
   for (let { title, template, metadata, result, skip } of only.length ? only : tests) {
@@ -30,6 +30,7 @@ describe('hydrate', () => {
         hydrateOrRender(template, container);
         hydrateOrRender(template, container);
         const rendered = container.innerHTML.replace(/=""/g, '');
+        result = result.replace(/ hydrate:defer/g, '');
         if (rendered !== result) {
           console.log(`${title}:\n${result}\n${rendered}`);
         }

@@ -344,7 +344,7 @@ export class CustomElementPart extends AttributePart {
 
     // Only render content if hydrating and server rendering hasn't been disabled via `render:client` attribute
     if (options.includeHydrationMetadata && !renderer.element.hasAttribute('render:client')) {
-      result.push(META_ATTR);
+      result.push(Buffer.from(`<!--lit-attr ${this.length}-->`));
 
       const renderedContent = renderer.render();
 

@@ -25,6 +25,7 @@ const {
 } = _$LH;
 
 const RE_CHILD_MARKER = /^lit |^lit-child/;
+const RE_ATTR_LENGTH = /^lit-attr (\d+)/;
 
 /**
  * Hydrate or render existing server-rendered markup.
@@ -226,7 +227,6 @@ function openChildPart(value, marker, stack, options) {
     // TODO: primitive instead of TemplateResult. Error?
   } else if (isTemplateResult(value)) {
     if (!marker.data.includes(digestForTemplateStrings(value.strings))) {
-      console.log(marker.data, value);
       throw Error('unexpected TemplateResult rendered to part');
     }
 
@@ -236,21 +236,21 @@ function openChildPart(value, marker, stack, options) {
 
     part._$committedValue = instance;
     stack.push({
-      type: 'template-instance',
       instance,
-      part,
-      templatePartIndex: 0,
       instancePartIndex: 0,
+      part,
       result: value,
+      templatePartIndex: 0,
+      type: 'template-instance',
     });
   } else if (isIterable(value)) {
     part._$committedValue = [];
     stack.push({
-      part: part,
+      done: false,
+      iterator: value[Symbol.iterator](),
+      part,
       type: 'iterable',
       value,
-      iterator: value[Symbol.iterator](),
-      done: false,
     });
   } else {
     part._$committedValue = value == null ? '' : value;
@@ -294,7 +294,6 @@ function closeChildPart(marker, part, stack) {
  * @param { ClientRenderOptions } [options]
  */
 function createAttributeParts(comment, stack, options) {
-  console.log(comment.data, 'comment parent:', comment.parentElement?.tagName);
   const node = comment.previousElementSibling ?? comment.parentElement;
 
   if (node === null) {
@@ -303,11 +302,11 @@ function createAttributeParts(comment, stack, options) {
 
   const state = stack[stack.length - 1];
 
-  console.log(stack);
   if (state.type === 'template-instance') {
     const { instance } = state;
+    const n = parseInt(RE_ATTR_LENGTH.exec(comment.data)?.[1] ?? '0');
 
-    while (true) {
+    for (let i = 0; i < n; i++) {
       // @ts-expect-error - internal property
       const templatePart = instance._$template.parts[state.templatePartIndex];
 
@@ -318,7 +317,6 @@ function createAttributeParts(comment, stack, options) {
         break;
       }
 
-      console.log(templatePart);
       if (templatePart.type === PartType.ATTRIBUTE) {
         const instancePart = new templatePart.ctor(
           node,
@@ -330,7 +328,6 @@ function createAttributeParts(comment, stack, options) {
         const value = isSingleExpression(instancePart)
           ? state.result.values[state.instancePartIndex]
           : state.result.values;
-        console.log({ value, instancePart, node });
         const noCommit = !(instancePart.type === PartType.EVENT || instancePart.type === PartType.PROPERTY);
 
         instancePart._$setValue(value, instancePart, state.instancePartIndex, noCommit);
