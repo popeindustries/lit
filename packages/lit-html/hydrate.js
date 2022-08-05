@@ -125,11 +125,13 @@ export function hydrateOrRender(value, container, options = {}) {
     // @ts-expect-error - internal property
     partOwnerNode['_$litPart$'] = rootPart;
   } catch (err) {
-    if (openingComment !== null && closingComment !== null) {
+    if (err) {
       console.error(
         `hydration failed due to the following error:\n  ${err}\nClearing nodes and performing clean render`,
       );
+    }
 
+    if (openingComment !== null && closingComment !== null) {
       /** @type { Node | null } */
       let node = closingComment;
       while (node && node !== openingComment) {

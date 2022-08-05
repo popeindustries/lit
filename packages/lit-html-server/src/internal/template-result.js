@@ -1,5 +1,5 @@
 import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart } from './parts.js';
-import { META_CHILD_CLOSE, META_CLOSE } from './consts.js';
+import { META_CHILD_CLOSE, META_CLOSE, META_CLOSE_SHADOW } from './consts.js';
 import { Buffer } from '#buffer';
 
 let id = 0;
@@ -12,14 +12,14 @@ export class TemplateResult {
    * Constructor
    * @param { Template } template
    * @param { Array<unknown> } values
-   * @param { boolean } [root]
    * @param { boolean } [hydratable]
    */
-  constructor(template, values, root = false, hydratable = false) {
+  constructor(template, values, hydratable = false) {
     this.hydratable = hydratable;
     this.id = id++;
     this.index = 0;
-    this.root = root;
+    /** @type { 'light' | 'shadow' | null } */
+    this.root = null;
     this.maxIndex = template.strings.length + template.parts.length - 1;
     this.template = template;
     this.valueIndex = 0;
@@ -53,13 +53,15 @@ export class TemplateResult {
 
       if (withMetadata) {
         if (isFirstString) {
-          string = Buffer.concat([
-            Buffer.from(`<!--lit${this.root ? '' : '-child'} ${this.template.digest}-->`),
-            string,
-          ]);
+          const metadata = `${this.root === 'shadow' ? '<template shadowroot="open">' : ''}<!--lit${
+            this.root !== null ? '' : '-child'
+          } ${this.template.digest}-->`;
+          string = Buffer.concat([Buffer.from(metadata), string]);
         }
         if (isLastString) {
-          string = Buffer.concat([string, this.root ? META_CLOSE : META_CHILD_CLOSE]);
+          const metadata =
+            this.root === null ? META_CHILD_CLOSE : this.root === 'shadow' ? META_CLOSE_SHADOW : META_CLOSE;
+          string = Buffer.concat([string, metadata]);
         }
       }
 

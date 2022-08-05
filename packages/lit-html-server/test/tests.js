@@ -301,7 +301,7 @@ export const tests = [
   },
   {
     only: true,
-    title: 'nested custom elements with...',
+    title: 'nested custom elements with deferred hydration',
     template: (h, hydrateOrRender) => {
       class Base extends HTMLElement {
         connectedCallback() {
@@ -326,5 +326,39 @@ export const tests = [
     metadata: true,
     result:
       '<!--lit lJKtXaezMNE=--><h1>Title</h1><my-el7 hydrate:defer a><!--lit-attr 1--><!--lit Zzpy/eJ8XLk=--><div a><!--lit-attr 1-->my <my-el8 hydrate:defer><!--lit-attr 1--><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></my-el8></div><!--/lit--></my-el7><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
+  },
+  {
+    only: true,
+    title: 'nested custom elements with shadowDOM and deferred hydration',
+    template: (h, hydrateOrRender) => {
+      class Base extends HTMLElement {
+        constructor() {
+          super();
+          if (!this.shadowRoot) {
+            this.attachShadow({ mode: 'open' });
+          }
+        }
+        connectedCallback() {
+          hydrateOrRender(this.render(), this.shadowRoot, { host: this });
+        }
+      }
+      class MyEl9 extends PartialHydrationMixin(Base) {
+        render() {
+          return h`<div ?a="${this.hasAttribute('a')}">my <my-el10 .a="${this.hasAttribute('a')}"></my-el10></div>`;
+        }
+      }
+      class MyEl10 extends PartialHydrationMixin(Base) {
+        a = null;
+        render() {
+          return h`<div>text ${this.a ? h`has "a"` : h`missing "a"`}</div>`;
+        }
+      }
+      customElements.define('my-el10', MyEl10);
+      customElements.define('my-el9', MyEl9);
+      return h`<h1>Title</h1><my-el9 ?a="${true}"></my-el9><div b="${'b'}">${'some more text'}</div>`;
+    },
+    metadata: true,
+    result:
+      '<!--lit GpJxfqkCRnw=--><h1>Title</h1><my-el9 hydrate:defer a><!--lit-attr 1--><template shadowroot="open"><!--lit /0wYmzo69CE=--><div a><!--lit-attr 1-->my <my-el10 hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></template></my-el10></div><!--/lit--></template></my-el9><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
   },
 ];

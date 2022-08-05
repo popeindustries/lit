@@ -25,7 +25,12 @@ describe('hydrate', () => {
     } else if (metadata) {
       it(fullTitle, async () => {
         template = template(html, hydrateOrRender);
-        container.innerHTML = result;
+        const doc = new DOMParser().parseFromString(`<html><head></head><body>${result}</body></html>`, 'text/html', {
+          includeShadowRoots: true,
+        });
+        while (doc.body.childNodes.length > 0) {
+          container.appendChild(doc.body.firstChild);
+        }
         // Hydrate once, then render
         hydrateOrRender(template, container);
         hydrateOrRender(template, container);
@@ -50,4 +55,5 @@ describe('hydrate', () => {
       throw Error(`unexpected rendered output: ${rendered}`);
     }
   });
+  it('event bindings are registered via hydration');
 });

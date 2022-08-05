@@ -94,8 +94,8 @@ export class ElementRenderer {
     const { shadowRoot } = this.element;
 
     if (this.element.render !== undefined) {
-      const content = this.element.render();
-      return shadowRoot !== null ? html`<template shadowroot="open">${content}</template>` : content;
+      return this.element.render();
+      // return shadowRoot !== null ? html`<template shadowroot="open">${content}</template>` : content;
     }
 
     return null;

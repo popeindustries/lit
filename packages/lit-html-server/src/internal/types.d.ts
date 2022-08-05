@@ -4,7 +4,7 @@
 declare type TemplateResult = {
   id: number;
   hydratable: boolean;
-  root: boolean;
+  root: null | 'light' | 'shadow';
   template: Template;
   values: Array<unknown>;
   readChunk(options?: InternalRenderOptions): unknown;

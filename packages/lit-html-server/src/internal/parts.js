@@ -354,7 +354,7 @@ export class CustomElementPart extends AttributePart {
         );
       }
 
-      renderedContent.root = true;
+      renderedContent.root = renderer.element.shadowRoot ? 'shadow' : 'light';
       result.push(resolveNodeValue(renderedContent, this.tagName, options.includeHydrationMetadata ?? false));
     }
 

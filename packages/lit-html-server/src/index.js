@@ -27,7 +27,7 @@ const templateCache = new Map();
 function html(strings, ...values) {
   const template = getTemplate(strings);
 
-  return new TemplateResult(template, values, false);
+  return new TemplateResult(template, values);
 }
 
 /**
@@ -85,7 +85,7 @@ function getRenderResult(result) {
   const templateResult = !isTemplateResult(result)
     ? DEFAULT_TEMPLATE_FN(result)
     : /** @type { TemplateResult } */ (result);
-  templateResult.root = true;
+  templateResult.root = 'light';
   return templateResult;
 }
 
