@@ -28,9 +28,15 @@ const RE_CHILD_MARKER = /^lit |^lit-child/;
 const RE_ATTR_LENGTH = /^lit-attr (\d+)/;
 
 /**
- * Hydrate or render existing server-rendered markup.
+ * Hydrate or render existing server-rendered markup inside of a `container` element.
  * Can be called multiple times, automatically hydrating on first call,
- * and efficiently updating via `render` thereafter.
+ * and efficiently updating via `lit-html#render()` thereafter.
+ * More than one hydration sub-tree may be present in the same `container`.
+ * Use `options.renderBefore` to identify the hydration sub-tree,
+ * otherwise the last sub-tree in `container` will be targeted.
+ *
+ * Hydration sub-trees are demarcated by `<!--lit XXXXXXXXX-->` and `<!--/lit-->` comment nodes.
+ * Sub-trees may be nested and hydrated separately at a later time, as for example with custom element child content.
  * @param { unknown } value
  * @param { HTMLElement | DocumentFragment } container
  * @param { ClientRenderOptions } [options]
@@ -53,35 +59,37 @@ export function hydrateOrRender(value, container, options = {}) {
   try {
     // Since `container` can have more than one hydratable template,
     // find nearest closing and opening *sibling* comments to isolate hydratable elements.
-    // Start from last `container` child or `renderBefore` node if specified.
+    // Start from last `container` child, or `renderBefore` node if specified.
     const startNode = /** @type { Node } */ (options.renderBefore ?? container.lastChild);
     [openingComment, closingComment] = findEnclosingCommentNodes(startNode);
 
     let active = false;
     /** @type { HTMLElement | null } */
     let nestedTreeParent = null;
-    // Walk comment nodes, skipping those outside of our opening/closing comment tags
+    // Walk comment nodes, ignoring those outside of our opening/closing comment nodes,
+    // and skipping any nested roots found in between.
     const walker = document.createTreeWalker(container, NodeFilter.SHOW_COMMENT, (node) => {
       const markerText = /** @type { Comment } */ (node).data;
 
-      // Begin walking when opening comment found
+      // Begin walking when opening comment found...
       if (node === openingComment) {
         active = true;
         return NodeFilter.FILTER_ACCEPT;
       }
-      // Disable walking if we encounter a nested root
+      // ...but disable walking if we encounter a nested root...
       else if (active && markerText.startsWith('lit ')) {
         active = false;
+        // Store parent element to use to later identify closing node (which must be a sibling)
         nestedTreeParent = node.parentElement;
         return NodeFilter.FILTER_SKIP;
       }
-      // Re-enable walking when end of nested root found
+      // ...and re-enable walking when end of nested root found...
       else if (!active && markerText === '/lit' && node.parentElement === nestedTreeParent) {
         active = true;
         nestedTreeParent = null;
         return NodeFilter.FILTER_SKIP;
       }
-      // Stop walking when closing comment found
+      // ...and stop walking when closing comment found
       else if (node === closingComment) {
         active = false;
         return NodeFilter.FILTER_ACCEPT;
@@ -107,14 +115,17 @@ export function hydrateOrRender(value, container, options = {}) {
         if (stack.length === 0 && rootPart !== undefined) {
           throw Error('must be only one root part per container');
         }
+        // Create a new ChildPart and push to top of stack
         currentChildPart = openChildPart(value, marker, stack, options);
         rootPart ??= currentChildPart;
       } else if (markerText.startsWith('lit-attr')) {
+        // Create AttributeParts for current ChildPart at top of the stack
         createAttributeParts(marker, stack, options);
       } else if (markerText.startsWith('/lit-child')) {
         if (stack.length === 1 && currentChildPart !== rootPart) {
           throw Error('internal error');
         }
+        // Close current ChildPart, and pop off the stack
         currentChildPart = closeChildPart(marker, currentChildPart, stack);
       }
     }
@@ -131,9 +142,11 @@ export function hydrateOrRender(value, container, options = {}) {
       );
     }
 
+    // Clear all server rendered elements if we have found opening/closing comments
     if (openingComment !== null && closingComment !== null) {
       /** @type { Node | null } */
       let node = closingComment;
+
       while (node && node !== openingComment) {
         /** @type { Node | null } */
         const previousSibling = node.previousSibling;
@@ -148,6 +161,10 @@ export function hydrateOrRender(value, container, options = {}) {
 }
 
 /**
+ * Find opening/closing root comment nodes.
+ * Root comments take the form `<!--lit XXXXXXXXX--><!--/lit-->`,
+ * and identify ChildPart sub-trees that may be hydrated.
+ * Starting at `startNode`, traverse previous siblings until comment nodes are found.
  * @param { Node } startNode
  * @returns { [Comment, Comment] }
  */
@@ -160,7 +177,7 @@ function findEnclosingCommentNodes(startNode) {
   let node = startNode;
 
   while (node != null) {
-    // Comment
+    // Comments only
     if (node.nodeType === 8) {
       const comment = /** @type { Comment } */ (node);
 
@@ -182,6 +199,7 @@ function findEnclosingCommentNodes(startNode) {
 }
 
 /**
+ * Create `ChildPart` and add to the stack.
  * @param { unknown } value
  * @param { Comment } marker
  * @param { Array<ClientChildPartState> } stack
@@ -214,8 +232,8 @@ function openChildPart(value, marker, stack, options) {
       }
       /** @type { Array<ClientChildPart> } */ (state.part._$committedValue).push(part);
     } else {
-      // TODO: unexpected. Error?
-      part = new ChildPart(marker, null, state.part, options);
+      // Primitive likely rendered on client when TemplateResult rendered on server.
+      throw Error('unexpected primitive rendered to part');
     }
   }
 
@@ -255,6 +273,7 @@ function openChildPart(value, marker, stack, options) {
       value,
     });
   } else {
+    // Fallback for everything else (nothing, Objects, Functions, etc.)
     part._$committedValue = value == null ? '' : value;
     stack.push({ part: part, type: 'leaf' });
   }
@@ -263,39 +282,14 @@ function openChildPart(value, marker, stack, options) {
 }
 
 /**
- * @param { Comment } marker
- * @param { ClientChildPart | undefined } part
- * @param { Array<ClientChildPartState> } stack
- */
-function closeChildPart(marker, part, stack) {
-  if (part === undefined) {
-    throw Error('unbalanced part marker');
-  }
-
-  // @ts-expect-error - internal property
-  part._$endNode = marker;
-
-  const currentState = /** @type { ClientChildPartState } */ (stack.pop());
-
-  if (currentState.type === 'iterable') {
-    if (!currentState.iterator.next().done) {
-      throw Error('longer than expected iterable');
-    }
-  }
-
-  if (stack.length > 0) {
-    return stack[stack.length - 1].part;
-  } else {
-    return undefined;
-  }
-}
-
-/**
+ * Create AttributeParts
  * @param { Comment } comment
  * @param { Array<ClientChildPartState> } stack
  * @param { ClientRenderOptions } [options]
  */
 function createAttributeParts(comment, stack, options) {
+  // Void elements, which have no closing tag, are siblings of the comment,
+  // all others are parents.
   const node = comment.previousElementSibling ?? comment.parentElement;
 
   if (node === null) {
@@ -306,6 +300,8 @@ function createAttributeParts(comment, stack, options) {
 
   if (state.type === 'template-instance') {
     const { instance } = state;
+    // Attribute comments include number of parts for this node,
+    // so parse the value and use for the loop limit.
     const n = parseInt(RE_ATTR_LENGTH.exec(comment.data)?.[1] ?? '0');
 
     for (let i = 0; i < n; i++) {
@@ -330,6 +326,7 @@ function createAttributeParts(comment, stack, options) {
         const value = isSingleExpression(instancePart)
           ? state.result.values[state.instancePartIndex]
           : state.result.values;
+        // Avoid touching DOM for types other than event/property
         const noCommit = !(instancePart.type === PartType.EVENT || instancePart.type === PartType.PROPERTY);
 
         instancePart._$setValue(value, instancePart, state.instancePartIndex, noCommit);
@@ -352,6 +349,35 @@ function createAttributeParts(comment, stack, options) {
     node.removeAttribute('hydrate:defer');
   } else {
     throw Error('internal error');
+  }
+}
+
+/**
+ * Close the current ChildPart and remove from the stack
+ * @param { Comment } marker
+ * @param { ClientChildPart | undefined } part
+ * @param { Array<ClientChildPartState> } stack
+ */
+function closeChildPart(marker, part, stack) {
+  if (part === undefined) {
+    throw Error('unbalanced part marker');
+  }
+
+  // @ts-expect-error - internal property
+  part._$endNode = marker;
+
+  const currentState = /** @type { ClientChildPartState } */ (stack.pop());
+
+  if (currentState.type === 'iterable') {
+    if (!currentState.iterator.next().done) {
+      throw Error('longer than expected iterable');
+    }
+  }
+
+  if (stack.length > 0) {
+    return stack[stack.length - 1].part;
+  } else {
+    return undefined;
   }
 }
 
