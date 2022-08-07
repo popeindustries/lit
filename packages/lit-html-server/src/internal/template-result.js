@@ -15,6 +15,7 @@ export class TemplateResult {
    * @param { boolean } [hydratable]
    */
   constructor(template, values, hydratable = false) {
+    this._$litServerTemplateResult$ = true;
     this.hydratable = hydratable;
     this.id = id++;
     this.index = 0;

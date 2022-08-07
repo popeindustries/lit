@@ -35,11 +35,21 @@ const RE_ATTR_LENGTH = /^lit-attr (\d+)/;
  */
 export function render(value, container, options = {}) {
   const partOwnerNode = options.renderBefore ?? container;
+  // TODO: if `value` is lit-html-server TemplateResult, bail and save `value` in `container.__templateResult__`
 
   // @ts-expect-error - internal property
   if (partOwnerNode['_$litPart$'] !== undefined) {
     // Already hydrated, so render instead
     litRender(value, container, options);
+    return;
+  }
+
+  // If called on server (`value` is lit-html-server TemplateResult),
+  // store value on container for later use by ElementRenderer.
+  // @ts-expect-error - internal property
+  if (value && typeof value === 'object' && value['_$litServerTemplateResult$']) {
+    // @ts-expect-error - internal property
+    container.__templateResult__ = value;
     return;
   }
 

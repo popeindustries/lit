@@ -1,6 +1,8 @@
 import { escape } from './escape.js';
-import { html } from '../index.js';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+
+/**
+ * @typedef { HTMLElement & { __templateResult__: TemplateResult | null, render?(): TemplateResult } } CustomElement
+ */
 
 /**
  * @param { RenderOptions } options
@@ -23,7 +25,7 @@ export function getElementRenderer({ elementRenderers = [] }, tagName, ceClass =
 
 export class ElementRenderer {
   /**
-   * @param { typeof HTMLElement } ceClass
+   * @param { CustomElement } ceClass
    * @param { string } tagName
    */
   static matchesClass(ceClass, tagName) {
@@ -35,7 +37,7 @@ export class ElementRenderer {
    */
   constructor(tagName) {
     this.tagName = tagName;
-    /** @type { HTMLElement & { render?(): TemplateResult } } */
+    /** @type { CustomElement } */
     this.element;
   }
 
@@ -91,14 +93,10 @@ export class ElementRenderer {
    * @returns { TemplateResult | null }
    */
   render() {
-    const { shadowRoot } = this.element;
-
-    if (this.element.render !== undefined) {
-      return this.element.render();
-      // return shadowRoot !== null ? html`<template shadowroot="open">${content}</template>` : content;
-    }
-
-    return null;
+    // Return stored if element render has already been called (in connectedCallback f.ex)
+    const templateResult = this.element.__templateResult__ ?? this.element.render?.() ?? null;
+    this.element.__templateResult__ = null;
+    return templateResult;
   }
 }
 
@@ -109,6 +107,6 @@ class DefaultElementRenderer extends ElementRenderer {
   constructor(tagName) {
     super(tagName);
     const ceClass = customElements.get(tagName) ?? HTMLElement;
-    this.element = /** @type { HTMLElement } */ (new ceClass());
+    this.element = /** @type { CustomElement } */ (new ceClass());
   }
 }

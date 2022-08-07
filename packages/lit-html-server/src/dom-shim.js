@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-const RE_VALID_NAME = /^[a-z][a-z0-9._-]*-[a-z0-9._-]*$/;
+const RE_VALID_CE_NAME = /^[a-z][a-z0-9._-]*-[a-z0-9._-]*$/;
 
 if (typeof globalThis.window === 'undefined') {
   class Element {
@@ -36,7 +36,9 @@ if (typeof globalThis.window === 'undefined') {
     }
   }
 
-  class HTMLElement extends Element {}
+  class HTMLElement extends Element {
+    __templateResult__ = null;
+  }
 
   class Document {
     createTreeWalker() {}
@@ -52,7 +54,7 @@ if (typeof globalThis.window === 'undefined') {
     }
 
     define(name, constructor) {
-      if (!RE_VALID_NAME.test(name)) {
+      if (!RE_VALID_CE_NAME.test(name)) {
         throw Error(`invalid custom element name: ${name}`);
       } else if (this._registry.has(name)) {
         throw Error(`a constructor has already been registered with that name: ${name}`);

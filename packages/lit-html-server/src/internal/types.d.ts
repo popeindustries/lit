@@ -2,6 +2,7 @@
  * The return type of the template tag functions
  */
 declare type TemplateResult = {
+  _$litServerTemplateResult$: boolean;
   id: number;
   hydratable: boolean;
   root: null | 'light' | 'shadow';
