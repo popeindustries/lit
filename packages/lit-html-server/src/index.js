@@ -26,7 +26,6 @@ const templateCache = new Map();
  */
 function html(strings, ...values) {
   const template = getTemplate(strings);
-
   return new TemplateResult(template, values);
 }
 

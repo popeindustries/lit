@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { html, render } from 'lit-html';
-import { hydrateOrRender } from '../hydrate.js';
+import { html } from 'lit-html';
+import { render } from '../index.js';
 import { tests } from '../../lit-html-server/test/tests.js';
 
 describe('hydrate', () => {
@@ -24,7 +24,7 @@ describe('hydrate', () => {
       it.skip(fullTitle);
     } else if (metadata) {
       it(fullTitle, async () => {
-        template = template(html, hydrateOrRender);
+        template = template(html, render);
         const doc = new DOMParser().parseFromString(`<html><head></head><body>${result}</body></html>`, 'text/html', {
           includeShadowRoots: true,
         });
@@ -32,8 +32,8 @@ describe('hydrate', () => {
           container.appendChild(doc.body.firstChild);
         }
         // Hydrate once, then render
-        hydrateOrRender(template, container);
-        hydrateOrRender(template, container);
+        render(template, container);
+        render(template, container);
         const rendered = container.innerHTML.replace(/=""/g, '');
         result = result.replace(/ hydrate:defer/g, '');
         if (rendered !== result) {
@@ -46,7 +46,7 @@ describe('hydrate', () => {
   it.skip('hydration error clears nodes and renders', () => {
     container.innerHTML = `<!--lit-child AEmR7W+R0Ak=--><div><!--lit-child--><!--lit-child-->1<!--/lit-child--><!--lit-child-->2<!--/lit-child--><!--lit-child-->3<!--/lit-child--><!--/lit-child--></div><!--/lit-child-->`;
     const template = html`<div>${[1, 2]}</div>`;
-    hydrateOrRender(template, container);
+    render(template, container);
     const rendered = container.innerHTML;
     if (
       !rendered.startsWith('<!----><div><!--?lit$') &&

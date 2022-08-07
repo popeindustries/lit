@@ -129,7 +129,7 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
  * @param { InternalRenderOptions } options
  */
 function getTemplateResultChunk(result, stack, options) {
-  // Enable hydration metadata for subtree
+  // Enable hydration metadata for sub-tree
   if (result.hydratable && !options.includeHydrationMetadata) {
     options.includeHydrationMetadata = true;
     options.hydrationRoot = result.id;
@@ -139,7 +139,7 @@ function getTemplateResultChunk(result, stack, options) {
 
   // Finished reading, dispose
   if (chunk === null) {
-    // Disable hydration metadata when finished with subtree
+    // Disable hydration metadata when finished with sub-tree
     if (options.hydrationRoot === result.id) {
       options.includeHydrationMetadata = false;
       options.hydrationRoot = undefined;

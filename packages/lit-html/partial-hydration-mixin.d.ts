@@ -1,5 +1,5 @@
 /**
- * Custom element mixin for adding partial hydration support.
+ * Custom element mixin for adding partial/deferred hydration support.
  */
 export function PartialHydrationMixin<BaseClass extends CustomElementBase>(
   Base: BaseClass,

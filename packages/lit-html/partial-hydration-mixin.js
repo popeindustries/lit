@@ -3,7 +3,7 @@
  */
 
 /**
- *
+ * Custom element mixin for adding partial/deferred hydration support.
  * @param { CustomElementBase } Base
  */
 export function PartialHydrationMixin(Base) {

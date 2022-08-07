@@ -1,31 +1,17 @@
-import esbuild from 'esbuild';
 import fs from 'node:fs';
 import path from 'node:path';
 
-await esbuild.build({
-  bundle: true,
-  entryPoints: ['./src/hydrate.js'],
-  external: ['lit-html', 'lit-html/*'],
-  format: 'esm',
-  format: 'esm',
-  target: 'es2020',
-  platform: 'browser',
-  outdir: '.',
-});
+const litDirectivesDir = path.resolve('./node_modules/lit-html/directives');
 
-const typesHydrate = fs
-  .readFileSync(path.resolve('src/types-hydrate.d.ts'), 'utf8')
-  .replace(/(declare) (interface|type|enum|namespace|function|class)/g, 'export $2');
+if (!fs.existsSync(path.resolve('directives'))) {
+  fs.mkdirSync(path.resolve('directives'));
+}
 
-fs.writeFileSync(
-  path.resolve('hydrate.d.ts'),
-  `${typesHydrate}\n${fs.readFileSync(path.resolve('src/hydrate.d.ts'), 'utf8')}`,
-);
-
-// if (!fs.existsSync(path.resolve('directives'))) {
-//   fs.mkdirSync(path.resolve('directives'));
-// }
-
-// for (const basePath of fs.readdirSync(path.resolve('src/directives'))) {
-//   fs.copyFileSync(path.resolve('src/directives', basePath), path.resolve('directives', basePath));
-// }
+// Copy all lit-html directives
+for (const basePath of fs.readdirSync(litDirectivesDir)) {
+  if (basePath.endsWith('.js') || basePath.endsWith('.d.ts')) {
+    const dest = path.resolve('directives', basePath);
+    const importPath = basePath.replace('.d.ts', '.js');
+    fs.writeFileSync(dest, `export * from 'lit-html/directives/${importPath}';`);
+  }
+}

@@ -112,7 +112,7 @@ describe('directives', () => {
   });
 
   describe('hydratable', () => {
-    it('subtree with metadata', async () => {
+    it('sub-tree with metadata', async () => {
       const result = h`<div class="${'bye'}">${hydratable(h`<span class="${'hi'}">hi</span>`)}</div>`;
       assert.equal(
         await render(result),

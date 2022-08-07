@@ -1,7 +1,7 @@
 {
   "name": "@popeindustries/lit-html",
   "version": "5.0.0-beta.1",
-  "description": "Seamlessly render lit-html templates on the server and in the browser",
+  "description": "Enable hydration of lit-html templates rendered on the server with @popeindustries/lit-html-server",
   "author": "Alexander Pope <alex@pope.industries>",
   "keywords": [
     "html template",
@@ -14,13 +14,8 @@
     "template render"
   ],
   "type": "module",
-  "types": "index.d.ts",
   "exports": {
-    ".": {
-      "browser": "./browser.js",
-      "node": "./index.js"
-    },
-    "./hydrate.js": "./hydrate.js",
+    ".": "./index.js",
     "./partial-hydration-mixin.js": "./partial-hydration-mixin.js",
     "./directives/*": "./directives/*"
   },
@@ -36,14 +31,9 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "@popeindustries/lit-html-server": "workspace:*",
     "lit-html": "^2.2.7"
   },
-  "devDependencies": {
-    "@lit-labs/ssr": "2.2.2",
-    "autocannon": "^7.9.0",
-    "send": "^0.18.0"
-  },
+  "devDependencies": {},
   "scripts": {
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f",

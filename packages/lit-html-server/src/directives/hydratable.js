@@ -14,7 +14,7 @@ class HydratableDirective extends Directive {
   }
 
   /**
-   * Server renders an html subtree with hydration metadata.
+   * Server renders an html sub-tree with hydration metadata.
    * On the client, pass the same `TemplateResult` resolved by `value` to `hydrateOrRender()`
    * to hydrate the server-rendered DOM into an active lit-html template.
    * @param { TemplateResult | Promise<TemplateResult> } value
