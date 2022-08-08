@@ -1,12 +1,12 @@
 import { getProcessor } from './template-result-processor.js';
 
 /**
- * A custom Readable stream factory for rendering a template result to a stream
+ * A custom `ReadableStream` factory for rendering a template result to a web stream
  * @param { TemplateResult } result - a template result returned from call to "html`...`"
  * @param { InternalRenderOptions } [options]
  * @returns { ReadableStream }
  */
-export function streamTemplateRenderer(result, options) {
+export function webStreamTemplateRenderer(result, options) {
   if (typeof ReadableStream === 'undefined') {
     throw Error('ReadableStream not supported on this platform');
   }

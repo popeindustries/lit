@@ -45,7 +45,7 @@ export function render(value, container, options = {}) {
   }
 
   // If called on server (`value` is lit-html-server TemplateResult),
-  // store value on container for later use by ElementRenderer.
+  // store `value` on `container` for later use by ElementRenderer.
   // @ts-expect-error - internal property
   if (value && typeof value === 'object' && value['_$litServerTemplateResult$']) {
     // @ts-expect-error - internal property

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { html, renderToStream, renderToString } from '../src/index.js';
+import { html, renderToNodeStream, renderToString } from '../src/index.js';
 import assert from 'node:assert';
 import { streamAsPromise } from './utils.js';
 import { tests } from './tests.js';
@@ -20,7 +20,7 @@ describe.only('Render', () => {
       it(fullTitle, async () => {
         template = template(html, () => '');
         const string = await renderToString(template, { includeHydrationMetadata: metadata });
-        const stream = await streamAsPromise(renderToStream(template, { includeHydrationMetadata: metadata }));
+        const stream = await streamAsPromise(renderToNodeStream(template, { includeHydrationMetadata: metadata }));
         assert.equal(string, stream);
         assert.equal(string, result);
       });

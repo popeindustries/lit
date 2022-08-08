@@ -31,12 +31,8 @@
       "browser": "./src/internal/browser-digest.js",
       "node": "./src/internal/digest.js"
     },
-    "#stream": {
-      "browser": "./src/internal/browser-stream.js",
-      "node": "./src/internal/stream.js"
-    },
-    "#template-renderer": {
-      "browser": "./src/internal/browser-stream-template-renderer.js",
+    "#node-stream-template-renderer": {
+      "browser": "./src/internal/browser-node-stream-template-renderer.js",
       "node": "./src/internal/node-stream-template-renderer.js"
     }
   },

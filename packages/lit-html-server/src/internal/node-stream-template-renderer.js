@@ -1,20 +1,20 @@
 import { getProcessor } from './template-result-processor.js';
-import { Readable } from '#stream';
+import { Readable } from 'node:stream';
 
 /**
- * Factory for StreamTemplateRenderer instances
+ * Factory for NodeStreamTemplateRenderer instances
  * @param { TemplateResult } result - a template result returned from call to "html`...`"
  * @param { InternalRenderOptions } [options]
  * @returns { Readable }
  */
-export function streamTemplateRenderer(result, options) {
-  return new StreamTemplateRenderer(result, options);
+export function nodeStreamTemplateRenderer(result, options) {
+  return new NodeStreamTemplateRenderer(result, options);
 }
 
 /**
- * A custom Readable stream class for rendering a template result to a stream
+ * A custom `Readable` stream class for rendering a template result to a Node stream
  */
-class StreamTemplateRenderer extends Readable {
+class NodeStreamTemplateRenderer extends Readable {
   /**
    * Constructor
    * @param { TemplateResult } result - a template result returned from call to "html`...`"

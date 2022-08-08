@@ -300,7 +300,6 @@ export const tests = [
       '<!--lit-child l8hegyhGWbE=--><my-el6 render:client><span slot="my-text">some text</span></my-el6><!--/lit-child-->',
   },
   {
-    only: true,
     title: 'nested custom elements with deferred hydration',
     template: (h, hydrateOrRender) => {
       class Base extends HTMLElement {
@@ -328,7 +327,6 @@ export const tests = [
       '<!--lit lJKtXaezMNE=--><h1>Title</h1><my-el7 hydrate:defer a><!--lit-attr 1--><!--lit Zzpy/eJ8XLk=--><div a><!--lit-attr 1-->my <my-el8 hydrate:defer><!--lit-attr 1--><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></my-el8></div><!--/lit--></my-el7><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
   },
   {
-    only: true,
     title: 'nested custom elements with shadowDOM and deferred hydration',
     template: (h, hydrateOrRender) => {
       class Base extends HTMLElement {

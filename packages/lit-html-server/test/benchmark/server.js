@@ -1,5 +1,5 @@
 import { CustomElement, Renderer } from './custom-element.js';
-import { html, renderToStream } from '../../index.js';
+import { html, renderToNodeStream } from '../../index.js';
 import everything from './the-everything-bagel-template.js';
 import http from 'http';
 import { hydratable } from '../../directives/hydratable.js';
@@ -33,7 +33,7 @@ http
       number: Math.random() * 100,
     };
     res.writeHead(200);
-    const stream = renderToStream(template(data), { elementRenderers: [Renderer] });
+    const stream = renderToNodeStream(template(data), { elementRenderers: [Renderer] });
     stream.pipe(res);
   })
   .listen(3000);

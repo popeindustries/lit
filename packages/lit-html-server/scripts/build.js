@@ -22,6 +22,7 @@ await esbuild.build({
   outfile: 'browser.js',
   plugins: [
     {
+      // Replace contents of `dom-shim.js` with empty string
       name: 'empty',
       setup(build) {
         build.onResolve({ filter: /.*/ }, function (args) {
