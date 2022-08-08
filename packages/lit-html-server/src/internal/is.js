@@ -40,13 +40,23 @@ export function isPrimitive(value) {
 }
 
 /**
- * Determine whether "result" is a TemplateResult
+ * Determine whether "result" is a TemplateInstance
+ * @param { unknown } result
+ * @returns { result is TemplateInstance }
+ */
+export function isTemplateInstance(result) {
+  const r = /** @type { TemplateInstance } */ (result);
+  return r != null && '_$litServerTemplateInstance$' in r;
+}
+
+/**
+ * Determine whether "result" is a lit-html TemplateResult
  * @param { unknown } result
  * @returns { result is TemplateResult }
  */
 export function isTemplateResult(result) {
   const r = /** @type { TemplateResult } */ (result);
-  return result != null && typeof r.template !== 'undefined' && typeof r.values !== 'undefined';
+  return r != null && '_$litType$' in r;
 }
 
 /**

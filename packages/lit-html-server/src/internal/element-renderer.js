@@ -1,7 +1,7 @@
 import { escape } from './escape.js';
 
 /**
- * @typedef { HTMLElement & { __templateResult__: TemplateResult | null, render?(): TemplateResult } } CustomElement
+ * @typedef { HTMLElement & { __templateInstance__: TemplateInstance | null, render?(): TemplateInstance } } CustomElement
  */
 
 /**
@@ -90,12 +90,12 @@ export class ElementRenderer {
   }
 
   /**
-   * @returns { TemplateResult | null }
+   * @returns { TemplateInstance | null }
    */
   render() {
     // Return stored if element render has already been called (in connectedCallback f.ex)
-    const templateResult = this.element.__templateResult__ ?? this.element.render?.() ?? null;
-    this.element.__templateResult__ = null;
+    const templateResult = this.element.__templateInstance__ ?? this.element.render?.() ?? null;
+    this.element.__templateInstance__ = null;
     return templateResult;
   }
 }

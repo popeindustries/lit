@@ -1,6 +1,15 @@
 /* eslint no-constant-condition:0 */
-import { isArray, isAsyncIterator, isBuffer, isIteratorResult, isPromise, isTemplateResult } from './is.js';
+import {
+  isArray,
+  isAsyncIterator,
+  isBuffer,
+  isIteratorResult,
+  isTemplateResult,
+  isPromise,
+  isTemplateInstance,
+} from './is.js';
 import { Buffer } from '#buffer';
+import { getTemplateInstance } from './template-instance.js';
 
 /**
  * Process "stack" and push chunks to "renderer"
@@ -42,9 +51,9 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
         return renderer.push(null);
       }
 
-      if (isTemplateResult(chunk)) {
+      if (isTemplateInstance(chunk) || isTemplateResult(chunk)) {
         popStack = false;
-        chunk = getTemplateResultChunk(chunk, stack, options);
+        chunk = getTemplateInstanceChunk(chunk, stack, options);
       }
 
       // Skip if finished reading TemplateResult (null)
@@ -124,31 +133,38 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
 /**
  * Retrieve next chunk from "result".
  * Adds nested TemplateResults to the stack if necessary.
- * @param { TemplateResult } result
+ * @param { TemplateInstance | TemplateResult } instance
  * @param { Array<unknown> } stack
  * @param { InternalRenderOptions } options
  */
-function getTemplateResultChunk(result, stack, options) {
-  // Enable hydration metadata for sub-tree
-  if (result.hydratable && !options.includeHydrationMetadata) {
-    options.includeHydrationMetadata = true;
-    options.hydrationRoot = result.id;
+function getTemplateInstanceChunk(instance, stack, options) {
+  // Convert TemplateResult to TemplateInstance
+  if (isTemplateResult(instance)) {
+    instance = getTemplateInstance(instance);
+    // Replace at top of stack
+    stack[0] = instance;
   }
 
-  let chunk = result.readChunk(options);
+  // Enable hydration metadata for sub-tree
+  if (instance.hydratable && !options.includeHydrationMetadata) {
+    options.includeHydrationMetadata = true;
+    options.hydrationRoot = instance.id;
+  }
+
+  let chunk = instance.readChunk(options);
 
   // Finished reading, dispose
   if (chunk === null) {
     // Disable hydration metadata when finished with sub-tree
-    if (options.hydrationRoot === result.id) {
+    if (options.hydrationRoot === instance.id) {
       options.includeHydrationMetadata = false;
       options.hydrationRoot = undefined;
     }
     stack.shift();
-  } else if (isTemplateResult(chunk)) {
+  } else if (isTemplateInstance(chunk)) {
     // Add to top of stack
     stack.unshift(chunk);
-    chunk = getTemplateResultChunk(chunk, stack, options);
+    chunk = getTemplateInstanceChunk(chunk, stack, options);
   }
 
   return chunk;

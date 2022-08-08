@@ -1,12 +1,17 @@
+declare type TemplateResult = import('lit-html').TemplateResult;
+
 /**
  * The return type of the template tag functions
  */
-declare type TemplateResult = {
-  _$litServerTemplateResult$: boolean;
-  id: number;
+declare type TemplateInstance = {
+  _$litServerTemplateInstance$: boolean;
   hydratable: boolean;
+  id: number;
+  index: number;
   root: null | 'light' | 'shadow';
+  maxIndex: number;
   template: Template;
+  valueIndex: number;
   values: Array<unknown>;
   readChunk(options?: InternalRenderOptions): unknown;
 };

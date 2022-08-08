@@ -37,7 +37,7 @@ if (typeof globalThis.window === 'undefined') {
   }
 
   class HTMLElement extends Element {
-    __templateResult__ = null;
+    __templateInstance__ = null;
   }
 
   class Document {

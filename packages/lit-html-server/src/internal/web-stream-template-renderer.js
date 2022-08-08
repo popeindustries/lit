@@ -1,8 +1,8 @@
-import { getProcessor } from './template-result-processor.js';
+import { getProcessor } from './render-processor.js';
 
 /**
  * A custom `ReadableStream` factory for rendering a template result to a web stream
- * @param { TemplateResult } result - a template result returned from call to "html`...`"
+ * @param { TemplateInstance } result - a template result returned from call to "html`...`"
  * @param { InternalRenderOptions } [options]
  * @returns { ReadableStream }
  */

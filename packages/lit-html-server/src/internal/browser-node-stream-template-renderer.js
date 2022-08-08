@@ -1,7 +1,7 @@
 /**
  * Factory for NodeStreamTemplateRenderer instances.
  * Not supported in browser environments
- * @param { TemplateResult } result - a template result returned from call to "html`...`"
+ * @param { TemplateInstance } result - a template result returned from call to "html`...`"
  * @param { InternalRenderOptions } [options]
  */
 export function nodeStreamTemplateRenderer(result, options) {

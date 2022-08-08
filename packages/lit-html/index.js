@@ -16,6 +16,8 @@ import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/dire
 import { noChange, render as litRender, _$LH } from 'lit-html';
 import { PartType } from 'lit-html/directive.js';
 
+export { html, noChange, nothing, svg } from 'lit-html';
+
 const {
   _ChildPart: ChildPart,
   _ElementPart: ElementPart,
@@ -35,7 +37,6 @@ const RE_ATTR_LENGTH = /^lit-attr (\d+)/;
  */
 export function render(value, container, options = {}) {
   const partOwnerNode = options.renderBefore ?? container;
-  // TODO: if `value` is lit-html-server TemplateResult, bail and save `value` in `container.__templateResult__`
 
   // @ts-expect-error - internal property
   if (partOwnerNode['_$litPart$'] !== undefined) {
@@ -44,12 +45,12 @@ export function render(value, container, options = {}) {
     return;
   }
 
-  // If called on server (`value` is lit-html-server TemplateResult),
+  // If called on server (`value` is lit-html-server TemplateInstance),
   // store `value` on `container` for later use by ElementRenderer.
   // @ts-expect-error - internal property
-  if (value && typeof value === 'object' && value['_$litServerTemplateResult$']) {
+  if (value && typeof value === 'object' && value['_$litServerTemplateInstance$']) {
     // @ts-expect-error - internal property
-    container.__templateResult__ = value;
+    container.__templateInstance__ = value;
     return;
   }
 

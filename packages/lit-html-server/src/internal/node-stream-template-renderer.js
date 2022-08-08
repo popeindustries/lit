@@ -1,9 +1,9 @@
-import { getProcessor } from './template-result-processor.js';
+import { getProcessor } from './render-processor.js';
 import { Readable } from 'node:stream';
 
 /**
  * Factory for NodeStreamTemplateRenderer instances
- * @param { TemplateResult } result - a template result returned from call to "html`...`"
+ * @param { TemplateInstance } result - a template result returned from call to "html`...`"
  * @param { InternalRenderOptions } [options]
  * @returns { Readable }
  */
@@ -17,7 +17,7 @@ export function nodeStreamTemplateRenderer(result, options) {
 class NodeStreamTemplateRenderer extends Readable {
   /**
    * Constructor
-   * @param { TemplateResult } result - a template result returned from call to "html`...`"
+   * @param { TemplateInstance } result - a template result returned from call to "html`...`"
    * @param { InternalRenderOptions } [options]
    */
   constructor(result, options) {

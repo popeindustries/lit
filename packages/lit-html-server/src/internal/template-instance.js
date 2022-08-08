@@ -1,13 +1,31 @@
 import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart } from './parts.js';
 import { META_CHILD_CLOSE, META_CLOSE, META_CLOSE_SHADOW } from './consts.js';
 import { Buffer } from '#buffer';
+import { Template } from './template.js';
 
+const templateCache = new Map();
 let id = 0;
+
+/**
+ * Retrieve `TemplateInstance` instance
+ * @param { TemplateResult } result
+ */
+export function getTemplateInstance(result) {
+  const strings = result.strings;
+  let template = templateCache.get(strings);
+
+  if (template === undefined) {
+    template = new Template(strings);
+    templateCache.set(strings, template);
+  }
+
+  return new TemplateInstance(template, result.values);
+}
 
 /**
  * A class for consuming the combined static and dynamic parts of a Template.
  */
-export class TemplateResult {
+export class TemplateInstance {
   /**
    * Constructor
    * @param { Template } template
@@ -15,7 +33,7 @@ export class TemplateResult {
    * @param { boolean } [hydratable]
    */
   constructor(template, values, hydratable = false) {
-    this._$litServerTemplateResult$ = true;
+    this._$litServerTemplateInstance$ = true;
     this.hydratable = hydratable;
     this.id = id++;
     this.index = 0;
