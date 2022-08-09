@@ -19,7 +19,7 @@ function template(data) {
         <title>${data.title}</title>
       </head>
       <body>
-        ${hydratable(everything(html, data))}
+        ${hydratable(everything(data))}
       </body>
     </html>
   `;

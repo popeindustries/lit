@@ -45,15 +45,6 @@ export function render(value, container, options = {}) {
     return;
   }
 
-  // If called on server (`value` is lit-html-server TemplateInstance),
-  // store `value` on `container` for later use by ElementRenderer.
-  // @ts-expect-error - internal property
-  if (value && typeof value === 'object' && value['_$litServerTemplateInstance$']) {
-    // @ts-expect-error - internal property
-    container.__templateInstance__ = value;
-    return;
-  }
-
   /** @type { Comment | null } */
   let openingComment = null;
   /** @type { Comment | null } */

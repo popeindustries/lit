@@ -15,7 +15,11 @@
   ],
   "type": "module",
   "exports": {
-    ".": "./index.js",
+    ".": {
+      "types": "./index.d.ts",
+      "browser": "./index.js",
+      "default": "./not-browser.js"
+    },
     "./partial-hydration-mixin.js": "./partial-hydration-mixin.js",
     "./directives/*": "./directives/*"
   },

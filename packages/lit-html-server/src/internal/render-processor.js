@@ -6,7 +6,7 @@ import {
   isIteratorResult,
   isTemplateResult,
   isPromise,
-  isTemplateInstance,
+  isTemplateInstanceOrResult,
 } from './is.js';
 import { Buffer } from '#buffer';
 import { getTemplateInstance } from './template-instance.js';
@@ -51,7 +51,7 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
         return renderer.push(null);
       }
 
-      if (isTemplateInstance(chunk) || isTemplateResult(chunk)) {
+      if (isTemplateInstanceOrResult(chunk)) {
         popStack = false;
         chunk = getTemplateInstanceChunk(chunk, stack, options);
       }
@@ -99,7 +99,7 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
               renderer.destroy(err);
             });
         } else if (isArray(chunk)) {
-          // First remove existing Array if at top of stack (not added by pending TemplateResult)
+          // First remove existing Array if at top of stack (not added by pending TemplateInstance)
           if (stack[0] === chunk) {
             popStack = false;
             stack.shift();
@@ -131,7 +131,7 @@ export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
 }
 
 /**
- * Retrieve next chunk from "result".
+ * Retrieve next chunk from "instance".
  * Adds nested TemplateResults to the stack if necessary.
  * @param { TemplateInstance | TemplateResult } instance
  * @param { Array<unknown> } stack
@@ -161,7 +161,7 @@ function getTemplateInstanceChunk(instance, stack, options) {
       options.hydrationRoot = undefined;
     }
     stack.shift();
-  } else if (isTemplateInstance(chunk)) {
+  } else if (isTemplateInstanceOrResult(chunk)) {
     // Add to top of stack
     stack.unshift(chunk);
     chunk = getTemplateInstanceChunk(chunk, stack, options);

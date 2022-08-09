@@ -50,13 +50,23 @@ export function isTemplateInstance(result) {
 }
 
 /**
- * Determine whether "result" is a lit-html TemplateResult
+ * Determine whether "result" is a TemplateResult
  * @param { unknown } result
  * @returns { result is TemplateResult }
  */
 export function isTemplateResult(result) {
   const r = /** @type { TemplateResult } */ (result);
   return r != null && '_$litType$' in r;
+}
+
+/**
+ * Determine whether "result" is a TemplateResult or TemplateInstance
+ * @param { unknown } result
+ * @returns { result is TemplateResult | TemplateInstance }
+ */
+export function isTemplateInstanceOrResult(result) {
+  const r = /** @type { TemplateResult | TemplateInstance } */ (result);
+  return r != null && ('_$litType$' in r || '_$litServerTemplateInstance$' in r);
 }
 
 /**

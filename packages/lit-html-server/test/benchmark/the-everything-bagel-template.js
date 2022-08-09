@@ -1,12 +1,12 @@
 import './custom-element.js';
+import { html } from 'lit-html';
 import { classMap } from 'lit-html/directives/class-map.js';
 import { ref } from 'lit-html/directives/ref.js';
 
 /**
- * @param { Function } html
  * @param { { title: string, isTrue: boolean, number: number } } data
  */
-export default function everything(html, data) {
+export default function everything(data) {
   return html`
     <header><h1 class="${classMap({ negative: data.isTrue })}" ?negative="${data.isTrue}">${data.title}</h1></header>
     <main>
