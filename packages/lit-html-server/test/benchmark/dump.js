@@ -13,7 +13,7 @@ const data = {
 
 if (process.argv[2] === 'ssr') {
   let buffer = '';
-  for (const chunk of render(everything(litHtml, data))) {
+  for (const chunk of render(everything(data))) {
     buffer += chunk;
   }
   console.log(
@@ -21,5 +21,5 @@ if (process.argv[2] === 'ssr') {
   );
 } else {
   customElements.define('custom-element', CustomElement);
-  renderToString(html`${hydratable(everything(html, data))}`, { elementRenderers: [Renderer] }).then(console.log);
+  renderToString(html`${hydratable(everything(data))}`, { elementRenderers: [Renderer] }).then(console.log);
 }

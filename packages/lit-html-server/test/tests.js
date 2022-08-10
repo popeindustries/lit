@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { html as h, render } from '@popeindustries/lit-html';
-import { createAsyncIterable } from './utils.js';
 import { PartialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
 
 export const tests = [
@@ -351,3 +350,14 @@ export const tests = [
       '<!--lit GpJxfqkCRnw=--><h1>Title</h1><my-el9 a hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit /0wYmzo69CE=--><div a><!--lit-attr 1-->my <my-el10 hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></template></my-el10></div><!--/lit--></template></my-el9><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
   },
 ];
+
+/**
+ * Convert "syncIterable" to an AsyncIterable
+ * @param { Iterable<unknown> } syncIterable
+ * @returns { AsyncIterable<unknown> }
+ */
+export async function* createAsyncIterable(syncIterable) {
+  for (const elem of syncIterable) {
+    yield elem;
+  }
+}

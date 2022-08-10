@@ -93,10 +93,8 @@ export class ElementRenderer {
    * @returns { TemplateInstance | null }
    */
   render() {
-    // Return stored if element render has already been called (in connectedCallback f.ex)
-    const templateResult = this.element.__templateInstance__ ?? this.element.render?.() ?? null;
-    this.element.__templateInstance__ = null;
-    return templateResult;
+    // TODO: add innerHTML support?
+    return this.element.render?.() ?? null;
   }
 }
 

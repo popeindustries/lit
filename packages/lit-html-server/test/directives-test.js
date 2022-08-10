@@ -6,7 +6,6 @@ import { asyncAppend } from '../src/directives/async-append.js';
 import { asyncReplace } from '../src/directives/async-replace.js';
 import { cache } from 'lit-html/directives/cache.js';
 import { classMap } from 'lit-html/directives/class-map.js';
-import { createAsyncIterable } from './utils.js';
 import { guard } from 'lit-html/directives/guard.js';
 import { ifDefined } from 'lit-html/directives/if-defined.js';
 import { hydratable } from '../src/directives/hydratable.js';
@@ -116,7 +115,7 @@ describe('directives', () => {
       const result = h`<div class="${'bye'}">${hydratable(h`<span class="${'hi'}">hi</span>`)}</div>`;
       assert.equal(
         await render(result),
-        '<div class="bye"><!--lit-child rtM8orPci6o=--><span class="hi"><!--lit-attr 0-->hi</span><!--/lit-child--></div>',
+        '<div class="bye"><!--lit rtM8orPci6o=--><span class="hi"><!--lit-attr 1-->hi</span><!--/lit--></div>',
       );
     });
   });
@@ -261,3 +260,14 @@ describe('directives', () => {
     });
   });
 });
+
+/**
+ * Convert "syncIterable" to an AsyncIterable
+ * @param { Iterable<unknown> } syncIterable
+ * @returns { AsyncIterable<unknown> }
+ */
+export async function* createAsyncIterable(syncIterable) {
+  for (const elem of syncIterable) {
+    yield elem;
+  }
+}

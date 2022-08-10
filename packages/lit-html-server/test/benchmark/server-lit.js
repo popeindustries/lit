@@ -33,6 +33,6 @@ function* template(data) {
         <title>${data.title}</title>
       </head>
       <body>`;
-  yield* render(everything(litHtml, data));
+  yield* render(everything(data));
   yield `</body></html>`;
 }

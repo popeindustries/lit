@@ -22,19 +22,24 @@ class HydratableDirective extends Directive {
    */
   render(value) {
     if (isPromise(value)) {
-      return value.then((value) => {
-        const instance = getTemplateInstance(value);
-        instance.hydratable = true;
-        return instance;
-      });
+      return value.then((value) => resolveTemplateResult(value));
     }
-    const instance = getTemplateInstance(value);
-    instance.hydratable = true;
-    return instance;
+    return resolveTemplateResult(value);
   }
 }
 
 export const hydratable = directive(HydratableDirective);
+
+/**
+ * Convert `result` to TemplateInstance
+ * @param { TemplateResult } result
+ */
+function resolveTemplateResult(result) {
+  const instance = getTemplateInstance(result);
+  instance.hydratable = true;
+  instance.root = 'light';
+  return instance;
+}
 
 /**
  * Determine if "promise" is a Promise instance

@@ -4,7 +4,7 @@ import assert from 'node:assert';
 import { streamAsPromise } from './utils.js';
 import { tests } from './tests.js';
 
-describe.only('Render', () => {
+describe('Render', () => {
   beforeEach(() => {
     customElements._registry.clear();
   });

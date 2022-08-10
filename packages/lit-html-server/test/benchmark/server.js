@@ -1,8 +1,8 @@
 import { CustomElement, Renderer } from './custom-element.js';
-import { html, renderToNodeStream } from '../../index.js';
+import { html, renderToNodeStream } from '@popeindustries/lit-html-server';
 import everything from './the-everything-bagel-template.js';
 import http from 'http';
-import { hydratable } from '../../directives/hydratable.js';
+import { hydratable } from '@popeindustries/lit-html-server/directives/hydratable.js';
 
 customElements.define('custom-element', CustomElement);
 
@@ -26,7 +26,7 @@ function template(data) {
 }
 
 http
-  .createServer((req, res) => {
+  .createServer(async (req, res) => {
     const data = {
       title: new Date().toISOString(),
       isTrue: Math.random() > 0.5,

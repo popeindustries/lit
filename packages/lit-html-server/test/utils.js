@@ -1,29 +1,5 @@
-import { html } from '../src/index.js';
-import { html as litHtml } from 'lit-html';
 import { partType } from '../src/internal/parts.js';
 import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-
-/**
- * @param { string } template
- */
-export function getTemplates(template) {
-  return [html, litHtml].map((fn) => {
-    const html = fn;
-    return eval(template);
-  });
-}
-
-/**
- * Convert "syncIterable" to an AsyncIterable
- * @param { Iterable<unknown> } syncIterable
- * @returns { AsyncIterable<unknown> }
- */
-export async function* createAsyncIterable(syncIterable) {
-  for (const elem of syncIterable) {
-    yield elem;
-  }
-}
 
 /**
  * Convert stream to a Promise
