@@ -86,16 +86,20 @@ export const tests = [
       '<!--lit rQEcjeuOsoE=--><div>some <!--lit-child--><!--lit-child BRUAAAUVAAA=--><!--lit-child-->1<!--/lit-child--><!--/lit-child--><!--lit-child BRUAAAUVAAA=--><!--lit-child-->2<!--/lit-child--><!--/lit-child--><!--lit-child BRUAAAUVAAA=--><!--lit-child-->3<!--/lit-child--><!--/lit-child--><!--/lit-child--> text</div><!--/lit-->',
   },
   {
-    skip: true,
     title: 'AsyncIterator child',
-    template: () => h`<div>${createAsyncIterable(['some', ' async'])} text</div>`,
+    template: () => {
+      const iter = createAsyncIterable(['some', ' async']);
+      return h`<div>${iter} text</div>`;
+    },
     metadata: false,
     result: '<div>some async text</div>',
   },
   {
-    skip: true,
     title: 'AsyncIterator child templates',
-    template: () => h`<div>${createAsyncIterable([h`some`, h` async`])} text</div>`,
+    template: () => {
+      const iter = createAsyncIterable([h`some`, h` async`]);
+      return h`<div>${iter} text</div>`;
+    },
     metadata: false,
     result: '<div>some async text</div>',
   },

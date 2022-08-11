@@ -4,11 +4,7 @@ import assert from 'node:assert';
 import { streamAsPromise } from './utils.js';
 import { tests } from './tests.js';
 
-describe('Render', () => {
-  beforeEach(() => {
-    customElements._registry.clear();
-  });
-
+describe.only('Render', () => {
   const only = tests.filter(({ only }) => only);
 
   for (let { title, template, metadata, result, skip } of only.length ? only : tests) {
@@ -18,9 +14,12 @@ describe('Render', () => {
       it.skip(fullTitle);
     } else {
       it(fullTitle, async () => {
-        template = template();
-        const string = await renderToString(template, { includeHydrationMetadata: metadata });
-        const stream = await streamAsPromise(renderToNodeStream(template, { includeHydrationMetadata: metadata }));
+        customElements._registry.clear();
+        let t = template();
+        const string = await renderToString(t, { includeHydrationMetadata: metadata });
+        customElements._registry.clear();
+        t = template = template();
+        const stream = await streamAsPromise(renderToNodeStream(t, { includeHydrationMetadata: metadata }));
         assert.equal(string, stream);
         assert.equal(string, result);
       });
