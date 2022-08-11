@@ -1,6 +1,8 @@
-import { AttributePart, ChildPart, CustomElementPart, getAttributeTypeFromName, MetadataPart } from './parts.js';
+// Avoid live bindings Node bug
+import * as parts from './parts.js';
 import { Buffer } from '#buffer';
 import { digestForTemplateStrings } from '#digest';
+import { getAttributeTypeFromName } from './parts.js';
 
 // https://html.spec.whatwg.org/multipage/scripting.html#valid-custom-element-name
 const HTML_TAGS_WITH_HYPHENS = new Set([
@@ -31,12 +33,20 @@ const ATTRIBUTE = 2;
 const COMMENT = 3;
 
 /**
+ * Create Template instance
+ * @param { TemplateStringsArray } strings
+ */
+export function getTemplate(strings) {
+  return new Template(strings);
+}
+
+/**
  * A cacheable Template that stores the "strings" and "parts" associated with a
  * tagged template literal invoked with "html`...`".
  */
-export class Template {
+class Template {
   /**
-   * Create Template instance
+   * Constructor
    * @param { TemplateStringsArray } strings
    */
   constructor(strings) {
@@ -55,7 +65,7 @@ export class Template {
    * @param { TemplateStringsArray } strings
    */
   _parse(strings) {
-    /** @type { AttributePart | CustomElementPart | undefined } */
+    /** @type { parts.AttributePart | parts.CustomElementPart | undefined } */
     let attributePart;
     let isCustomElement = false;
     /** @type { typeof ATTRIBUTE | typeof TEXT | typeof COMMENT } */
@@ -109,7 +119,7 @@ export class Template {
               nodeIndex++;
 
               if (isCustomElement) {
-                attributePart = new CustomElementPart(tagName, nodeIndex);
+                attributePart = new parts.CustomElementPart(tagName, nodeIndex);
               } else {
                 // If tag end ('>') is in the same string, we can skip attribute parsing
                 RE_TAG_END.lastIndex = lastIndex;
@@ -117,7 +127,7 @@ export class Template {
                   // Skip to tag end
                   lastIndex = RE_TAG_END.lastIndex - 1;
                 } else {
-                  attributePart = new AttributePart(tagName);
+                  attributePart = new parts.AttributePart(tagName);
                 }
               }
 
@@ -148,7 +158,7 @@ export class Template {
             } else if (attributePart !== undefined) {
               // Insert metadata for attributes after close of opening tag
               this.strings.push(Buffer.from('>'));
-              this.parts.push(new MetadataPart(tagName, Buffer.from(`<!--lit-attr ${attributePart.length}-->`)));
+              this.parts.push(new parts.MetadataPart(tagName, Buffer.from(`<!--lit-attr ${attributePart.length}-->`)));
               string = string.slice(lastIndex);
               lastIndex = 0;
             }
@@ -253,7 +263,7 @@ export class Template {
 
         if (mode === TEXT) {
           if (!isLastString) {
-            this.parts.push(new ChildPart(tagName));
+            this.parts.push(new parts.ChildPart(tagName));
           }
         } else if (mode === COMMENT) {
           throw Error('parsing expressions inside comment tags is not supported!');

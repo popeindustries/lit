@@ -1,6 +1,6 @@
 // @ts-nocheck
 import assert from 'assert';
-import { Template } from '../src/internal/template.js';
+import { getTemplate } from '../src/internal/template.js';
 import { templateToString } from './utils.js';
 
 describe('Parse', () => {
@@ -111,7 +111,7 @@ describe('Parse', () => {
       it.skip(fullTitle);
     } else {
       it(fullTitle, async () => {
-        const string = templateToString(new Template(template.split('${x}')));
+        const string = templateToString(getTemplate(template.split('${x}')));
         try {
           assert(string === result);
         } catch (err) {

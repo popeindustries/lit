@@ -1,7 +1,7 @@
 import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart } from './parts.js';
 import { META_CHILD_CLOSE, META_CLOSE, META_CLOSE_SHADOW } from './consts.js';
 import { Buffer } from '#buffer';
-import { Template } from './template.js';
+import { getTemplate } from './template.js';
 
 const templateCache = new Map();
 let id = 0;
@@ -15,7 +15,7 @@ export function getTemplateInstance(result) {
   let template = templateCache.get(strings);
 
   if (template === undefined) {
-    template = new Template(strings);
+    template = getTemplate(strings);
     templateCache.set(strings, template);
   }
 
