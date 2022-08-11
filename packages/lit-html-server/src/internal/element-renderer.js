@@ -1,7 +1,7 @@
 import { escape } from './escape.js';
 
 /**
- * @typedef { HTMLElement & { __templateInstance__: TemplateInstance | null, render?(): TemplateInstance } } CustomElement
+ * @typedef { HTMLElement & { render?(): TemplateResult } } CustomElement
  */
 
 /**
@@ -90,11 +90,11 @@ export class ElementRenderer {
   }
 
   /**
-   * @returns { TemplateInstance | null }
+   * @returns { TemplateResult | string | null }
    */
   render() {
-    // TODO: add innerHTML support?
-    return this.element.render?.() ?? null;
+    const innerHTML = this.element.shadowRoot?.innerHTML || this.element.innerHTML;
+    return innerHTML || (this.element.render?.() ?? null);
   }
 }
 

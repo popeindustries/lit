@@ -116,7 +116,7 @@ declare class ElementRenderer {
   setProperty(name: string, value: unknown): void;
   setAttribute(name: string, value: string): void;
   renderAttributes(): string;
-  render(): unknown;
+  render(): TemplateResult | string | null;
 }
 
 /**

@@ -1,22 +1,20 @@
 import { EMPTY_STRING_BUFFER, META_CHILD_CLOSE, META_CHILD_OPEN } from './consts.js';
-import { getTemplateInstance, TemplateInstance } from './template-instance.js';
 import {
   isArray,
   isAsyncIterator,
   isBuffer,
   isDirective,
-  isObject,
   isPrimitive,
   isPromise,
   isSyncIterator,
   isTemplateInstanceOrResult,
-  isTemplateResult,
 } from './is.js';
-import { html, noChange, nothing } from 'lit-html';
+import { noChange, nothing } from 'lit-html';
 import { Buffer } from '#buffer';
-import { digestForTemplateStrings } from '#digest';
 import { escape } from './escape.js';
 import { getElementRenderer } from './element-renderer.js';
+import { getFakeTemplateResult } from './template-result.js';
+import { getTemplateInstance } from './template-instance.js';
 
 export const partType = {
   METADATA: 0,
@@ -260,7 +258,6 @@ export class ChildPart {
       value,
       this.tagName,
       RE_RAW_TEXT_ELEMENT.test(this.tagName) || !options.includeHydrationMetadata ? false : true,
-      true,
     );
   }
 }
@@ -357,21 +354,20 @@ export class CustomElementPart extends AttributePart {
     /** @type { Array<unknown> } */
     const result = [resolvedAttributes];
 
-    // Only render content if hydrating and server rendering hasn't been disabled via `render:client` attribute
-    if (options.includeHydrationMetadata && shouldRender) {
+    if (options.includeHydrationMetadata) {
       result.push(Buffer.from(`<!--lit-attr ${this.length}-->`));
+    }
 
-      const renderedContent = renderer.render();
+    if (shouldRender) {
+      let renderedContent = renderer.render();
 
       if (renderedContent !== null) {
-        if (!isTemplateResult(renderedContent)) {
-          throw Error(
-            `expected TemplateResult from call to "${this.tagName}" render(), but recieved: ${renderedContent}`,
-          );
+        // Handle string from innerHTML (convert to fake TemplateResult to avoid escaping).
+        if (typeof renderedContent === 'string') {
+          renderedContent = getFakeTemplateResult(renderedContent);
         }
-
         const instance = getTemplateInstance(renderedContent);
-        instance.root = renderer.element.shadowRoot ? 'shadow' : 'light';
+        instance.root = renderer.element.shadowRoot !== null ? 'shadow' : 'light';
         result.push(resolveNodeValue(instance, this.tagName, options.includeHydrationMetadata ?? false));
       }
     }
@@ -478,10 +474,9 @@ function resolvePropertyValue(value, tagName, data) {
  * @param { unknown } value
  * @param { string } tagName
  * @param { boolean } withMetadata
- * @param { boolean } [escaped]
  * @returns { unknown }
  */
-function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
+function resolveNodeValue(value, tagName, withMetadata) {
   let valueIsDirective = false;
 
   if (isDirective(value)) {
@@ -498,9 +493,7 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
 
   if (isPrimitive(value)) {
     let string = typeof value !== 'string' ? String(value) : value;
-    if (escaped) {
-      string = escape(string, tagName === 'script' || tagName === 'style' ? tagName : 'text');
-    }
+    string = escape(string, tagName === 'script' || tagName === 'style' ? tagName : 'text');
     value = Buffer.from(string);
   }
 
@@ -516,7 +509,7 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
         `lit-html does not support interpolation of Promises, and these will not be rendered correctly in the browser. Use the "until" directive instead.`,
       );
     }
-    return value.then((value) => resolveNodeValue(value, tagName, withMetadata, escaped));
+    return value.then((value) => resolveNodeValue(value, tagName, withMetadata));
   } else if (isSyncIterator(value)) {
     if (!isArray(value)) {
       value = Array.from(value);
@@ -524,7 +517,7 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
     /** @type { Array<unknown> } */
     const collection = withMetadata ? [META_CHILD_OPEN] : [];
     for (let val of /** @type { Array<unknown> } */ (value)) {
-      val = resolveNodeValue(val, tagName, withMetadata, escaped);
+      val = resolveNodeValue(val, tagName, withMetadata);
       // Flatten
       if (isArray(val)) {
         collection.push(...val);
@@ -544,7 +537,7 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
         `lit-html does not support interpolation of AsyncIterators, and these will not be rendered correctly in the browser. Use the "async-*" directives instead.`,
       );
     }
-    return resolveAsyncIteratorValue(value, tagName, withMetadata, escaped);
+    return resolveAsyncIteratorValue(value, tagName, withMetadata);
   } else {
     throw Error(`unknown NodePart value: ${value}`);
   }
@@ -555,12 +548,11 @@ function resolveNodeValue(value, tagName, withMetadata, escaped = true) {
  * @param { AsyncIterable<unknown> } iterator
  * @param { string } tagName
  * @param { boolean } withMetadata
- * @param { boolean } escaped
  * @returns { AsyncGenerator<unknown> }
  */
-async function* resolveAsyncIteratorValue(iterator, tagName, withMetadata, escaped) {
+async function* resolveAsyncIteratorValue(iterator, tagName, withMetadata) {
   for await (const value of iterator) {
-    yield resolveNodeValue(value, tagName, withMetadata, escaped);
+    yield resolveNodeValue(value, tagName, withMetadata);
   }
 }
 
@@ -579,21 +571,8 @@ function resolveDirectiveValue(directiveResult, partInfo) {
   if (result === noChange) {
     return EMPTY_STRING_BUFFER;
   }
-  // Handle fake TemplateResult from unsafeHTML/unsafeSVG
-  else if (isObject(result) && 'strings' in result) {
-    // @ts-ignore
-    const unsafeStrings = result.strings;
-    // Make fake Template instance to avoid unnecessary parsing
-    const template = {
-      digest: digestForTemplateStrings(unsafeStrings),
-      strings: [Buffer.from(unsafeStrings[0])],
-      parts: [],
-    };
-    // @ts-ignore
-    return new TemplateInstance(template, []);
-  } else {
-    return result;
-  }
+
+  return result;
 }
 
 /**

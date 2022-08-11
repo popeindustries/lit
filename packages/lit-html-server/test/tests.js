@@ -225,7 +225,6 @@ export const tests = [
     result: '<!--lit mcimSba/om0=--><my-el2 a="a" hydrate:defer><!--lit-attr 0--></my-el2><!--/lit-->',
   },
   {
-    skip: true,
     title: 'custom element with innerHTML set during construction',
     template: () => {
       class MyEl extends HTMLElement {
@@ -238,10 +237,10 @@ export const tests = [
       return h`<my-el3></my-el3>`;
     },
     metadata: true,
-    result: '<!--lit +I/NQre/om0=--><my-el3><!--lit-attr 0--><!--lit-child-->text<!--/lit-child--></my-el3><!--/lit-->',
+    result:
+      '<!--lit +I/NQre/om0=--><my-el3 hydrate:defer><!--lit-attr 0--><!--lit iW9ZALRtWQA=-->text<!--/lit--></my-el3><!--/lit-->',
   },
   {
-    skip: true,
     title: 'custom element with innerHTML set during connectedCallback',
     template: () => {
       class MyEl extends HTMLElement {
@@ -254,10 +253,9 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit-child 31Y0PLC/om0=--><my-el4><!--lit-attr 0--><!--lit-child-->text<!--/lit-child--></my-el4><!--/lit-child-->',
+      '<!--lit 31Y0PLC/om0=--><my-el4 hydrate:defer><!--lit-attr 0--><!--lit iW9ZALRtWQA=-->text<!--/lit--></my-el4><!--/lit-->',
   },
   {
-    skip: true,
     title: 'custom element with shadowDOM innerHTML set during construction',
     template: () => {
       class MyEl extends HTMLElement {
@@ -272,7 +270,7 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit-child Ph5bNbG/om0=--><my-el5><!--lit-attr 0--><!--lit-child--><template shadowroot="open">text</template><!--/lit-child--></my-el5><!--/lit-child-->',
+      '<!--lit Ph5bNbG/om0=--><my-el5 hydrate:defer><!--lit-attr 0--><template shadowroot="open"><!--lit iW9ZALRtWQA=-->text<!--/lit--></template></my-el5><!--/lit-->',
   },
   {
     title: 'custom element with "render:client" attribute',
@@ -287,7 +285,8 @@ export const tests = [
       return h`<my-el6 ?render:client=${true}><span slot="my-text">some text</span></my-el6>`;
     },
     metadata: true,
-    result: '<!--lit l8hegyhGWbE=--><my-el6 render:client><span slot="my-text">some text</span></my-el6><!--/lit-->',
+    result:
+      '<!--lit l8hegyhGWbE=--><my-el6 render:client><!--lit-attr 1--><span slot="my-text">some text</span></my-el6><!--/lit-->',
   },
   {
     title: 'nested custom elements with deferred hydration',
