@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { getTemplates, renderLitTemplate } from './utils.js';
 import assert from 'node:assert';
-import { renderToString } from '../src/index.js';
+import { renderToString } from '../src/lit-html-server.js';
 
 describe.skip('Compatibility', () => {
   const tests = [

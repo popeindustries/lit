@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { html } from 'lit-html';
-import { render } from '../index.js';
+import { render } from '../lit-html.js';
 import { tests } from '../../lit-html-server/test/tests.js';
 
 describe('hydrate', () => {

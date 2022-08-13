@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { directive, Directive } from 'lit-html/directive.js';
-import { html as h, renderToString as render } from '../src/index.js';
+import { html as h, renderToString as render } from '../src/lit-html-server.js';
 import assert from 'assert';
 import { asyncAppend } from '../src/directives/async-append.js';
 import { asyncReplace } from '../src/directives/async-replace.js';

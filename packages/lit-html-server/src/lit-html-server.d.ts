@@ -1,10 +1,6 @@
 export { html, noChange, nothing, svg } from 'lit-html';
 
 /**
- * Retrieve `TemplateInstance` instance
- */
-export function getTemplateInstance(result: TemplateResult): TemplateInstance;
-/**
  * Renders a value, usually a `TemplateResult` returned from using the `html` tagged template literal, to a Buffer resolving Promise
  */
 export function renderToBuffer(value: unknown, options?: RenderOptions): Promise<Buffer>;

@@ -1,0 +1,10 @@
+/decorators
+/directives
+/*.js
+/*.d.ts
+!/html.d.ts
+!/html.js
+!/html-server.d.ts
+!/html-server.js
+!/index.d.ts
+!/index.js

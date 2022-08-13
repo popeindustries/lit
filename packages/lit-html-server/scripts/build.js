@@ -4,22 +4,22 @@ import path from 'node:path';
 
 await esbuild.build({
   bundle: true,
-  entryPoints: ['./src/index.js'],
+  entryPoints: ['./src/lit-html-server.js'],
   external: ['lit-html', 'lit-html/*', '*dom-shim.js'],
   format: 'esm',
   target: 'node16',
   platform: 'node',
-  outfile: 'index.js',
+  outfile: 'lit-html-server.js',
 });
 
 await esbuild.build({
   bundle: true,
-  entryPoints: ['./src/index.js'],
+  entryPoints: ['./src/lit-html-server.js'],
   external: ['lit-html', 'lit-html/*'],
   format: 'esm',
   target: 'es2020',
   platform: 'browser',
-  outfile: 'browser.js',
+  outfile: 'lit-html-server-in-worker.js',
   plugins: [
     {
       // Replace contents of `dom-shim.js` with empty string
@@ -45,7 +45,10 @@ const types = fs
   .readFileSync(path.resolve('src/internal/types.d.ts'), 'utf8')
   .replace(/(declare) (interface|type|enum|namespace|function|class)/g, 'export $2');
 
-fs.writeFileSync(path.resolve('index.d.ts'), `${types}\n${fs.readFileSync(path.resolve('src/index.d.ts'), 'utf8')}`);
+fs.writeFileSync(
+  path.resolve('lit-html-server.d.ts'),
+  `${types}\n${fs.readFileSync(path.resolve('src/lit-html-server.d.ts'), 'utf8')}`,
+);
 
 fs.copyFileSync(path.resolve('src/dom-shim.js'), path.resolve('dom-shim.js'));
 

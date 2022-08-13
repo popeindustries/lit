@@ -17,8 +17,9 @@
   "types": "index.d.ts",
   "exports": {
     ".": {
-      "browser": "./browser.js",
-      "node": "./index.js"
+      "types": "./lit-html-server.d.ts",
+      "browser": "./lit-html-server-in-worker.js",
+      "node": "./lit-html-server.js"
     },
     "./directives/*": "./directives/*"
   },
@@ -48,10 +49,10 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "lit-html": "^2.2.7"
+    "lit-html": "^2.3.0"
   },
   "devDependencies": {
-    "@lit-labs/ssr": "2.2.2",
+    "@lit-labs/ssr": "2.2.3",
     "@popeindustries/lit-html": "workspace:*",
     "autocannon": "^7.9.0",
     "send": "^0.18.0"

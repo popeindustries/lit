@@ -7,9 +7,10 @@
  */
 
 /**
- * @typedef { import('./index.d.js').HydrationChildPartState } HydrationChildPartState
+ * @typedef { import('./lit-html.js').HydrationChildPartState } HydrationChildPartState
  * @typedef { import('lit-html').ChildPart } ChildPart
  * @typedef { import('lit-html').RenderOptions } RenderOptions
+ * @typedef { import('lit-html').RootPart } RootPart
  */
 
 import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/directive-helpers.js';
@@ -34,6 +35,7 @@ const RE_ATTR_LENGTH = /^lit-attr (\d+)/;
  * @param { unknown } value
  * @param { HTMLElement | DocumentFragment } container
  * @param { RenderOptions } [options]
+ * @returns { RootPart }
  */
 export function render(value, container, options = {}) {
   const partOwnerNode = options.renderBefore ?? container;
@@ -42,7 +44,8 @@ export function render(value, container, options = {}) {
   if (partOwnerNode['_$litPart$'] !== undefined) {
     // Already hydrated, so render instead
     litRender(value, container, options);
-    return;
+    // @ts-expect-error - internal property
+    return partOwnerNode['_$litPart$'];
   }
 
   /** @type { Comment | null } */
@@ -91,7 +94,7 @@ export function render(value, container, options = {}) {
 
       return active ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
     });
-    /** @type { ChildPart | undefined } */
+    /** @type { RootPart | undefined } */
     let rootPart = undefined;
     /** @type { ChildPart | undefined } */
     let currentChildPart = undefined;
@@ -111,7 +114,7 @@ export function render(value, container, options = {}) {
         }
         // Create a new ChildPart and push to top of stack
         currentChildPart = openChildPart(value, marker, stack, options);
-        rootPart ??= currentChildPart;
+        rootPart ??= /** @type { RootPart } */ (currentChildPart);
       } else if (markerText.startsWith('lit-attr')) {
         // Create AttributeParts for current ChildPart at top of the stack
         createAttributeParts(marker, stack, options);
@@ -129,6 +132,7 @@ export function render(value, container, options = {}) {
 
     // @ts-expect-error - internal property
     partOwnerNode['_$litPart$'] = rootPart;
+    return rootPart;
   } catch (err) {
     if (err) {
       console.error(
@@ -150,7 +154,7 @@ export function render(value, container, options = {}) {
       partOwnerNode.removeChild(openingComment);
     }
 
-    litRender(value, container, options);
+    return litRender(value, container, options);
   }
 }
 

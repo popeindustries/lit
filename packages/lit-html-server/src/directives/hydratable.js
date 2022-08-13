@@ -1,5 +1,6 @@
 import { directive, Directive, PartType } from 'lit-html/directive.js';
-import { getTemplateInstance } from '@popeindustries/lit-html-server';
+// @ts-ignore - private
+import { __internalGetTemplateInstance__ } from '@popeindustries/lit-html-server';
 
 class HydratableDirective extends Directive {
   /**
@@ -35,7 +36,7 @@ export const hydratable = directive(HydratableDirective);
  * @param { TemplateResult } result
  */
 function resolveTemplateResult(result) {
-  const instance = getTemplateInstance(result);
+  const instance = __internalGetTemplateInstance__(result);
   instance.hydratable = true;
   instance.root = 'light';
   return instance;

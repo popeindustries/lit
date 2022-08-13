@@ -5,7 +5,7 @@ export function PartialHydrationMixin<BaseClass extends CustomElementBase>(
   Base: BaseClass,
 ): BaseClass & {
   prototype: PartialHydration;
-  new (): PartialHydration;
+  new (...args: Array<any>): PartialHydration;
 };
 
 export class PartialHydration extends CustomElement {}
@@ -13,7 +13,7 @@ export class PartialHydration extends CustomElement {}
 export interface CustomElementBase {
   readonly observedAttributes: Array<string>;
   prototype: CustomElement;
-  new (): CustomElement;
+  new (...args: Array<any>): CustomElement;
 }
 
 export class CustomElement extends HTMLElement {

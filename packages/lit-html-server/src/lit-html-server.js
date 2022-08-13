@@ -8,7 +8,8 @@ import { webStreamTemplateRenderer } from './internal/web-stream-template-render
 
 export { html, noChange, nothing, svg } from 'lit-html';
 export { ElementRenderer } from './internal/element-renderer.js';
-export { getTemplateInstance } from './internal/template-instance.js';
+// Secret export for use by `hydratable` directive
+export { getTemplateInstance as __internalGetTemplateInstance__ } from './internal/template-instance.js';
 
 /**
  * Render a template result to a Node Readable stream

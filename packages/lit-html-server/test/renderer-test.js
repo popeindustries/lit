@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { renderToNodeStream, renderToString } from '../src/index.js';
+import { renderToNodeStream, renderToString } from '../src/lit-html-server.js';
 import assert from 'node:assert';
 import { streamAsPromise } from './utils.js';
 import { tests } from './tests.js';

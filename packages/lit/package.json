@@ -1,7 +1,7 @@
 {
-  "name": "@popeindustries/lit-html",
-  "version": "5.0.0-beta.1",
-  "description": "Enable hydration of lit-html templates rendered on the server with @popeindustries/lit-html-server",
+  "name": "@popeindustries/lit",
+  "version": "1.0.0-beta.1",
+  "description": "Seamlessly render lit templates and elements on the server and in the browser",
   "author": "Alexander Pope <alex@pope.industries>",
   "keywords": [
     "html template",
@@ -16,34 +16,41 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./lit-html.d.ts",
-      "browser": "./lit-html.js",
-      "default": "./lit-html-not-browser.js"
+      "types": "./index.d.ts",
+      "default": "./index.js"
     },
     "./async-directive.js": {
       "types": "./async-directive.d.ts",
       "default": "./async-directive.js"
     },
-    "./directive.js": {
-      "types": "./directive.d.ts",
-      "default": "./directive.js"
+    "./decorators.js": {
+      "types": "./decorators.d.ts",
+      "default": "./decorators.js"
     },
     "./directive-helpers.js": {
       "types": "./directive-helpers.d.ts",
       "default": "./directive-helpers.js"
     },
-    "./partial-hydration-mixin.js": {
-      "types": "./partial-hydration-mixin.d.ts",
-      "default": "./partial-hydration-mixin.js"
+    "./directive.js": {
+      "types": "./directive.d.ts",
+      "default": "./directive.js"
+    },
+    "./html-server.js": {
+      "types": "./html-server.d.ts",
+      "default": "./html-server.js"
+    },
+    "./html.js": {
+      "types": "./html.d.ts",
+      "default": "./html.js"
     },
     "./static.js": {
       "types": "./static.d.ts",
       "default": "./static.js"
     },
+    "./decorators/*": "./decorators/*",
     "./directives/*": "./directives/*"
   },
   "files": [
-    "directives",
     "*.d.ts",
     "*.js",
     "README.MD"
@@ -54,12 +61,15 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
+    "@lit/reactive-element": "^1.4.0",
+    "@popeindustries/lit-element": "workspace:*",
+    "@popeindustries/lit-html": "workspace:*",
+    "@popeindustries/lit-html-server": "workspace:*",
     "lit-html": "^2.3.0"
   },
+  "devDependencies": {},
   "scripts": {
     "build": "node ./scripts/build.js",
-    "clean": "git clean -x -f",
-    "test": "pnpm run build && pnpm run lint && pnpm run test:browser",
-    "test:browser": "node ./test/browser/cli.js"
+    "clean": "git clean -x -f"
   }
 }

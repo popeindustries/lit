@@ -32,8 +32,8 @@ interface TemplateResultRenderer {
   destroy: (err: Error) => void;
 }
 
-declare type AttributeDataType = 'boolean' | 'attribute' | 'property' | 'event' | 'element';
-declare type BooleanAttributeData = {
+type AttributeDataType = 'boolean' | 'attribute' | 'property' | 'event' | 'element';
+type BooleanAttributeData = {
   type: 'boolean';
   length: number;
   name: string;
@@ -41,7 +41,7 @@ declare type BooleanAttributeData = {
   value?: string;
   resolvedBuffer?: Buffer;
 };
-declare type AttributeOrPropertyAttributeData = {
+type AttributeOrPropertyAttributeData = {
   type: 'attribute' | 'property';
   length: number;
   name: string;
@@ -49,14 +49,14 @@ declare type AttributeOrPropertyAttributeData = {
   value?: string;
   resolvedBuffer?: Buffer;
 };
-declare type DefaultAttributeData = {
+type DefaultAttributeData = {
   type: 'event' | 'element';
   length: number;
   name: string;
   value: string;
   resolvedBuffer: Buffer;
 };
-declare type AttributeData = BooleanAttributeData | AttributeOrPropertyAttributeData | DefaultAttributeData;
+type AttributeData = BooleanAttributeData | AttributeOrPropertyAttributeData | DefaultAttributeData;
 declare interface PartInfo {
   type: number;
   tagName: string;
@@ -96,7 +96,7 @@ interface MetadataPartType {
 }
 declare type Part = MetadataPartType | CustomElementPartType | ChildPartType | AttributePartType;
 
-declare type ElementRendererConstructor = (new (tagName: string) => ElementRenderer) & typeof ElementRenderer;
+type ElementRendererConstructor = (new (tagName: string) => ElementRenderer) & typeof ElementRenderer;
 
 /**
  * Base class renderer for rendering custom elements.
@@ -129,24 +129,24 @@ declare type RenderOptions = {
   elementRenderers?: Array<ElementRendererConstructor>;
 };
 
-declare type InternalRenderOptions = RenderOptions & {
+type InternalRenderOptions = RenderOptions & {
   includeHydrationMetadata?: boolean;
   hydrationRoot?: number;
 };
 
-declare type RegexTagGroups = {
+type RegexTagGroups = {
   commentStart: string | undefined;
   tagName: string | undefined;
   dynamicTagName: string | undefined;
 };
 
-declare type RegexAttrGroups = {
+type RegexAttrGroups = {
   attributeName: string | undefined;
   spacesAndEquals: string | undefined;
   quoteChar: string | undefined;
 };
 
-declare type RegexAttrValueGroups = {
+type RegexAttrValueGroups = {
   attributeValue: string | undefined;
   closingChar: string | undefined;
 };

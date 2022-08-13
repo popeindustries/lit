@@ -1,0 +1,52 @@
+{
+  "name": "@popeindustries/lit-element",
+  "version": "3.0.0-beta.1",
+  "description": "Enable hydration of lit-element elements rendered on the server with @popeindustries/lit-html-server",
+  "author": "Alexander Pope <alex@pope.industries>",
+  "keywords": [
+    "html template",
+    "lit-html",
+    "ssr",
+    "stream",
+    "streaming",
+    "tagged template literal",
+    "template",
+    "template render"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./lit-element.js": {
+      "types": "./lit-element.d.ts",
+      "default": "./lit-element.js"
+    },
+    "./decorators.js": {
+      "types": "./decorators.d.ts",
+      "default": "./decorators.js"
+    },
+    "./decorators/*": "./decorators/*"
+  },
+  "files": [
+    "*.d.ts",
+    "*.js",
+    "README.MD"
+  ],
+  "repository": "https://github.com/popeindustries/lit.git",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "@lit/reactive-element": "^1.4.0",
+    "@popeindustries/lit-html": "workspace:*",
+    "lit-element": "^3.2.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "build": "node ./scripts/build.js",
+    "clean": "git clean -x -f"
+  }
+}
