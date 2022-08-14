@@ -1,8 +1,13 @@
 /**
  * Custom element mixin for adding partial/deferred hydration support.
  *
+ * Defers calls to `BaseClass.connectedCallback()` until the `hydrate:defer`
+ * attribute is removed (automatically added during server render).
+ *
+ * Optionally adds support for deferring until idle with `hydrate:idle`,
+ * and until viewport visibility with `hydrate:visible`.
  */
-export function PartialHydrationMixin<BaseClass extends CustomElementBase>(
+export function partialHydrationMixin<BaseClass extends CustomElementBase>(
   Base: BaseClass,
 ): BaseClass & {
   prototype: PartialHydrationElement;

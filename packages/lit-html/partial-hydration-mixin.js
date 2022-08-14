@@ -9,7 +9,7 @@ let intersectionObserver;
  * Custom element mixin for adding partial/deferred hydration support.
  * @param { CustomElementBase } Base
  */
-export function PartialHydrationMixin(Base) {
+export function partialHydrationMixin(Base) {
   return class PartialHydrationElement extends Base {
     static get observedAttributes() {
       return [...(super.observedAttributes ?? []), 'hydrate:defer'];

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { html as h, render } from '@popeindustries/lit-html';
-import { PartialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
+import { partialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
 
 export const tests = [
   {
@@ -300,12 +300,12 @@ export const tests = [
           render(this.render(), this, { host: this });
         }
       }
-      class MyEl7 extends PartialHydrationMixin(Base) {
+      class MyEl7 extends partialHydrationMixin(Base) {
         render() {
           return h`<div ?a="${this.hasAttribute('a')}">my <my-el8 .a="${this.hasAttribute('a')}"></my-el8></div>`;
         }
       }
-      class MyEl8 extends PartialHydrationMixin(Base) {
+      class MyEl8 extends partialHydrationMixin(Base) {
         a = null;
         render() {
           return h`<div>text ${this.a ? h`has "a"` : h`missing "a"`}</div>`;
@@ -333,12 +333,12 @@ export const tests = [
           render(this.render(), this.shadowRoot, { host: this });
         }
       }
-      class MyEl9 extends PartialHydrationMixin(Base) {
+      class MyEl9 extends partialHydrationMixin(Base) {
         render() {
           return h`<div ?a="${this.hasAttribute('a')}">my <my-el10 .a="${this.hasAttribute('a')}"></my-el10></div>`;
         }
       }
-      class MyEl10 extends PartialHydrationMixin(Base) {
+      class MyEl10 extends partialHydrationMixin(Base) {
         a = null;
         render() {
           return h`<div>text ${this.a ? h`has "a"` : h`missing "a"`}</div>`;
