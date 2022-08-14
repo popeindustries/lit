@@ -2,7 +2,7 @@
  * A modified version of `lit-html/experimental-hydrate.js` with the following changes:
  * - allow multiple sibling hydratable sub-trees in same container
  * - correctly handle deferred, recursive, hydratable sub-trees in custom element roots
- * - proxy subsequent calls to `hydrateOrRender` to lit-html's `render`
+ * - proxy subsequent calls to `render` to lit-html's `render`
  * - clear markup and perform clean render on hydration error
  */
 

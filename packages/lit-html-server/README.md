@@ -1,9 +1,8 @@
 [![NPM Version](https://img.shields.io/npm/v/@popeindustries/lit-html-server.svg?style=flat)](https://npmjs.org/package/@popeindustries/lit-html-server)
-[![Build Status](https://img.shields.io/github/workflow/status/popeindustries/lit-html-server/test/master)](https://github.com/popeindustries/lit-html-server/actions)
 
-# lit-html-server
+# @popeindustries/lit-html-server
 
-Render [**lit-html**](https://github.com/lit/lit) templates on the server as strings or streams (and in the browser too!). Supports all **lit-html** types, special attribute expressions, and many of the standard directives.
+Efficiently render [**lit-html**](https://github.com/lit/lit) templates on the server (or ServiceWorker) as strings or streams.
 
 > Although based on **lit-html** semantics, **lit-html-server** is a great general purpose HTML template streaming library. Tagged template literals are a native JavaScript feature, and the HTML rendered is 100% standard markup, with no special syntax or runtime required!
 
@@ -67,7 +66,9 @@ http.createServer((request, response) => {
 
 ## Hydration
 
-Server rendered HTML may be converted to live **lit-html** templates with the help of inline metadata. This process of reusing static HTML to seemlessly bootstrap dynamic templates is often referred to as _hydration_. **lit-html-server** does not output hydration metadata by default, but instead requires that a sub-tree is designated as _hydratable_ via the `rehydratable` directive:
+Server rendered HTML may be converted to live **lit-html** templates with the help of inline metadata. This process of reusing static HTML to seamlessly bootstrap dynamic templates is often referred to as _hydration_.
+
+**lit-html-server** does not output hydration metadata by default, but instead requires that a sub-tree is designated as _hydratable_ via the `rehydratable` directive:
 
 ```js
 import { hydratable } from '@popeindustries/lit-html-server/directives/hydratable.js';
@@ -196,7 +197,7 @@ class MyElementRenderer extends ElementRenderer {
 const stream = renderToNodeStream(Layout(data), { elementRenderers: [MyElementRenderer] });
 ```
 
-Note that the default `ElementRenderer` will render `innerHTML` content or content returned by `this.element.render()`.
+Note that the default `ElementRenderer` will render `innerHTML` strings or content returned by `this.element.render()`.
 
 ### Shadow DOM
 
@@ -204,7 +205,7 @@ If `attachShadow` has been called by an element during construction/connection, 
 
 ```html
 <!--lit Ph5bNbG/om0=-->
-<my-el hydrate:defer>
+<my-el>
   <!--lit-attr 0--><template shadowroot="open"><!--lit iW9ZALRtWQA=-->text<!--/lit--> </template>
 </my-el>
 <!--/lit-->
@@ -214,17 +215,21 @@ If `attachShadow` has been called by an element during construction/connection, 
 
 In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when **lit-html-server** is imported. See [`dom-shim.js`](/src/dom-shim.js) for details.
 
+### Partial/deferred hydration
+
 ## Directives
 
 _Most_ of the built-in `lit-html/directives/*` already support server rendering, and work as expected in **lit-html-server**, the exception being those directives that are asynchronous. **lit-html-server** supports the rendering of Promises and AsyncInterators as first-class primitives, so special versions of `async-append.js`, `async-replace.js`, and `until.js` are included in `lit-html-server/directives`.
 
 ## API (Node.js)
 
-> The following render methods accept an `options` object with the following properties:
->
-> - **`elementRenderers?: Array<ElementRendererConstructor>`** - ElementRenderer subclasses for rendering of custom elements
+#### `RenderOptions`
 
-### `renderToNodeStream(value: unknown, options?: RenderOptions): Readable`
+The following render methods accept an `options` object with the following properties:
+
+- **`elementRenderers?: Array<ElementRendererConstructor>`** - ElementRenderer subclasses for rendering of custom elements
+
+#### `renderToNodeStream(value: unknown, options?: RenderOptions): Readable`
 
 Returns the `value` (generally the result of a template tagged by `html`) as a Node.js `Readable` stream of markup:
 
@@ -235,7 +240,7 @@ const name = 'Bob';
 renderToNodeStream(html`<h1>Hello ${name}!</h1>`).pipe(response);
 ```
 
-### `renderToWebStream(value: unknown, options?: RenderOptions): ReadableStream`
+#### `renderToWebStream(value: unknown, options?: RenderOptions): ReadableStream`
 
 Returns the `value` (generally the result of a template tagged by `html`) as a web `ReadableStream` stream of markup:
 
