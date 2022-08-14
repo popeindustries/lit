@@ -71,6 +71,7 @@ export class ElementRenderer {
   setAttribute(name, value) {
     const oldValue = this.element.getAttribute(name);
     this.element.setAttribute(name, value);
+    // TODO: only call if `name` in `observedAttributes`
     this.attributeChangedCallback(name, oldValue, value);
   }
 

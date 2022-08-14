@@ -14,7 +14,7 @@
 
 // customElements.define('custom-element', CustomElement);
 
-import { ElementRenderer, html } from '../../index.js';
+import { ElementRenderer, html } from '../../lit-html-server.js';
 
 export class CustomElement extends HTMLElement {
   negative = false;

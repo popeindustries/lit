@@ -1,9 +1,8 @@
 import { CustomElement, Renderer } from './custom-element.js';
-import { html, renderToString } from '../../index.js';
+import { html, renderToString } from '@popeindustries/lit-html-server';
 import everything from './the-everything-bagel-template.js';
-import { html as litHtml } from 'lit-html';
 import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
-import { hydratable } from '../../directives/hydratable.js';
+import { hydratable } from '@popeindustries/lit-html-server/directives/hydratable.js';
 
 const data = {
   title: 'title',

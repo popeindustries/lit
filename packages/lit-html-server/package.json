@@ -19,6 +19,9 @@
     ".": {
       "types": "./lit-html-server.d.ts",
       "browser": "./lit-html-server-in-worker.js",
+      "worker": "./lit-html-server-in-worker.js",
+      "sw": "./lit-html-server-in-worker.js",
+      "serviceworker": "./lit-html-server-in-worker.js",
       "node": "./lit-html-server.js"
     },
     "./directives/*": "./directives/*"

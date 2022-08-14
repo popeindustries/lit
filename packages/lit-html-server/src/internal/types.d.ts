@@ -108,14 +108,38 @@ declare class ElementRenderer {
    * should be handled by this renderer.
    */
   static matchesClass(ceClass: typeof HTMLElement, tagName: string): boolean;
+  /**
+   * The custom element instance
+   */
   element: HTMLElement;
+  /**
+   * The custom element tag name
+   */
   tagName: string;
   constructor(tagName: string);
+  /**
+   * Function called when element is to be rendered
+   */
   connectedCallback(): void;
+  /**
+   * Function called when observed element attribute value has changed
+   */
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void;
+  /**
+   * Update element property value
+   */
   setProperty(name: string, value: unknown): void;
+  /**
+   * Update element attribute value
+   */
   setAttribute(name: string, value: string): void;
+  /**
+   * Render element attributes as string
+   */
   renderAttributes(): string;
+  /**
+   * Render element content
+   */
   render(): TemplateResult | string | null;
 }
 
@@ -124,7 +148,7 @@ declare class ElementRenderer {
  */
 declare type RenderOptions = {
   /**
-   * Renderer classes for rendering of custom elements
+   * `ElementRenderer` subclasses for rendering of custom elements
    */
   elementRenderers?: Array<ElementRendererConstructor>;
 };
