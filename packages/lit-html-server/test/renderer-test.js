@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { renderToNodeStream, renderToString } from '../src/lit-html-server.js';
 import assert from 'node:assert';
+import { LitElementRenderer } from '@popeindustries/lit-element/lit-element-renderer.js';
 import { streamAsPromise } from './utils.js';
-import { tests } from './tests.js';
+import { tests } from '../../../tests/tests.js';
 
-describe('Render', () => {
+describe.only('Render', () => {
   const only = tests.filter(({ only }) => only);
 
   for (let { title, template, metadata, result, skip } of only.length ? only : tests) {
@@ -16,11 +17,16 @@ describe('Render', () => {
       it(fullTitle, async () => {
         customElements._registry.clear();
         let t = template();
-        const string = await renderToString(t, { includeHydrationMetadata: metadata });
-        customElements._registry.clear();
-        t = template = template();
-        const stream = await streamAsPromise(renderToNodeStream(t, { includeHydrationMetadata: metadata }));
-        assert.equal(string, stream);
+        const string = await renderToString(t, {
+          includeHydrationMetadata: metadata,
+          elementRenderers: [LitElementRenderer],
+        });
+        // customElements._registry.clear();
+        // t = template = template();
+        // const stream = await streamAsPromise(
+        //   renderToNodeStream(t, { includeHydrationMetadata: metadata, elementRenderers: [LitElementRenderer] }),
+        // );
+        // assert.equal(string, stream);
         assert.equal(string, result);
       });
     }

@@ -1,8 +1,8 @@
 // @ts-nocheck
 import autocannon from 'autocannon';
-import { fileURLToPath } from 'url';
-import { fork } from 'child_process';
-import path from 'path';
+import { fileURLToPath } from 'node:url';
+import { fork } from 'node:child_process';
+import path from 'node:path';
 
 const url = `http://localhost:3000`;
 const server = process.argv[2] === 'ssr' ? './server-lit.js' : './server.js';
@@ -24,7 +24,6 @@ function stress() {
         duration: 10,
       },
       async (err, results) => {
-        // console.log(results);
         if (err) {
           return reject(err);
         }

@@ -2,9 +2,20 @@
 
 # @popeindustries/lit-html-server
 
-Efficiently render [**lit-html**](https://github.com/lit/lit) templates on the server (or ServiceWorker) as strings or streams.
+Efficiently render streaming [**lit-html**](https://github.com/lit/lit) templates on the server (or in a ServiceWorker!).
 
 > Although based on **lit-html** semantics, **lit-html-server** is a great general purpose HTML template streaming library. Tagged template literals are a native JavaScript feature, and the HTML rendered is 100% standard markup, with no special syntax or runtime required!
+
+## Features
+
+- 6-7x faster than **@lit-labs/ssr**
+- render full HTML pages (not just `body`)
+- stream responses in Node.js and ServiceWorker with first-class Promise/AsyncIterator support
+- render optional hydration metadata with `hydratable` directive
+- render web components with light or shadow DOM
+- default web component rendering with `innerHTML` support
+- customisable web component rendering with `ElementRenderer`
+- compatible with `lit-html/directives`
 
 ## Usage
 
@@ -44,7 +55,7 @@ async function renderBody(api) {
 
   return html`
     <h1>${data.title}</h1>
-    <my-widget ?enabled="${data.hasWidget}"></my-widget>
+    <my-el ?enabled="${data.hasWidget}"></my-el>
     <p class="${classMap({ negative: data.invertedText })}">${data.text}</p>
   `;
 }
@@ -66,7 +77,7 @@ http.createServer((request, response) => {
 
 ## Hydration
 
-Server rendered HTML may be converted to live **lit-html** templates with the help of inline metadata. This process of reusing static HTML to seamlessly bootstrap dynamic templates is often referred to as _hydration_.
+Server rendered HTML may be converted to live **lit-html** templates with the help of inline metadata. This process of reusing static HTML to seamlessly bootstrap dynamic templates is referred to as _hydration_.
 
 **lit-html-server** does not output hydration metadata by default, but instead requires that a sub-tree is designated as _hydratable_ via the `rehydratable` directive:
 
@@ -131,7 +142,7 @@ In order to efficiently reuse templates on the client (`renderMenu` and `renderP
 
 ## Web Components
 
-The rendering of custom element content is largely handled by custom `ElementRenderer` instances that adhere to the following interface:
+The rendering of web component content is largely handled by custom `ElementRenderer` instances that adhere to the following interface:
 
 ```ts
 declare class ElementRenderer {
@@ -217,9 +228,11 @@ In order to support importing and evaluating custom element code in Node, minima
 
 ### Partial/deferred hydration
 
+When rendering web components, **lit-html-server** adds `hydrate:defer` attributes to each custom element. This provides a mechanism to control and defer hydration order of nested web components that may be dependant on data passed from a parent. See [`@popeindustries/lit-html/partial-hydration-mixin.js`]() for more on deferred hydration.
+
 ## Directives
 
-_Most_ of the built-in `lit-html/directives/*` already support server rendering, and work as expected in **lit-html-server**, the exception being those directives that are asynchronous. **lit-html-server** supports the rendering of Promises and AsyncInterators as first-class primitives, so special versions of `async-append.js`, `async-replace.js`, and `until.js` are included in `lit-html-server/directives`.
+_Most_ of the built-in `lit-html/directives/*` already support server rendering, and work as expected in **lit-html-server**, the exception being those directives that are asynchronous. **lit-html-server** supports the rendering of Promises and AsyncInterators as first-class primitives, so special versions of `async-append.js`, `async-replace.js`, and `until.js` should be imported from `@popeindustries/lit-html-server/directives`.
 
 ## API (Node.js)
 
@@ -260,7 +273,7 @@ self.addEventListener('fetch', (event) => {
 });
 ```
 
-> Note: due to the slight differences when running in Node or the browser, a separate version for running in the browser is exported as `@popeindustries/lit-html-server/lit-html-server-in-worker.js`. For those dev servers/bundlers that support conditional `package.json#exports`, exports are provided for (`browser/worker/serviceworker/sw`) to allow seamlessly importing directly from `@popeindustries/lit-html-server`.
+> Note: due to the slight differences when running in Node or the browser, a separate version for running in a browser environment is exported as `@popeindustries/lit-html-server/lit-html-service-worker.js`. For those dev servers/bundlers that support conditional `package.json#exports`, exports are provided to enable importing directly from `@popeindustries/lit-html-server`.
 
 ### `renderToString(value: unknown, options?: RenderOptions): Promise<string>`
 

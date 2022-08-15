@@ -1,5 +1,4 @@
 import { partType } from '../src/internal/parts.js';
-import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 
 /**
  * Convert stream to a Promise
@@ -17,17 +16,6 @@ export function streamAsPromise(stream) {
       resolve(result);
     });
   });
-}
-
-/**
- * @param { import('lit-html').TemplateResult } template
- */
-export function renderLitTemplate(template) {
-  let buffer = '';
-  for (const chunk of render(template)) {
-    buffer += chunk;
-  }
-  return buffer.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;quot;', '"').replaceAll('&quot;', '"');
 }
 
 /**

@@ -10,5 +10,7 @@
     "noEmit": true,
     "strict": true,
     "target": "esnext"
-  }
+  },
+  "include": ["benchmark"],
+  "exclude": ["node_modules"]
 }

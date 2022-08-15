@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Some of this code is copied and modified from `lit-html/experimental-hydrate.js`
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 import { ChildPart, RenderOptions, RootPart, SanitizerFactory, TemplateResult } from 'lit-html';
 
 export * from 'lit-html';

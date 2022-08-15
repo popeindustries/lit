@@ -1,7 +1,6 @@
-import './custom-element.js';
-import { html } from 'lit-html';
-import { classMap } from 'lit-html/directives/class-map.js';
-import { ref } from 'lit-html/directives/ref.js';
+import { css, html, LitElement } from '@popeindustries/lit-element';
+import { classMap } from 'lit/directives/class-map.js';
+import { ref } from 'lit/directives/ref.js';
 
 /**
  * @param { { title: string, isTrue: boolean, number: number } } data
@@ -51,7 +50,7 @@ export default function everything(data) {
         Button: Lorem ipsum!
       </button>
       <div .prop=${data.isTrue}><span>Div: Lorem ipsum</span></div>
-      <custom-element ?negative="${!data.isTrue}"></custom-element>
+      <my-el ?negative="${!data.isTrue}"></my-el>
     </main>
   `;
 }
@@ -74,3 +73,21 @@ function nestedTemplate(html, data) {
     </p>
   `;
 }
+
+class MyEl extends LitElement {
+  static styles = css`
+    p {
+      color: green;
+    }
+  `;
+  createRenderRoot() {
+    const renderRoot = super.createRenderRoot();
+    console.log(renderRoot);
+    return renderRoot;
+  }
+  render() {
+    return html`<p>I am green!</p>`;
+  }
+}
+
+customElements.define('my-el', MyEl);

@@ -2,7 +2,15 @@
 
 # @popeindustries/lit-html
 
-Enable hydration of **lit-html** templates rendered on the server with [@popeindustries/lit-html-server]().
+Hydrate your SSR'd **lit-html**: reuse HTML rendered on the server with [@popeindustries/lit-html-server]() to seamlessly and efficiently bootstrap templates in the browser.
+
+## Features
+
+- automatically _hydrate_ templates with server rendered DOM on first call to `render()`.
+- subsequent calls to `render()` will _update_ the existing DOM by forwarding to `lit-html.render()`.
+- hydration errors will cause the server rendered markup to be cleared and _replaced_ with the result of `lit-html.render()`.
+- render _multiple_ sub-trees in the same container.
+- easily enable _partial/deferred_ hydration with `partial-hydration-mixin`.
 
 ## Usage
 
@@ -36,12 +44,15 @@ Given the following server rendered HTML:
 </body>
 ```
 
-...import your **lit-html** template used on the server:
+...import your **lit-html** templates used on the server:
 
 ```js
 function renderMenu(data) {
   const { negative, sections } = data;
   return html`<nav ?negative="${negative}">${sections.map((section) => html`<button>${section}</button>`)}</nav>`;
+}
+function renderPage(data) {
+  return html`<main>This is the main page content.</main>`;
 }
 ```
 
@@ -51,14 +62,8 @@ function renderMenu(data) {
 import { render } from '@popeindustries/lit-html';
 
 render(renderMenu(data), document.body, { renderBefore: document.querySelector('body > p') });
+render(renderPage(data), document.body, { renderBefore: document.querySelector('body > footer') });
 ```
-
-## Features
-
-- fist call to `render()` on a container with valid server rendered metadata will efficiently hydrate the template.
-- subsequent calls to `render()` will be forwarded to `lit-html.render()`.
-- any hydration errors will cause the server rendered markup to be cleared and replaced with the result of `lit-html.render()`.
-- rendering multiple sub-trees is supported in the same container.
 
 ## `partial-hydration-mixin`
 

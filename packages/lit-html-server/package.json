@@ -1,7 +1,7 @@
 {
   "name": "@popeindustries/lit-html-server",
   "version": "4.0.0-beta.1",
-  "description": "Render lit-html templates on the server",
+  "description": "Efficiently render streaming lit-html templates on the server (or in a ServiceWorker!)",
   "author": "Alexander Pope <alex@pope.industries>",
   "keywords": [
     "html template",
@@ -18,11 +18,8 @@
   "exports": {
     ".": {
       "types": "./lit-html-server.d.ts",
-      "browser": "./lit-html-server-in-worker.js",
-      "worker": "./lit-html-server-in-worker.js",
-      "serviceworker": "./lit-html-server-in-worker.js",
-      "sw": "./lit-html-server-in-worker.js",
-      "node": "./lit-html-server.js"
+      "node": "./lit-html-server.js",
+      "default": "./lit-html-service-worker.js"
     },
     "./directives/*": "./directives/*"
   },
@@ -55,15 +52,13 @@
     "lit-html": "^2.3.0"
   },
   "devDependencies": {
-    "@lit-labs/ssr": "2.2.3",
+    "@popeindustries/lit-element": "workspace:*",
     "@popeindustries/lit-html": "workspace:*",
-    "autocannon": "^7.9.0",
     "send": "^0.18.0"
   },
   "scripts": {
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f",
-    "perf": "node test/benchmark/perf.js",
     "test": "pnpm run build && pnpm run lint && pnpm run test:unit && pnpm run test:browser",
     "test:unit": "NODE_ENV=test mocha --require './src/dom-shim.js' --reporter spec --timeout 2000 'test/*-test.js'",
     "test:browser": "node ./test/browser/cli.js"

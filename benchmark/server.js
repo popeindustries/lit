@@ -1,10 +1,8 @@
-import { CustomElement, Renderer } from './custom-element.js';
 import { html, renderToNodeStream } from '@popeindustries/lit-html-server';
 import everything from './the-everything-bagel-template.js';
-import http from 'http';
+import http from 'node:http';
 import { hydratable } from '@popeindustries/lit-html-server/directives/hydratable.js';
-
-customElements.define('custom-element', CustomElement);
+import { LitElementRenderer } from '@popeindustries/lit-element/lit-element-renderer.js';
 
 /**
  * @param { { title: string, isTrue: boolean, number: number } } data
@@ -33,7 +31,7 @@ http
       number: Math.random() * 100,
     };
     res.writeHead(200);
-    const stream = renderToNodeStream(template(data), { elementRenderers: [Renderer] });
+    const stream = renderToNodeStream(template(data), { elementRenderers: [LitElementRenderer] });
     stream.pipe(res);
   })
   .listen(3000);

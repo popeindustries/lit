@@ -1,8 +1,7 @@
 import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import everything from './the-everything-bagel-template.js';
-import http from 'http';
-import { html as litHtml } from 'lit-html';
+import http from 'node:http';
 
 const html = String.raw;
 

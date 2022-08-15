@@ -1,9 +1,9 @@
-// @ts-nocheck
 import { LitElement as LE, ReactiveElement } from 'lit-element/lit-element.js';
-import { PartialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
+import { partialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
 import { render } from '@popeindustries/lit-html';
 
-export class LitElement extends PartialHydrationMixin(LE) {
+// @ts-expect-error - need access to pseudo private `__childPart`
+export class LitElement extends partialHydrationMixin(LE) {
   /**
    * Updates the element.
    * Overridden to use `@popeindustries/lit-html#render()` for hydration support.
@@ -14,6 +14,7 @@ export class LitElement extends PartialHydrationMixin(LE) {
     if (!this.hasUpdated) {
       this.renderOptions.isConnected = this.isConnected;
     }
+    // @ts-expect-error - protected
     // Skip calling LitElement#update by calling it's super directly
     ReactiveElement.prototype.update.call(this, changedProperties);
     this.__childPart = render(value, this.renderRoot, this.renderOptions);

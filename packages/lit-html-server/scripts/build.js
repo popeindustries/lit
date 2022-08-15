@@ -19,7 +19,7 @@ await esbuild.build({
   format: 'esm',
   target: 'es2020',
   platform: 'browser',
-  outfile: 'lit-html-server-in-worker.js',
+  outfile: 'lit-html-service-worker.js',
   plugins: [
     {
       // Replace contents of `dom-shim.js` with empty string

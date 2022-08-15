@@ -23,6 +23,10 @@
       "types": "./lit-element.d.ts",
       "default": "./lit-element.js"
     },
+    "./lit-element-renderer.js": {
+      "types": "./lit-element-renderer.d.ts",
+      "default": "./lit-element-renderer.js"
+    },
     "./decorators.js": {
       "types": "./decorators.d.ts",
       "default": "./decorators.js"
@@ -42,6 +46,7 @@
   "dependencies": {
     "@lit/reactive-element": "^1.4.0",
     "@popeindustries/lit-html": "workspace:*",
+    "@popeindustries/lit-html-server": "workspace:*",
     "lit-element": "^3.2.2"
   },
   "devDependencies": {},

@@ -41,7 +41,18 @@ if (typeof globalThis.window === 'undefined') {
   }
 
   class Document {
-    createTreeWalker() {}
+    get adoptedStyleSheets() {
+      return [];
+    }
+    createTreeWalker() {
+      return {};
+    }
+    createTextNode() {
+      return {};
+    }
+    createElement() {
+      return {};
+    }
   }
 
   class CustomElementRegistry {
@@ -73,8 +84,18 @@ if (typeof globalThis.window === 'undefined') {
     HTMLElement,
     Document,
     document: new Document(),
+    CSSStyleSheet: class CSSStyleSheet {
+      replace() {}
+      replaceSync() {}
+    },
     CustomElementRegistry,
     customElements: new CustomElementRegistry(),
+    location: new URL('http://localhost'),
+    MutationObserver: class MutationObserver {
+      observe() {}
+    },
+    requestAnimationFrame() {},
+    ShadowRoot: class ShadowRoot {},
   };
 
   window.window = window;

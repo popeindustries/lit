@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { css, LitElement } from '@popeindustries/lit-element';
 import { html as h, render } from '@popeindustries/lit-html';
 import { partialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
 
@@ -351,6 +352,40 @@ export const tests = [
     metadata: true,
     result:
       '<!--lit GpJxfqkCRnw=--><h1>Title</h1><my-el9 a hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit /0wYmzo69CE=--><div a><!--lit-attr 1-->my <my-el10 hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></template></my-el10></div><!--/lit--></template></my-el9><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
+  },
+  {
+    only: true,
+    title: 'LitElement custom element',
+    template: () => {
+      class MyEl11 extends LitElement {
+        static styles = css`
+          p {
+            color: green;
+          }
+        `;
+        constructor() {
+          super();
+          console.log('constructor');
+        }
+        connectedCallback() {
+          super.connectedCallback();
+          console.log('connectedCallback');
+        }
+        createRenderRoot() {
+          console.log('createRenderRoot');
+          const renderRoot = super.createRenderRoot();
+          return renderRoot;
+        }
+        render() {
+          return h`<p>I am green!</p>`;
+        }
+      }
+      customElements.define('my-el11', MyEl11);
+      return h`<my-el11></my-el11>`;
+    },
+    metadata: true,
+    result:
+      '<!--lit dk2BC/krgh4=--><my-el11 hydrate:defer><!--lit-attr 0--><template shadowroot="open"><!--lit LI34b8MpjYw=--><style>p{color:green;}</style><!--lit-child ymb4EFq7aMg=--><p>I am green!</p><!--/lit-child--><!--/lit--></template></my-el11><!--/lit-->',
   },
 ];
 

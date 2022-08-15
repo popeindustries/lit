@@ -1,16 +1,18 @@
 /**
- * A modified version of `lit-html/experimental-hydrate.js` with the following changes:
- * - allow multiple sibling hydratable sub-trees in same container
- * - correctly handle deferred, recursive, hydratable sub-trees in custom element roots
- * - proxy subsequent calls to `render` to lit-html's `render`
- * - clear markup and perform clean render on hydration error
+ * @license
+ * Some of this code is copied and modified from `lit-html/experimental-hydrate.js`
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 /**
  * @typedef { import('./lit-html.js').HydrationChildPartState } HydrationChildPartState
+ * @typedef { import('lit-html').AttributePart } AttributePart
  * @typedef { import('lit-html').ChildPart } ChildPart
+ * @typedef { import('lit-html').ElementPart } ElementPart
  * @typedef { import('lit-html').RenderOptions } RenderOptions
  * @typedef { import('lit-html').RootPart } RootPart
+ * @typedef { (part: ChildPart | AttributePart | ElementPart, value: unknown) => unknown } resolveDirective
  */
 
 import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/directive-helpers.js';
@@ -19,13 +21,34 @@ import { PartType } from 'lit-html/directive.js';
 
 export { html, noChange, nothing, svg } from 'lit-html';
 
-const {
-  _ChildPart: ChildPart,
-  _ElementPart: ElementPart,
-  _isIterable: isIterable,
-  _resolveDirective: resolveDirective,
-  _TemplateInstance: TemplateInstance,
-} = _$LH;
+/** @type { _$LH['_ChildPart'] } */
+let ChildPart;
+/** @type { resolveDirective } */
+let resolveDirective;
+/** @type { _$LH['_ElementPart'] } */
+let ElementPart;
+/** @type { _$LH['_TemplateInstance'] } } */
+let TemplateInstance;
+
+for (const key in _$LH) {
+  // @ts-ignore
+  const member = _$LH[key];
+  const type = typeof member;
+
+  if (type === 'function' && 'prototype' in member) {
+    const proto = member.prototype;
+
+    if ('_$AC' in proto && 'endNode' in proto) {
+      ChildPart = /** @type { _$LH['_ChildPart'] } */ (member);
+    } else if ('_$AI' in proto && !('tagName' in proto)) {
+      ElementPart = /** @type { _$LH['_ElementPart'] } */ (member);
+    } else if ('_$AU' in proto && 'parentNode' in proto) {
+      TemplateInstance = /** @type { _$LH['_TemplateInstance'] } */ (member);
+    } else if (!('_$AU' in proto) && proto.constructor.length === 2) {
+      resolveDirective = /** @type { resolveDirective } */ (member);
+    }
+  }
+}
 
 const RE_CHILD_MARKER = /^lit |^lit-child/;
 const RE_ATTR_LENGTH = /^lit-attr (\d+)/;
@@ -134,6 +157,7 @@ export function render(value, container, options = {}) {
     partOwnerNode['_$litPart$'] = rootPart;
     return rootPart;
   } catch (err) {
+    console.log(err);
     if (err) {
       console.error(
         `hydration failed due to the following error:\n  ${err}\nClearing nodes and performing clean render`,
@@ -253,7 +277,8 @@ function openChildPart(value, marker, stack, options) {
     }
 
     // @ts-expect-error - internal method
-    const template = ChildPart.prototype._$getTemplate(value);
+    console.log(ChildPart.prototype);
+    const template = ChildPart.prototype._$AC(value);
     const instance = new TemplateInstance(template, part);
 
     part._$committedValue = instance;
@@ -398,4 +423,16 @@ function digestForTemplateStrings(strings) {
     }
   }
   return btoa(String.fromCharCode(...new Uint8Array(hashes.buffer)));
+}
+
+/**
+ * Determine if "iterator" is a synchronous iterator
+ * @param { unknown } iterator
+ * @returns { iterator is Iterable<unknown> }
+ */
+function isIterable(iterator) {
+  return (
+    iterator != null &&
+    (Array.isArray(iterator) || typeof (/** @type { Iterable<unknown> } */ (iterator)[Symbol.iterator]) === 'function')
+  );
 }
