@@ -22,30 +22,38 @@ import { PartType } from 'lit-html/directive.js';
 export { html, noChange, nothing, svg } from 'lit-html';
 
 /** @type { _$LH['_ChildPart'] } */
-let ChildPart;
-/** @type { resolveDirective } */
-let resolveDirective;
+let ChildPart = _$LH._ChildPart;
 /** @type { _$LH['_ElementPart'] } */
-let ElementPart;
+let ElementPart = _$LH._ElementPart;
+/** @type { resolveDirective } */
+let resolveDirective = _$LH._resolveDirective;
 /** @type { _$LH['_TemplateInstance'] } } */
-let TemplateInstance;
+let TemplateInstance = _$LH._TemplateInstance;
 
-for (const key in _$LH) {
-  // @ts-ignore
-  const member = _$LH[key];
-  const type = typeof member;
+let childPartCommittedValueKey = '_$committedValue';
+let childPartEndNodeKey = '_$endNode';
+let childPartGetTemplateKey = '_$getTemplate';
+let templateInstancepPartsKey = '_parts';
+let templateInstancepTemplateKey = '_$template';
 
-  if (type === 'function' && 'prototype' in member) {
-    const proto = member.prototype;
+if (ChildPart === undefined) {
+  for (const key in _$LH) {
+    // @ts-ignore
+    const member = _$LH[key];
+    const type = typeof member;
 
-    if ('_$AC' in proto && 'endNode' in proto) {
-      ChildPart = /** @type { _$LH['_ChildPart'] } */ (member);
-    } else if ('_$AI' in proto && !('tagName' in proto)) {
-      ElementPart = /** @type { _$LH['_ElementPart'] } */ (member);
-    } else if ('_$AU' in proto && 'parentNode' in proto) {
-      TemplateInstance = /** @type { _$LH['_TemplateInstance'] } */ (member);
-    } else if (!('_$AU' in proto) && proto.constructor.length === 2) {
-      resolveDirective = /** @type { resolveDirective } */ (member);
+    if (type === 'function' && 'prototype' in member) {
+      const proto = member.prototype;
+
+      if ('_$AC' in proto && 'endNode' in proto) {
+        ChildPart = /** @type { _$LH['_ChildPart'] } */ (member);
+      } else if ('_$AI' in proto && !('tagName' in proto)) {
+        ElementPart = /** @type { _$LH['_ElementPart'] } */ (member);
+      } else if ('_$AU' in proto && 'parentNode' in proto) {
+        TemplateInstance = /** @type { _$LH['_TemplateInstance'] } */ (member);
+      } else if (!('_$AU' in proto) && proto.constructor.length === 2) {
+        resolveDirective = /** @type { resolveDirective } */ (member);
+      }
     }
   }
 }
@@ -241,8 +249,7 @@ function openChildPart(value, marker, stack, options) {
 
     if (state.type === 'template-instance') {
       part = new ChildPart(marker, null, state.instance, options);
-      // @ts-expect-error - internal property
-      state.instance._parts.push(part);
+      state.instance[templateInstancepPartsKey].push(part);
       value = state.result.values[state.instancePartIndex++];
       state.templatePartIndex++;
     } else if (state.type === 'iterable') {
@@ -256,7 +263,7 @@ function openChildPart(value, marker, stack, options) {
       } else {
         value = result.value;
       }
-      /** @type { Array<ChildPart> } */ (state.part._$committedValue).push(part);
+      state.part[childPartCommittedValueKey].push(part);
     } else {
       // Primitive likely rendered on client when TemplateResult rendered on server.
       throw Error('unexpected primitive rendered to part');
@@ -276,9 +283,8 @@ function openChildPart(value, marker, stack, options) {
       throw Error('unexpected TemplateResult rendered to part');
     }
 
-    // @ts-expect-error - internal method
     console.log(ChildPart.prototype);
-    const template = ChildPart.prototype._$AC(value);
+    const template = ChildPart.prototype[childPartGetTemplateKey](value);
     const instance = new TemplateInstance(template, part);
 
     part._$committedValue = instance;
@@ -332,8 +338,7 @@ function createAttributeParts(comment, stack, options) {
     const n = parseInt(RE_ATTR_LENGTH.exec(comment.data)?.[1] ?? '0');
 
     for (let i = 0; i < n; i++) {
-      // @ts-expect-error - internal property
-      const templatePart = instance._$template.parts[state.templatePartIndex];
+      const templatePart = instance[templateInstancepTemplateKey].parts[state.templatePartIndex];
 
       if (
         templatePart === undefined ||
@@ -358,16 +363,14 @@ function createAttributeParts(comment, stack, options) {
 
         instancePart._$setValue(value, instancePart, state.instancePartIndex, noCommit);
         state.instancePartIndex += templatePart.strings.length - 1;
-        // @ts-expect-error - internal property
-        instance._parts.push(instancePart);
+        instance[templateInstancepPartsKey].push(instancePart);
       }
       // Element binding
       else {
         const instancePart = new ElementPart(node, state.instance, options);
 
         resolveDirective(instancePart, state.result.values[state.instancePartIndex++]);
-        // @ts-expect-error - internal property
-        instance._parts.push(instancePart);
+        instance[templateInstancepPartsKey].push(instancePart);
       }
 
       state.templatePartIndex++;
@@ -390,8 +393,7 @@ function closeChildPart(marker, part, stack) {
     throw Error('unbalanced part marker');
   }
 
-  // @ts-expect-error - internal property
-  part._$endNode = marker;
+  part[childPartEndNodeKey] = marker;
 
   const currentState = /** @type { HydrationChildPartState } */ (stack.pop());
 
