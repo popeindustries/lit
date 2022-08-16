@@ -5,9 +5,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { ChildPart, RenderOptions, RootPart, SanitizerFactory, TemplateResult } from 'lit-html';
+import { ChildPart, RenderOptions, RootPart, SanitizerFactory, TemplateResult } from './vendor/lit-html.js';
 
-export * from 'lit-html';
+export * from './vendor/lit-html.js';
 
 /**
  * Hydrate or render existing server-rendered markup inside of a `container` element.

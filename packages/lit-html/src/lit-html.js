@@ -7,56 +7,25 @@
 
 /**
  * @typedef { import('./lit-html.js').HydrationChildPartState } HydrationChildPartState
- * @typedef { import('lit-html').AttributePart } AttributePart
- * @typedef { import('lit-html').ChildPart } ChildPart
- * @typedef { import('lit-html').ElementPart } ElementPart
- * @typedef { import('lit-html').RenderOptions } RenderOptions
- * @typedef { import('lit-html').RootPart } RootPart
- * @typedef { (part: ChildPart | AttributePart | ElementPart, value: unknown) => unknown } resolveDirective
+ * @typedef { import('./vendor/lit-html.js').AttributePart } AttributePart
+ * @typedef { import('./vendor/lit-html.js').ChildPart } ChildPart
+ * @typedef { import('./vendor/lit-html.js').ElementPart } ElementPart
+ * @typedef { import('./vendor/lit-html.js').RenderOptions } RenderOptions
+ * @typedef { import('./vendor/lit-html.js').RootPart } RootPart
  */
 
-import { isPrimitive, isSingleExpression, isTemplateResult } from 'lit-html/directive-helpers.js';
-import { noChange, render as litRender, _$LH } from 'lit-html';
-import { PartType } from 'lit-html/directive.js';
+import { isPrimitive, isSingleExpression, isTemplateResult } from './vendor/directive-helpers.js';
+import { noChange, render as litRender, _$LH } from './vendor/lit-html.js';
+import { PartType } from './vendor/directive.js';
 
-export { html, noChange, nothing, svg } from 'lit-html';
+export { html, noChange, nothing, svg } from './vendor/lit-html.js';
 
-/** @type { _$LH['_ChildPart'] } */
-let ChildPart = _$LH._ChildPart;
-/** @type { _$LH['_ElementPart'] } */
-let ElementPart = _$LH._ElementPart;
-/** @type { resolveDirective } */
-let resolveDirective = _$LH._resolveDirective;
-/** @type { _$LH['_TemplateInstance'] } } */
-let TemplateInstance = _$LH._TemplateInstance;
-
-let childPartCommittedValueKey = '_$committedValue';
-let childPartEndNodeKey = '_$endNode';
-let childPartGetTemplateKey = '_$getTemplate';
-let templateInstancepPartsKey = '_parts';
-let templateInstancepTemplateKey = '_$template';
-
-if (ChildPart === undefined) {
-  for (const key in _$LH) {
-    // @ts-ignore
-    const member = _$LH[key];
-    const type = typeof member;
-
-    if (type === 'function' && 'prototype' in member) {
-      const proto = member.prototype;
-
-      if ('_$AC' in proto && 'endNode' in proto) {
-        ChildPart = /** @type { _$LH['_ChildPart'] } */ (member);
-      } else if ('_$AI' in proto && !('tagName' in proto)) {
-        ElementPart = /** @type { _$LH['_ElementPart'] } */ (member);
-      } else if ('_$AU' in proto && 'parentNode' in proto) {
-        TemplateInstance = /** @type { _$LH['_TemplateInstance'] } */ (member);
-      } else if (!('_$AU' in proto) && proto.constructor.length === 2) {
-        resolveDirective = /** @type { resolveDirective } */ (member);
-      }
-    }
-  }
-}
+const {
+  _ChildPart: ChildPart,
+  _ElementPart: ElementPart,
+  _resolveDirective: resolveDirective,
+  _TemplateInstance: TemplateInstance,
+} = _$LH;
 
 const RE_CHILD_MARKER = /^lit |^lit-child/;
 const RE_ATTR_LENGTH = /^lit-attr (\d+)/;
@@ -165,7 +134,6 @@ export function render(value, container, options = {}) {
     partOwnerNode['_$litPart$'] = rootPart;
     return rootPart;
   } catch (err) {
-    console.log(err);
     if (err) {
       console.error(
         `hydration failed due to the following error:\n  ${err}\nClearing nodes and performing clean render`,
@@ -249,7 +217,8 @@ function openChildPart(value, marker, stack, options) {
 
     if (state.type === 'template-instance') {
       part = new ChildPart(marker, null, state.instance, options);
-      state.instance[templateInstancepPartsKey].push(part);
+      // @ts-expect-error - private
+      state.instance._parts.push(part);
       value = state.result.values[state.instancePartIndex++];
       state.templatePartIndex++;
     } else if (state.type === 'iterable') {
@@ -263,7 +232,8 @@ function openChildPart(value, marker, stack, options) {
       } else {
         value = result.value;
       }
-      state.part[childPartCommittedValueKey].push(part);
+      // @ts-expect-error - private
+      state.part._$committedValue.push(part);
     } else {
       // Primitive likely rendered on client when TemplateResult rendered on server.
       throw Error('unexpected primitive rendered to part');
@@ -283,8 +253,8 @@ function openChildPart(value, marker, stack, options) {
       throw Error('unexpected TemplateResult rendered to part');
     }
 
-    console.log(ChildPart.prototype);
-    const template = ChildPart.prototype[childPartGetTemplateKey](value);
+    // @ts-expect-error - private
+    const template = ChildPart.prototype._$getTemplate(value);
     const instance = new TemplateInstance(template, part);
 
     part._$committedValue = instance;
@@ -338,7 +308,8 @@ function createAttributeParts(comment, stack, options) {
     const n = parseInt(RE_ATTR_LENGTH.exec(comment.data)?.[1] ?? '0');
 
     for (let i = 0; i < n; i++) {
-      const templatePart = instance[templateInstancepTemplateKey].parts[state.templatePartIndex];
+      // @ts-expect-error - private
+      const templatePart = instance._$template.parts[state.templatePartIndex];
 
       if (
         templatePart === undefined ||
@@ -363,14 +334,16 @@ function createAttributeParts(comment, stack, options) {
 
         instancePart._$setValue(value, instancePart, state.instancePartIndex, noCommit);
         state.instancePartIndex += templatePart.strings.length - 1;
-        instance[templateInstancepPartsKey].push(instancePart);
+        // @ts-expect-error - private
+        instance._parts.push(instancePart);
       }
       // Element binding
       else {
         const instancePart = new ElementPart(node, state.instance, options);
 
         resolveDirective(instancePart, state.result.values[state.instancePartIndex++]);
-        instance[templateInstancepPartsKey].push(instancePart);
+        // @ts-expect-error - private
+        instance._parts.push(instancePart);
       }
 
       state.templatePartIndex++;
@@ -393,7 +366,8 @@ function closeChildPart(marker, part, stack) {
     throw Error('unbalanced part marker');
   }
 
-  part[childPartEndNodeKey] = marker;
+  // @ts-expect-error - private
+  part._$endNode = marker;
 
   const currentState = /** @type { HydrationChildPartState } */ (stack.pop());
 

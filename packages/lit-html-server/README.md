@@ -262,7 +262,7 @@ import { html, renderToWebStream } from '@popeindustries/lit-html-server';
 
 self.addEventListener('fetch', (event) => {
   const name = 'Bob';
-  const stream = renderToStream(html`<h1>Hello ${name}!</h1>`);
+  const stream = renderToWebStream(html`<h1>Hello ${name}!</h1>`);
   const response = new Response(stream, {
     headers: {
       'content-type': 'text/html',
