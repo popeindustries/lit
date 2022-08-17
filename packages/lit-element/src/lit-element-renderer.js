@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { CSSResult, html as h, LitElement, ReactiveElement } from 'lit-element/lit-element.js';
+import { CSSResult, html as h, LitElement, ReactiveElement } from './vendor/lit-element.js';
 import { ElementRenderer } from '@popeindustries/lit-html-server';
 import { _$LE } from 'lit-element/private-ssr-support.js';
 

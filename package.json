@@ -40,7 +40,8 @@
     "postpublish": "pnpm run clean",
     "prepublishOnly": "pnpm run clean && pnpm run build",
     "prepare": "husky install",
-    "test:unit": "pnpm -r run test:unit"
+    "test:unit": "pnpm -r run test:unit",
+    "vendor": "node ./scripts/vendor.js"
   },
   "prettier": {
     "arrowParens": "always",

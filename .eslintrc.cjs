@@ -24,7 +24,7 @@ module.exports = {
     '@typescript-eslint/no-this-alias': 'off',
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/no-unused-vars': [
-      2,
+      1,
       {
         args: 'none',
         ignoreRestSiblings: true,

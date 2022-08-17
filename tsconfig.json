@@ -11,6 +11,6 @@
     "strict": true,
     "target": "esnext"
   },
-  "include": ["benchmark", "packages/**/src"],
+  "include": ["benchmark", "packages/**/src", "scripts"],
   "exclude": ["node_modules", "**/vendor"]
 }

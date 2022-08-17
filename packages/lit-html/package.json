@@ -75,7 +75,6 @@
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f",
     "test": "pnpm run build && pnpm run lint && pnpm run test:browser",
-    "test:browser": "node ./test/browser/cli.js",
-    "vendor": "node ./scripts/vendor.js"
+    "test:browser": "node ./test/browser/cli.js"
   }
 }
