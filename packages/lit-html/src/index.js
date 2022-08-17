@@ -384,7 +384,6 @@ function closeChildPart(marker, part, stack) {
 
 /**
  * Generate hash from template "strings".
- * @see https://github.com/lit/lit/blob/72877fd1de43ccdd579778d5df407e960cb64b03/packages/lit-html/src/experimental-hydrate.ts#L423
  * @param { TemplateStringsArray } strings
  */
 function digestForTemplateStrings(strings) {

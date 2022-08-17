@@ -68,20 +68,6 @@ for (const basename of fs.readdirSync(srcDir)) {
   }
 }
 
-// Bundle index.js
-await esbuild.build({
-  bundle: true,
-  define,
-  entryPoints: ['./src/index.js'],
-  external: ['./vendor/*'],
-  format: 'esm',
-  target: 'es2020',
-  minify: true,
-  platform: 'browser',
-  outdir: '.',
-  plugins: [replacePlugin()],
-});
-
 function replacePlugin() {
   return {
     name: 'replace',
