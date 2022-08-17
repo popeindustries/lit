@@ -5,7 +5,7 @@ import { LitElementRenderer } from '@popeindustries/lit-element/lit-element-rend
 import { streamAsPromise } from './utils.js';
 import { tests } from '../../../tests/tests.js';
 
-describe.only('Render', () => {
+describe('Render', () => {
   const only = tests.filter(({ only }) => only);
 
   for (let { title, template, metadata, result, skip } of only.length ? only : tests) {

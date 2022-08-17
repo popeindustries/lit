@@ -51,11 +51,7 @@
   "dependencies": {
     "lit-html": "^2.3.0"
   },
-  "devDependencies": {
-    "@popeindustries/lit-element": "workspace:*",
-    "@popeindustries/lit-html": "workspace:*",
-    "send": "^0.18.0"
-  },
+  "devDependencies": {},
   "scripts": {
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f",

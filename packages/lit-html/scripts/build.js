@@ -2,12 +2,14 @@ import esbuild from 'esbuild';
 import fs from 'node:fs';
 import path from 'node:path';
 
+const litDir = path.resolve('./node_modules/lit-html');
 const srcDir = path.resolve('./src');
 const vendorSrcDir = path.join(srcDir, 'vendor');
 const destDir = path.resolve();
+const vendorDestDir = path.join(destDir, 'vendor');
 
-if (!fs.existsSync(path.resolve('directives'))) {
-  fs.mkdirSync(path.resolve('directives'));
+if (!fs.existsSync(path.resolve('vendor'))) {
+  fs.mkdirSync(path.resolve('vendor'));
 }
 
 const define = {
@@ -21,8 +23,8 @@ const buildVendorEntryPoints = [];
 buildVendor();
 
 function buildVendor(dir = '') {
-  if (dir && !fs.existsSync(path.resolve(destDir, dir))) {
-    fs.mkdirSync(path.resolve(destDir, dir));
+  if (dir && !fs.existsSync(path.resolve(vendorDestDir, dir))) {
+    fs.mkdirSync(path.resolve(vendorDestDir, dir));
   }
 
   for (const basename of fs.readdirSync(path.join(vendorSrcDir, dir))) {
@@ -30,9 +32,14 @@ function buildVendor(dir = '') {
     const ext = path.extname(basename);
 
     if (ext === '.ts') {
-      fs.copyFileSync(filepath, path.join(destDir, dir, basename));
+      fs.copyFileSync(filepath, path.join(vendorDestDir, dir, basename));
     } else if (ext === '.js') {
-      buildVendorEntryPoints.push(filepath);
+      const code = fs.readFileSync(filepath, 'utf8');
+      if (code.includes('_$LH')) {
+        buildVendorEntryPoints.push(filepath);
+      } else {
+        fs.copyFileSync(path.join(litDir, dir, basename), path.join(vendorDestDir, dir, basename));
+      }
     } else if (ext === '') {
       buildVendor(basename);
     }
@@ -47,7 +54,7 @@ await esbuild.build({
   target: 'es2020',
   minify: true,
   platform: 'browser',
-  outdir: '.',
+  outdir: './vendor',
   plugins: [replacePlugin()],
 });
 
@@ -61,30 +68,18 @@ for (const basename of fs.readdirSync(srcDir)) {
   }
 }
 
-// Bundle lit-html.js
+// Bundle index.js
 await esbuild.build({
   bundle: true,
   define,
-  entryPoints: ['./src/lit-html.js'],
+  entryPoints: ['./src/index.js'],
+  external: ['./vendor/*'],
   format: 'esm',
   target: 'es2020',
   minify: true,
   platform: 'browser',
   outdir: '.',
-  plugins: [
-    replacePlugin(),
-    {
-      // Rewrite externals paths
-      name: 'externals',
-      setup(build) {
-        build.onResolve({ filter: /.*/ }, function (args) {
-          if (args.path.includes('directive')) {
-            return { path: `./${path.basename(args.path)}`, external: true };
-          }
-        });
-      },
-    },
-  ],
+  plugins: [replacePlugin()],
 });
 
 function replacePlugin() {

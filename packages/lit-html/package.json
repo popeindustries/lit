@@ -16,28 +16,28 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./lit-html.d.ts",
+      "types": "./index.d.ts",
       "browser": {
-        "development": "./src/lit-html.js",
-        "default": "./lit-html.js"
+        "development": "./src/index.js",
+        "default": "./index.js"
       },
-      "development": "./src/lit-html-not-browser.js",
-      "default": "./lit-html-not-browser.js"
+      "development": "./src/index-not-browser.js",
+      "default": "./index-not-browser.js"
     },
     "./async-directive.js": {
       "types": "./async-directive.d.ts",
       "development": "./src/vendor/async-directive.js",
-      "default": "./async-directive.js"
+      "default": "./vendor/async-directive.js"
     },
     "./directive-helpers.js": {
       "types": "./directive-helpers.d.ts",
       "development": "./src/vendor/directive-helpers.js",
-      "default": "./directive-helpers.js"
+      "default": "./vendor/directive-helpers.js"
     },
     "./directive.js": {
       "types": "./directive.d.ts",
       "development": "./src/vendor/directive.js",
-      "default": "./directive.js"
+      "default": "./vendor/directive.js"
     },
     "./partial-hydration-mixin.js": {
       "types": "./partial-hydration-mixin.d.ts",
@@ -46,15 +46,16 @@
     "./static.js": {
       "types": "./static.d.ts",
       "development": "./src/vendor/static.js",
-      "default": "./static.js"
+      "default": "./vendor/static.js"
     },
     "./directives/*": {
       "development": "./src/vendor/directives/*",
-      "default": "./directives/*"
+      "default": "./vendor/directives/*"
     }
   },
   "files": [
-    "directives",
+    "src",
+    "vendor",
     "*.d.ts",
     "*.js",
     "README.MD"

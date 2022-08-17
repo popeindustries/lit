@@ -6,7 +6,7 @@
  */
 
 /**
- * @typedef { import('./lit-html.js').HydrationChildPartState } HydrationChildPartState
+ * @typedef { import('./index.js').HydrationChildPartState } HydrationChildPartState
  * @typedef { import('./vendor/lit-html.js').AttributePart } AttributePart
  * @typedef { import('./vendor/lit-html.js').ChildPart } ChildPart
  * @typedef { import('./vendor/lit-html.js').ElementPart } ElementPart

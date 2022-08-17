@@ -1,4 +1,4 @@
-export { html, noChange, nothing, svg } from './lit-html.js';
+export { html, noChange, nothing, svg } from './index.js';
 
 /**
  * No-op if called in non-browser environment

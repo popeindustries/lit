@@ -19,6 +19,7 @@ function vendor(dir = '') {
     if (basename.includes('hydrate') || basename.includes('ssr') || basename.includes('polyfill')) {
       continue;
     }
+
     const ext = path.extname(basename);
 
     if (ext === '.js') {
