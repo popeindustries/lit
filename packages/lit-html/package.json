@@ -17,20 +17,27 @@
   "exports": {
     ".": {
       "types": "./lit-html.d.ts",
-      "browser": "./lit-html.js",
+      "browser": {
+        "development": "./src/lit-html.js",
+        "default": "./lit-html.js"
+      },
+      "development": "./src/lit-html-not-browser.js",
       "default": "./lit-html-not-browser.js"
     },
     "./async-directive.js": {
       "types": "./async-directive.d.ts",
+      "development": "./src/vendor/async-directive.js",
       "default": "./async-directive.js"
-    },
-    "./directive.js": {
-      "types": "./directive.d.ts",
-      "default": "./directive.js"
     },
     "./directive-helpers.js": {
       "types": "./directive-helpers.d.ts",
+      "development": "./src/vendor/directive-helpers.js",
       "default": "./directive-helpers.js"
+    },
+    "./directive.js": {
+      "types": "./directive.d.ts",
+      "development": "./src/vendor/directive.js",
+      "default": "./directive.js"
     },
     "./partial-hydration-mixin.js": {
       "types": "./partial-hydration-mixin.d.ts",
@@ -38,9 +45,13 @@
     },
     "./static.js": {
       "types": "./static.d.ts",
+      "development": "./src/vendor/static.js",
       "default": "./static.js"
     },
-    "./directives/*": "./directives/*"
+    "./directives/*": {
+      "development": "./src/vendor/directives/*",
+      "default": "./directives/*"
+    }
   },
   "files": [
     "directives",
