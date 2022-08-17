@@ -79,8 +79,6 @@ export function getAttributeTypeFromName(name) {
     return 'element';
   }
 
-  const prefix = name[0];
-
   switch (name[0]) {
     case '?':
       return 'boolean';

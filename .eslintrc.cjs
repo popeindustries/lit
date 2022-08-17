@@ -7,7 +7,7 @@ module.exports = {
     mocha: true,
     jasmine: true,
   },
-  global: {
+  globals: {
     globalThis: true,
   },
   parser: '@typescript-eslint/parser',
@@ -19,13 +19,12 @@ module.exports = {
     'plugin:prettier/recommended',
   ],
   rules: {
-    'no-constant-condition': 'off',
     'no-prototype-builtins': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/no-this-alias': 'off',
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/no-unused-vars': [
-      0,
+      2,
       {
         args: 'none',
         ignoreRestSiblings: true,

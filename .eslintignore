@@ -1,2 +1,5 @@
 *.d.ts
-test/browser
+**/test/browser
+**/vendor
+*.js
+!**/src/**/*.js

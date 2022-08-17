@@ -59,7 +59,7 @@
   "scripts": {
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f",
-    "test": "pnpm run build && pnpm run lint && pnpm run test:unit && pnpm run test:browser",
+    "test": "pnpm run build && pnpm run test:unit && pnpm run test:browser",
     "test:unit": "NODE_ENV=test mocha --require './src/dom-shim.js' --reporter spec --timeout 2000 'test/*-test.js'",
     "test:browser": "node ./test/browser/cli.js"
   }

@@ -21,12 +21,12 @@ describe.only('Render', () => {
           includeHydrationMetadata: metadata,
           elementRenderers: [LitElementRenderer],
         });
-        // customElements._registry.clear();
-        // t = template = template();
-        // const stream = await streamAsPromise(
-        //   renderToNodeStream(t, { includeHydrationMetadata: metadata, elementRenderers: [LitElementRenderer] }),
-        // );
-        // assert.equal(string, stream);
+        customElements._registry.clear();
+        t = template = template();
+        const stream = await streamAsPromise(
+          renderToNodeStream(t, { includeHydrationMetadata: metadata, elementRenderers: [LitElementRenderer] }),
+        );
+        assert.equal(string, stream);
         assert.equal(string, result);
       });
     }

@@ -135,9 +135,7 @@ export function render(value, container, options = {}) {
     return rootPart;
   } catch (err) {
     if (err) {
-      console.error(
-        `hydration failed due to the following error:\n  ${err}\nClearing nodes and performing clean render`,
-      );
+      console.error(`hydration failed. Clearing nodes and performing clean render: ${err}`);
     }
 
     // Clear all server rendered elements if we have found opening/closing comments
