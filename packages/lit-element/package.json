@@ -53,12 +53,13 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "@lit/reactive-element": "^1.4.0",
     "@popeindustries/lit-html": "workspace:*",
-    "@popeindustries/lit-html-server": "workspace:*",
+    "@popeindustries/lit-html-server": "workspace:*"
+  },
+  "devDependencies": {
+    "@lit/reactive-element": "^1.4.0",
     "lit-element": "^3.2.2"
   },
-  "devDependencies": {},
   "scripts": {
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f"

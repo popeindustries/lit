@@ -67,19 +67,19 @@ importers:
       '@popeindustries/lit-html-server': workspace:*
       lit-element: ^3.2.2
     dependencies:
-      '@lit/reactive-element': 1.4.0
       '@popeindustries/lit-html': link:../lit-html
       '@popeindustries/lit-html-server': link:../lit-html-server
+    devDependencies:
+      '@lit/reactive-element': 1.4.0
       lit-element: 3.2.2
 
   packages/lit-html:
     specifiers:
       '@types/trusted-types': ^2.0.2
       lit-html: ^2.3.0
-    dependencies:
-      lit-html: 2.3.0
     devDependencies:
       '@types/trusted-types': 2.0.2
+      lit-html: 2.3.0
 
   packages/lit-html-server:
     specifiers:
@@ -2257,6 +2257,7 @@ packages:
     dependencies:
       '@lit/reactive-element': 1.4.0
       lit-html: 2.3.0
+    dev: true
 
   /lit-html/2.3.0:
     resolution: {integrity: sha512-bnJneRqizoeSTxUeyDJLBDr+DI+7bn6P3WWqsj/4AwPWJjYgjSO5W64BVl1CrEo/8DtgU6DAYADX6yeI5/eDsg==}

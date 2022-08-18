@@ -66,10 +66,10 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "lit-html": "^2.3.0"
   },
   "devDependencies": {
-    "@types/trusted-types": "^2.0.2"
+    "@types/trusted-types": "^2.0.2",
+    "lit-html": "^2.3.0"
   },
   "scripts": {
     "build": "node ./scripts/build.js",
