@@ -47,27 +47,24 @@ export class LitElementRenderer extends ElementRenderer {
     this.element._$attributeToProperty(this.element, name, newValue);
   }
 
-  render() {
-    if (this.element.shadowRoot) {
-      const styles = /** @type { typeof LitElement } */ (this.element.constructor).elementStyles;
-      // @ts-expect-error - protected
-      const value = this.element.render();
+  renderStyles() {
+    const styles = /** @type { typeof LitElement } */ (this.element.constructor).elementStyles;
 
-      if (styles !== undefined && styles.length > 0) {
-        let css = '';
-        for (const style of styles) {
-          css += /** @type { CSSResult } */ (style).cssText;
-        }
-        return h`<style>${css.replace(/[\n\s]/g, '')}</style>${value}`;
-      } else {
-        return value;
+    if (styles !== undefined && styles.length > 0) {
+      let css = '';
+      for (const style of styles) {
+        css += /** @type { CSSResult } */ (style).cssText;
       }
-    } else if ('renderLight' in this.element) {
+      return css;
+    }
+  }
+
+  render() {
+    if ('renderLight' in this.element) {
       // @ts-ignore;
       return this.element.renderLight();
-    } else {
-      // @ts-expect-error - protected
-      return this.element.render();
     }
+    // @ts-expect-error - protected
+    return this.element.render();
   }
 }

@@ -90,6 +90,10 @@ export class ElementRenderer {
     return attributes;
   }
 
+  renderStyles() {
+    return undefined;
+  }
+
   /**
    * @returns { TemplateResult | string | null }
    */

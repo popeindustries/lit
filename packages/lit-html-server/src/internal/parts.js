@@ -288,6 +288,7 @@ export class CustomElementPart extends AttributePart {
    */
   resolveValue(values, options) {
     // Create renderer (and element instanace)
+    // TODO: recycle renderers since all operations here are synchronous
     const renderer = getElementRenderer(options, this.tagName, this.ceClass);
     renderer.connectedCallback();
 
@@ -359,14 +360,22 @@ export class CustomElementPart extends AttributePart {
     if (shouldRender) {
       let renderedContent = renderer.render();
 
-      if (renderedContent !== null) {
+      if (renderedContent != null) {
         // Handle string from innerHTML (convert to fake TemplateResult to avoid escaping).
         if (typeof renderedContent === 'string') {
           renderedContent = getFakeTemplateResult(renderedContent);
         }
+        const hasShadowDOM = renderer.element.shadowRoot !== null;
         const instance = getTemplateInstance(renderedContent);
-        instance.root = renderer.element.shadowRoot !== null ? 'shadow' : 'light';
-        result.push(resolveNodeValue(instance, this.tagName, options.includeHydrationMetadata ?? false));
+        instance.root = hasShadowDOM ? 'shadow' : 'light';
+        const styles = hasShadowDOM ? renderer.renderStyles() : undefined;
+        const resolvedStyles = styles
+          ? Buffer.from(`<style>${renderer.renderStyles()}</style>`.replace(/[\n\s]/g, ''))
+          : EMPTY_STRING_BUFFER;
+        result.push(
+          resolvedStyles,
+          resolveNodeValue(instance, this.tagName, options.includeHydrationMetadata ?? false),
+        );
       }
     }
 

@@ -363,19 +363,6 @@ export const tests = [
             color: green;
           }
         `;
-        constructor() {
-          super();
-          console.log('constructor');
-        }
-        connectedCallback() {
-          super.connectedCallback();
-          console.log('connectedCallback');
-        }
-        createRenderRoot() {
-          console.log('createRenderRoot');
-          const renderRoot = super.createRenderRoot();
-          return renderRoot;
-        }
         render() {
           return h`<p>I am green!</p>`;
         }
@@ -385,7 +372,7 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit dk2BC/krgh4=--><my-el11 hydrate:defer><!--lit-attr 0--><template shadowroot="open"><!--lit LI34b8MpjYw=--><style>p{color:green;}</style><!--lit-child ymb4EFq7aMg=--><p>I am green!</p><!--/lit-child--><!--/lit--></template></my-el11><!--/lit-->',
+      '<!--lit dk2BC/krgh4=--><my-el11 hydrate:defer><!--lit-attr 0--><style>p{color:green;}</style><template shadowroot="open"><!--lit ymb4EFq7aMg=--><p>I am green!</p><!--/lit--></template></my-el11><!--/lit-->',
   },
 ];
 

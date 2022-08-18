@@ -138,9 +138,13 @@ declare class ElementRenderer {
    */
   renderAttributes(): string;
   /**
+   * Render element styles as string for applying to shadow DOM
+   */
+  renderStyles(): string | null | undefined;
+  /**
    * Render element content
    */
-  render(): TemplateResult | string | null;
+  render(): TemplateResult | string | null | undefined;
 }
 
 /**

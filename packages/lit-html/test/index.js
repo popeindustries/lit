@@ -1,6 +1,5 @@
 // @ts-nocheck
-import { html } from 'lit-html';
-import { render } from '../index.js';
+import { html, render } from '@popeindustries/lit-html';
 import { tests } from '../../../tests/templates.js';
 
 describe('hydrate', () => {
@@ -10,11 +9,11 @@ describe('hydrate', () => {
 
   beforeEach(() => {
     container = document.createElement('div');
-    container.hidden = true;
+    // container.hidden = true;
     document.body.appendChild(container);
   });
   afterEach(() => {
-    container.remove();
+    // container.remove();
   });
 
   for (let { title, template, metadata, result, skip } of only.length ? only : tests) {
