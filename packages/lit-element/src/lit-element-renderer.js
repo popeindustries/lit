@@ -31,7 +31,7 @@ export class LitElementRenderer extends ElementRenderer {
     // Trigger `attachShadow()` to later determine if shadow DOM is being used
     this.element.createRenderRoot();
     // @ts-expect-error - protected
-    this.element.willUpdate(this.element._$changedProperties(this.element));
+    this.element.willUpdate(this.element._$changedProperties);
     // @ts-expect-error - protected
     // Reflect properties to attributes.
     ReactiveElement.prototype.update.call(this.element);

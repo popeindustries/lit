@@ -17,21 +17,28 @@
   "exports": {
     ".": {
       "types": "./index.d.ts",
+      "development": "./src/index.js",
       "default": "./index.js"
     },
     "./lit-element.js": {
       "types": "./lit-element.d.ts",
+      "development": "./src/lit-element.js",
       "default": "./lit-element.js"
     },
     "./lit-element-renderer.js": {
       "types": "./lit-element-renderer.d.ts",
+      "development": "./src/lit-element-renderer.js",
       "default": "./lit-element-renderer.js"
     },
     "./decorators.js": {
       "types": "./decorators.d.ts",
-      "default": "./decorators.js"
+      "development": "./src/vendor/decorators.js",
+      "default": "./vendor/decorators.js"
     },
-    "./decorators/*": "./decorators/*"
+    "./decorators/*": {
+      "development": "./src/vendor/decorators/*",
+      "default": "./vendor/decorators/*"
+    }
   },
   "files": [
     "*.d.ts",
