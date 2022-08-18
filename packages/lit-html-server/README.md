@@ -226,9 +226,9 @@ If `attachShadow` has been called by an element during construction/connection, 
 
 In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when **lit-html-server** is imported. See [`dom-shim.js`](/src/dom-shim.js) for details.
 
-### Partial/deferred hydration
+### Lazy (partial/deferred) hydration
 
-When rendering web components, **lit-html-server** adds `hydrate:defer` attributes to each custom element. This provides a mechanism to control and defer hydration order of nested web components that may be dependant on data passed from a parent. See [`@popeindustries/lit-html/partial-hydration-mixin.js`]() for more on deferred hydration.
+When rendering web components, **lit-html-server** adds `hydrate:defer` attributes to each custom element. This provides a mechanism to control and defer hydration order of nested web components that may be dependant on data passed from a parent. See [`@popeindustries/lit-html/lazy-hydration-mixin.js`]() for more on lazy hydration.
 
 ## Directives
 

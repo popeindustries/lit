@@ -39,9 +39,9 @@
       "development": "./src/vendor/directive.js",
       "default": "./vendor/directive.js"
     },
-    "./partial-hydration-mixin.js": {
-      "types": "./partial-hydration-mixin.d.ts",
-      "default": "./partial-hydration-mixin.js"
+    "./lazy-hydration-mixin.js": {
+      "types": "./lazy-hydration-mixin.d.ts",
+      "default": "./lazy-hydration-mixin.js"
     },
     "./static.js": {
       "types": "./static.d.ts",

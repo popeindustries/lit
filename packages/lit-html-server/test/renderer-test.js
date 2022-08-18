@@ -3,7 +3,7 @@ import { renderToNodeStream, renderToString } from '../src/lit-html-server.js';
 import assert from 'node:assert';
 import { LitElementRenderer } from '@popeindustries/lit-element/lit-element-renderer.js';
 import { streamAsPromise } from './utils.js';
-import { tests } from '../../../tests/tests.js';
+import { tests } from '../../../tests/templates.js';
 
 describe('Render', () => {
   const only = tests.filter(({ only }) => only);

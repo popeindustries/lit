@@ -80,11 +80,6 @@ class MyEl extends LitElement {
       color: green;
     }
   `;
-  createRenderRoot() {
-    const renderRoot = super.createRenderRoot();
-    console.log(renderRoot);
-    return renderRoot;
-  }
   render() {
     return html`<p>I am green!</p>`;
   }

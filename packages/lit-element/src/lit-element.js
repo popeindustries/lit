@@ -1,4 +1,7 @@
 import { LitElement as LE } from './vendor/lit-element.js';
-import { partialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
+import { lazyHydrationMixin } from '@popeindustries/lit-html/lazy-hydration-mixin.js';
 
-export class LitElement extends partialHydrationMixin(LE) {}
+export * from './vendor/reactive-element.js';
+export * from '@popeindustries/lit-html';
+
+export class LitElement extends lazyHydrationMixin(LE) {}

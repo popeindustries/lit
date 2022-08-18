@@ -1,16 +1,16 @@
 /**
- * @typedef { import('./partial-hydration-mixin.js').CustomElementBase } CustomElementBase
+ * @typedef { import('./lazy-hydration-mixin.js').CustomElementBase } CustomElementBase
  */
 
 /** @type { IntersectionObserver } */
 let intersectionObserver;
 
 /**
- * Custom element mixin for adding partial/deferred hydration support.
+ * Custom element mixin for adding lazy (partial/deferred) hydration support.
  * @param { CustomElementBase } Base
  */
-export function partialHydrationMixin(Base) {
-  return class PartialHydrationElement extends Base {
+export function lazyHydrationMixin(Base) {
+  return class LazyHydrationElement extends Base {
     static get observedAttributes() {
       return [...(super.observedAttributes ?? []), 'hydrate:defer'];
     }
@@ -66,7 +66,7 @@ export function partialHydrationMixin(Base) {
             for (const entry of entries) {
               if (entry.isIntersecting) {
                 intersectionObserver.unobserve(entry.target);
-                /** @type { PartialHydrationElement } */ (entry.target).triggerSuperConnectedCallback();
+                /** @type { LazyHydrationElement } */ (entry.target).triggerSuperConnectedCallback();
               }
             }
           });

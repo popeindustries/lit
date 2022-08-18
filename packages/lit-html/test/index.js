@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { html } from 'lit-html';
-import { render } from '../lit-html.js';
-import { tests } from '../../../tests/tests.js';
+import { render } from '../index.js';
+import { tests } from '../../../tests/templates.js';
 
 describe('hydrate', () => {
   const only = tests.filter(({ only }) => only);

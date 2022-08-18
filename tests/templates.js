@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { css, LitElement } from '@popeindustries/lit-element';
 import { html as h, render } from '@popeindustries/lit-html';
-import { partialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
+import { lazyHydrationMixin } from '@popeindustries/lit-html/lazy-hydration-mixin.js';
 
 export const tests = [
   {
@@ -301,12 +301,12 @@ export const tests = [
           render(this.render(), this, { host: this });
         }
       }
-      class MyEl7 extends partialHydrationMixin(Base) {
+      class MyEl7 extends lazyHydrationMixin(Base) {
         render() {
           return h`<div ?a="${this.hasAttribute('a')}">my <my-el8 .a="${this.hasAttribute('a')}"></my-el8></div>`;
         }
       }
-      class MyEl8 extends partialHydrationMixin(Base) {
+      class MyEl8 extends lazyHydrationMixin(Base) {
         a = null;
         render() {
           return h`<div>text ${this.a ? h`has "a"` : h`missing "a"`}</div>`;
@@ -334,12 +334,12 @@ export const tests = [
           render(this.render(), this.shadowRoot, { host: this });
         }
       }
-      class MyEl9 extends partialHydrationMixin(Base) {
+      class MyEl9 extends lazyHydrationMixin(Base) {
         render() {
           return h`<div ?a="${this.hasAttribute('a')}">my <my-el10 .a="${this.hasAttribute('a')}"></my-el10></div>`;
         }
       }
-      class MyEl10 extends partialHydrationMixin(Base) {
+      class MyEl10 extends lazyHydrationMixin(Base) {
         a = null;
         render() {
           return h`<div>text ${this.a ? h`has "a"` : h`missing "a"`}</div>`;
@@ -354,6 +354,7 @@ export const tests = [
       '<!--lit GpJxfqkCRnw=--><h1>Title</h1><my-el9 a hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit /0wYmzo69CE=--><div a><!--lit-attr 1-->my <my-el10 hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></template></my-el10></div><!--/lit--></template></my-el9><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
   },
   {
+    only: true,
     title: 'LitElement custom element',
     template: () => {
       class MyEl11 extends LitElement {

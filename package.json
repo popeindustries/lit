@@ -37,6 +37,7 @@
     "lint": "pnpm run lint:eslint && pnpm run lint:typescript",
     "lint:eslint": "eslint 'packages/**/{src,test}/**/*.js'",
     "lint:typescript": "tsc --noEmit --skipLibCheck",
+    "postinstall": "pnpm run vendor",
     "postpublish": "pnpm run clean",
     "prepublishOnly": "pnpm run clean && pnpm run build",
     "prepare": "husky install",

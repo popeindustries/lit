@@ -10,7 +10,7 @@ Hydrate your SSR'd **lit-html**: reuse HTML rendered on the server with [@popein
 - subsequent calls to `render()` will _update_ the existing DOM by forwarding to `lit-html.render()`.
 - hydration errors will cause the server rendered markup to be cleared and _replaced_ with the result of `lit-html.render()`.
 - render _multiple_ sub-trees in the same container.
-- easily enable _partial/deferred_ hydration with `partial-hydration-mixin`.
+- easily enable _lazy_ (partial/deferred) hydration with `lazy-hydration-mixin`.
 
 ## Usage
 
@@ -65,15 +65,15 @@ render(renderMenu(data), document.body, { renderBefore: document.querySelector('
 render(renderPage(data), document.body, { renderBefore: document.querySelector('body > footer') });
 ```
 
-## `partial-hydration-mixin`
+## `lazy-hydration-mixin`
 
 When hydrating sub-trees containing nested web components, it is often necessary to control the hydration order to allow parent elements to pass data down to their children. When rendering web components on the server, **lit-html-server** adds a `hydrate:defer` attribute that may be used to determine when hydration should take place.
 
-The `partial-hydration-mixin` is an easy way to add support for basic hydration deferral by delaying the call to the base class's `connectedCallback()` method:
+The `lazy-hydration-mixin` is an easy way to add support for basic hydration deferral by delaying the call to the base class's `connectedCallback()` method:
 
 ```js
 import { html, render } from '@popeindustries/lit-html';
-import { partialHydrationMixin } from '@popeindustries/lit-html/partial-hydration-mixin.js';
+import { partialHydrationMixin } from '@popeindustries/lit-html/lazy-hydration-mixin.js';
 
 class MyBaseClass extends HTMLElement {
   // Called when `hydrate:defer` attribute is removed
@@ -93,7 +93,7 @@ class MyEl extends partialHydrationMixin(MyBaseClass) {
 }
 ```
 
-This simple mechanism also enables additional forms of deferral, and the `partial-hydration-mixin` includes two additional types:
+This simple mechanism also enables additional forms of deferral, and the `lazy-hydration-mixin` includes two additional types:
 
 #### `hydrate:idle`
 
