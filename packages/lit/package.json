@@ -48,6 +48,25 @@
       "default": "./static.js"
     },
     "./decorators/*": "./decorators/*",
+    "./directives/async-append.js": {
+      "types": "./directives/async-append.d.ts",
+      "browser": "./directives/async-append.js",
+      "default": "./directives/async-append-server.js"
+    },
+    "./directives/async-replace.js": {
+      "types": "./directives/async-replace.d.ts",
+      "browser": "./directives/async-replace.js",
+      "default": "./directives/async-replace-server.js"
+    },
+    "./directives/hydratable.js": {
+      "types": "./directives/hydratable-server.d.ts",
+      "default": "./directives/hydratable-server.js"
+    },
+    "./directives/until.js": {
+      "types": "./directives/until.d.ts",
+      "browser": "./directives/until.js",
+      "default": "./directives/until-server.js"
+    },
     "./directives/*": "./directives/*"
   },
   "files": [
