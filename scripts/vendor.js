@@ -3,9 +3,6 @@ import path from 'node:path';
 
 const cwd = process.cwd();
 
-// srcDir = path.resolve(`./node_modules/${pkg}/development`);
-// const destDir = path.resolve('./src/vendor');
-
 vendorPkg('lit-html', './node_modules/lit-html/development', './src/vendor', true);
 vendorPkg('lit-element', './node_modules/lit-element/development', './src/vendor', true);
 vendorPkg('lit-element', './node_modules/@lit/reactive-element/development', './src/vendor', false);

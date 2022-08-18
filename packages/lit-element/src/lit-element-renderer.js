@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { html as h, ReactiveElement } from './vendor/lit-element.js';
+import { CSSResult, html as h, LitElement, ReactiveElement } from './vendor/lit-element.js';
 import { ElementRenderer } from '@popeindustries/lit-html-server';
 
 export class LitElementRenderer extends ElementRenderer {
@@ -21,8 +21,8 @@ export class LitElementRenderer extends ElementRenderer {
    */
   constructor(tagName) {
     super(tagName);
-    const ceClass = /** @type { typeof import('./vendor/lit-element.js').LitElement } */ (customElements.get(tagName));
-    /** @type { import('./vendor/lit-element.js').LitElement } */
+    const ceClass = /** @type { typeof LitElement } */ (customElements.get(tagName));
+    /** @type { LitElement } */
     this.element = new ceClass();
   }
 
@@ -49,15 +49,14 @@ export class LitElementRenderer extends ElementRenderer {
 
   render() {
     if (this.element.shadowRoot) {
-      const styles = /** @type { typeof import('./vendor/lit-element.js').LitElement } */ (this.element.constructor)
-        .elementStyles;
+      const styles = /** @type { typeof LitElement } */ (this.element.constructor).elementStyles;
       // @ts-expect-error - protected
       const value = this.element.render();
 
       if (styles !== undefined && styles.length > 0) {
         let css = '';
         for (const style of styles) {
-          css += /** @type { import('./vendor/lit-element.js').CSSResult } */ (style).cssText;
+          css += /** @type { CSSResult } */ (style).cssText;
         }
         return h`<style>${css.replace(/[\n\s]/g, '')}</style>${value}`;
       } else {
