@@ -45,12 +45,12 @@
  *
  * @packageDocumentation
  */
-import { PropertyValues, ReactiveElement } from '@lit/reactive-element';
+import { PropertyValues, ReactiveElement } from './reactive-element.js';
 import { RenderOptions } from '@popeindustries/lit-html';
-export * from '@lit/reactive-element';
+export * from './reactive-element.js';
 export * from '@popeindustries/lit-html';
 import { LitUnstable } from '@popeindustries/lit-html';
-import { ReactiveUnstable } from '@lit/reactive-element';
+import { ReactiveUnstable } from './reactive-element.js';
 /**
  * Contains types that are part of the unstable debug API.
  *

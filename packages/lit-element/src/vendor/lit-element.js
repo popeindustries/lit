@@ -46,9 +46,9 @@ var _a, _b, _c;
  *
  * @packageDocumentation
  */
-import { ReactiveElement } from '@lit/reactive-element';
+import { ReactiveElement } from './reactive-element.js';
 import { render, noChange } from '@popeindustries/lit-html';
-export * from '@lit/reactive-element';
+export * from './reactive-element.js';
 export * from '@popeindustries/lit-html';
 // For backwards compatibility export ReactiveElement as UpdatingElement. Note,
 // IE transpilation requires exporting like this.

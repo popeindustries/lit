@@ -3,16 +3,28 @@ import path from 'node:path';
 
 const cwd = process.cwd();
 
-for (const pkg of ['lit-element', 'lit-html']) {
+// srcDir = path.resolve(`./node_modules/${pkg}/development`);
+// const destDir = path.resolve('./src/vendor');
+
+vendorPkg('lit-html', './node_modules/lit-html/development', './src/vendor', true);
+vendorPkg('lit-element', './node_modules/lit-element/development', './src/vendor', true);
+vendorPkg('lit-element', './node_modules/@lit/reactive-element/development', './src/vendor', false);
+
+/**
+ * @param { string } pkg
+ * @param { string } srcDir
+ * @param { string } destDir
+ * @param { boolean } clear
+ */
+function vendorPkg(pkg, srcDir, destDir, clear) {
   process.chdir(path.join(cwd, 'packages', pkg));
 
-  const srcDir = path.resolve(`./node_modules/${pkg}/development`);
-  const destDir = path.resolve('./src/vendor');
-
-  if (fs.existsSync(destDir)) {
+  if (clear && fs.existsSync(destDir)) {
     fs.rmSync(destDir, { recursive: true, force: true });
   }
-  fs.mkdirSync(destDir);
+  if (!fs.existsSync(destDir)) {
+    fs.mkdirSync(destDir);
+  }
 
   vendor(srcDir, destDir);
 }
@@ -51,22 +63,28 @@ function copy(srcDir, destDir, dir, basename) {
     fs.mkdirSync(path.dirname(dest));
   }
 
-  const regex = /\s?from\s?["'](lit-html)["'];/g;
+  const reLitHtml = /\s?from\s?["'](lit-html)["'];/g;
+  const reReactiveElement = /\s?from\s?["'](@lit\/reactive-element)["'];/g;
   let code = fs.readFileSync(src, 'utf8');
+  let types = fs.readFileSync(src.replace('.js', '.d.ts'), 'utf8');
+  let copy = true;
 
-  if (regex.test(code)) {
-    const types = fs.readFileSync(src.replace('.js', '.d.ts'), 'utf8');
+  if (reLitHtml.test(code)) {
+    copy = false;
+    code = code.replaceAll(reLitHtml, (match, g) => match.replace(g, '@popeindustries/lit-html'));
+    types = types.replaceAll(reLitHtml, (match, g) => match.replace(g, '@popeindustries/lit-html'));
+  }
+  if (reReactiveElement.test(code)) {
+    copy = false;
+    code = code.replaceAll(reReactiveElement, (match, g) => match.replace(g, './reactive-element.js'));
+    types = types.replaceAll(reReactiveElement, (match, g) => match.replace(g, './reactive-element.js'));
+  }
 
-    fs.writeFileSync(
-      dest,
-      code.replaceAll(regex, (match, g) => match.replace(g, '@popeindustries/lit-html')),
-    );
-    fs.writeFileSync(
-      dest.replace('.js', '.d.ts'),
-      types.replaceAll(regex, (match, g) => match.replace(g, '@popeindustries/lit-html')),
-    );
-  } else {
+  if (copy) {
     fs.copyFileSync(src, dest);
     fs.copyFileSync(src.replace('.js', '.d.ts'), dest.replace('.js', '.d.ts'));
+  } else {
+    fs.writeFileSync(dest, code);
+    fs.writeFileSync(dest.replace('.js', '.d.ts'), types);
   }
 }
