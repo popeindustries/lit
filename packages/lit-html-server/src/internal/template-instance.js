@@ -1,5 +1,5 @@
 import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart } from './parts.js';
-import { META_CHILD_CLOSE, META_CLOSE, META_CLOSE_SHADOW } from './consts.js';
+import { META_CHILD_CLOSE, META_CHILD_OPEN, META_CLOSE, META_CLOSE_SHADOW } from './consts.js';
 import { Buffer } from '#buffer';
 import { getTemplate } from './template.js';
 
@@ -37,12 +37,31 @@ export class TemplateInstance {
     this.hydratable = hydratable;
     this.id = id++;
     this.index = 0;
-    /** @type { 'light' | 'shadow' | null } */
-    this.root = null;
     this.maxIndex = template.strings.length + template.parts.length - 1;
+    this.prefix = Buffer.from(`<!--lit-child ${template.digest}-->`);
+    this.suffix = META_CHILD_CLOSE;
     this.template = template;
     this.valueIndex = 0;
     this.values = values;
+  }
+
+  /**
+   * Set as root instance.
+   * If a `shadow` root, add optional styles.
+   * @param { 'light' | 'shadow' } [type]
+   * @param { string } [styles]
+   */
+  setAsRoot(type = 'light', styles = '') {
+    const litOpen = `<!--lit ${this.template.digest}-->`;
+
+    if (type === 'light') {
+      this.prefix = Buffer.from(litOpen);
+      this.suffix = META_CLOSE;
+    } else {
+      const resolvedStyles = styles ? `<style>${styles}</style>`.replace(/[\n\s]/g, '') : '';
+      this.prefix = Buffer.from(`<template shadowroot="open">${resolvedStyles}${litOpen}`);
+      this.suffix = META_CLOSE_SHADOW;
+    }
   }
 
   /**
@@ -72,15 +91,10 @@ export class TemplateInstance {
 
       if (withMetadata) {
         if (isFirstString) {
-          const metadata = `${this.root === 'shadow' ? '<template shadowroot="open">' : ''}<!--lit${
-            this.root !== null ? '' : '-child'
-          } ${this.template.digest}-->`;
-          string = Buffer.concat([Buffer.from(metadata), string]);
+          string = Buffer.concat([this.prefix, string]);
         }
         if (isLastString) {
-          const metadata =
-            this.root === null ? META_CHILD_CLOSE : this.root === 'shadow' ? META_CLOSE_SHADOW : META_CLOSE;
-          string = Buffer.concat([string, metadata]);
+          string = Buffer.concat([string, this.suffix]);
         }
       }
 

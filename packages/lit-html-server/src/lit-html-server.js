@@ -61,6 +61,6 @@ function getRootTemplateInstance(result) {
     result = html`${result}`;
   }
   const instance = getTemplateInstance(/** @type { TemplateResult } */ (result));
-  instance.root = 'light';
+  instance.setAsRoot('light');
   return instance;
 }

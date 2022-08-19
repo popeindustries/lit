@@ -91,7 +91,7 @@ export class ElementRenderer {
   }
 
   renderStyles() {
-    return undefined;
+    return '';
   }
 
   /**

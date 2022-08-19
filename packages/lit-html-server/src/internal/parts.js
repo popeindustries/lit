@@ -367,15 +367,12 @@ export class CustomElementPart extends AttributePart {
         }
         const hasShadowDOM = renderer.element.shadowRoot !== null;
         const instance = getTemplateInstance(renderedContent);
-        instance.root = hasShadowDOM ? 'shadow' : 'light';
-        const styles = hasShadowDOM ? renderer.renderStyles() : undefined;
-        const resolvedStyles = styles
-          ? Buffer.from(`<style>${renderer.renderStyles()}</style>`.replace(/[\n\s]/g, ''))
-          : EMPTY_STRING_BUFFER;
-        result.push(
-          resolvedStyles,
-          resolveNodeValue(instance, this.tagName, options.includeHydrationMetadata ?? false),
-        );
+        if (hasShadowDOM) {
+          instance.setAsRoot('shadow', renderer.renderStyles());
+        } else {
+          instance.setAsRoot('light');
+        }
+        result.push(resolveNodeValue(instance, this.tagName, options.includeHydrationMetadata ?? false));
       }
     }
 

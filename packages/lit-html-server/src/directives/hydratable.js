@@ -36,9 +36,9 @@ export const hydratable = directive(HydratableDirective);
  * @param { TemplateResult } result
  */
 function resolveTemplateResult(result) {
-  const instance = __internalGetTemplateInstance__(result);
+  const instance = /** @type { TemplateInstance } */ (__internalGetTemplateInstance__(result));
   instance.hydratable = true;
-  instance.root = 'light';
+  instance.setAsRoot('light');
   return instance;
 }
 

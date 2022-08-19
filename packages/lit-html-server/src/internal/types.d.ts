@@ -8,11 +8,13 @@ declare type TemplateInstance = {
   hydratable: boolean;
   id: number;
   index: number;
-  root: null | 'light' | 'shadow';
   maxIndex: number;
+  prefix: Buffer;
+  suffix: Buffer;
   template: Template;
   valueIndex: number;
   values: Array<unknown>;
+  setAsRoot(type?: 'light' | 'shadow', styles?: string): void;
   readChunk(options?: InternalRenderOptions): unknown;
 };
 
@@ -140,7 +142,7 @@ declare class ElementRenderer {
   /**
    * Render element styles as string for applying to shadow DOM
    */
-  renderStyles(): string | null | undefined;
+  renderStyles(): string;
   /**
    * Render element content
    */

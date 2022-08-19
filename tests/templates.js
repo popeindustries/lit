@@ -354,7 +354,6 @@ export const tests = [
       '<!--lit GpJxfqkCRnw=--><h1>Title</h1><my-el9 a hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit /0wYmzo69CE=--><div a><!--lit-attr 1-->my <my-el10 hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></template></my-el10></div><!--/lit--></template></my-el9><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
   },
   {
-    only: true,
     title: 'LitElement custom element',
     template: () => {
       class MyEl11 extends LitElement {
@@ -372,7 +371,7 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit dk2BC/krgh4=--><my-el11 hydrate:defer><!--lit-attr 0--><style>p{color:green;}</style><template shadowroot="open"><!--lit ymb4EFq7aMg=--><p>I am green!</p><!--/lit--></template></my-el11><!--/lit-->',
+      '<!--lit dk2BC/krgh4=--><my-el11 hydrate:defer><!--lit-attr 0--><template shadowroot="open"><style>p{color:green;}</style><!--lit ymb4EFq7aMg=--><p>I am green!</p><!--/lit--></template></my-el11><!--/lit-->',
   },
 ];
 
