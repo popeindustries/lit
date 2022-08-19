@@ -6,7 +6,7 @@
  */
 
 import { CSSResult, LitElement, ReactiveElement } from './vendor/lit-element.js';
-import { ElementRenderer } from '@popeindustries/lit-html-server';
+import { ElementRenderer } from '@popeindustries/lit-html-server/element-renderer.js';
 
 export class LitElementRenderer extends ElementRenderer {
   /**

@@ -5,11 +5,20 @@ import path from 'node:path';
 await esbuild.build({
   bundle: true,
   entryPoints: ['./src/lit-html-server.js'],
-  external: ['lit-html', 'lit-html/*', '*dom-shim.js'],
+  external: ['lit-html', 'lit-html/*', './dom-shim.js', './element-renderer.js'],
   format: 'esm',
   target: 'node16',
   platform: 'node',
   outfile: 'lit-html-server.js',
+});
+
+await esbuild.build({
+  bundle: true,
+  entryPoints: ['./src/internal/element-renderer.js'],
+  format: 'esm',
+  target: 'node16',
+  platform: 'node',
+  outfile: 'element-renderer.js',
 });
 
 await esbuild.build({
@@ -50,6 +59,7 @@ fs.writeFileSync(
   `${types}\n${fs.readFileSync(path.resolve('src/lit-html-server.d.ts'), 'utf8')}`,
 );
 
+fs.copyFileSync(path.resolve('src/internal/element-renderer.d.ts'), path.resolve('element-renderer.d.ts'));
 fs.copyFileSync(path.resolve('src/dom-shim.js'), path.resolve('dom-shim.js'));
 
 if (!fs.existsSync(path.resolve('directives'))) {

@@ -7,7 +7,6 @@ import { promiseTemplateRenderer } from './internal/promise-template-renderer.js
 import { webStreamTemplateRenderer } from './internal/web-stream-template-renderer.js';
 
 export { html, noChange, nothing, svg } from 'lit-html';
-export { ElementRenderer } from './internal/element-renderer.js';
 // Secret export for use by `hydratable` directive
 export { getTemplateInstance as __internalGetTemplateInstance__ } from './internal/template-instance.js';
 

@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { ElementRenderer } from '@popeindustries/lit-html-server';
+import { ElementRenderer } from '@popeindustries/lit-html-server/element-renderer.js';
 
 /**
  * Custom ElementRenderer for rendering LitElement elements.

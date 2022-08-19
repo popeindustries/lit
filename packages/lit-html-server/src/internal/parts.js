@@ -12,7 +12,7 @@ import {
 import { noChange, nothing } from 'lit-html';
 import { Buffer } from '#buffer';
 import { escape } from './escape.js';
-import { getElementRenderer } from './element-renderer.js';
+import { getElementRenderer } from './get-element-renderer.js';
 import { getFakeTemplateResult } from './template-result.js';
 import { getTemplateInstance } from './template-instance.js';
 

@@ -4,25 +4,6 @@ import { escape } from './escape.js';
  * @typedef { HTMLElement & { render?(): TemplateResult } } CustomElement
  */
 
-/**
- * @param { RenderOptions } options
- * @param { string } tagName
- * @param { typeof HTMLElement } [ceClass]
- */
-export function getElementRenderer({ elementRenderers = [] }, tagName, ceClass = customElements.get(tagName)) {
-  if (ceClass === undefined) {
-    console.warn(`Custom element "${tagName}" was not registered.`);
-  } else {
-    for (const renderer of elementRenderers) {
-      if (renderer.matchesClass(ceClass, tagName)) {
-        return new renderer(tagName);
-      }
-    }
-  }
-
-  return new DefaultElementRenderer(tagName);
-}
-
 export class ElementRenderer {
   /**
    * @param { CustomElement } ceClass
@@ -39,6 +20,8 @@ export class ElementRenderer {
     this.tagName = tagName;
     /** @type { CustomElement } */
     this.element;
+    // @ts-ignore
+    this.observedAttributes = /** @type { Array<string> } */ (this.element.constructor.observedAttributes);
   }
 
   connectedCallback() {
@@ -71,8 +54,9 @@ export class ElementRenderer {
   setAttribute(name, value) {
     const oldValue = this.element.getAttribute(name);
     this.element.setAttribute(name, value);
-    // TODO: only call if `name` in `observedAttributes`
-    this.attributeChangedCallback(name, oldValue, value);
+    if (this.observedAttributes.includes(name)) {
+      this.attributeChangedCallback(name, oldValue, value);
+    }
   }
 
   renderAttributes() {
@@ -100,16 +84,5 @@ export class ElementRenderer {
   render() {
     const innerHTML = this.element.shadowRoot?.innerHTML || this.element.innerHTML;
     return innerHTML || (this.element.render?.() ?? null);
-  }
-}
-
-class DefaultElementRenderer extends ElementRenderer {
-  /**
-   * @param { string } tagName
-   */
-  constructor(tagName) {
-    super(tagName);
-    const ceClass = customElements.get(tagName) ?? HTMLElement;
-    this.element = /** @type { CustomElement } */ (new ceClass());
   }
 }

@@ -9,11 +9,11 @@ describe('hydrate', () => {
 
   beforeEach(() => {
     container = document.createElement('div');
-    // container.hidden = true;
+    container.hidden = true;
     document.body.appendChild(container);
   });
   afterEach(() => {
-    // container.remove();
+    container.remove();
   });
 
   for (let { title, template, metadata, result, skip } of only.length ? only : tests) {

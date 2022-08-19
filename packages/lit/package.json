@@ -70,6 +70,8 @@
     "./directives/*": "./directives/*"
   },
   "files": [
+    "decorators",
+    "directives",
     "*.d.ts",
     "*.js",
     "README.MD"
