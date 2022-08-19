@@ -20,11 +20,13 @@ export class ElementRenderer {
     this.tagName = tagName;
     /** @type { CustomElement } */
     this.element;
-    // @ts-ignore
-    this.observedAttributes = /** @type { Array<string> } */ (this.element.constructor.observedAttributes);
+    /** @type { Array<string> } */
+    this.observedAttributes = [];
   }
 
   connectedCallback() {
+    // @ts-ignore
+    this.observedAttributes = /** @type { Array<string> } */ (this.element.constructor.observedAttributes) ?? [];
     // @ts-ignore
     this.element.connectedCallback?.();
   }
