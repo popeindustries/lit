@@ -35,6 +35,10 @@
       "types": "./directive.d.ts",
       "default": "./directive.js"
     },
+    "./element-renderer.js": {
+      "types": "./element-renderer.d.ts",
+      "default": "./element-renderer.js"
+    },
     "./html-server.js": {
       "types": "./html-server.d.ts",
       "default": "./html-server.js"
@@ -42,6 +46,14 @@
     "./html.js": {
       "types": "./html.d.ts",
       "default": "./html.js"
+    },
+    "./lazy-hydration-mixin.js": {
+      "types": "./lazy-hydration-mixin.d.ts",
+      "default": "./lazy-hydration-mixin.js"
+    },
+    "./lit-element-renderer.js": {
+      "types": "./lit-element-renderer.d.ts",
+      "default": "./lit-element-renderer.js"
     },
     "./static.js": {
       "types": "./static.d.ts",
