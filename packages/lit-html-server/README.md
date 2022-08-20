@@ -8,14 +8,14 @@ Efficiently render streaming [**lit-html**](https://github.com/lit/lit) template
 
 ## Features
 
-- 6-7x faster than **@lit-labs/ssr**
-- render full HTML pages (not just `body`)
-- stream responses in Node.js and ServiceWorker with first-class Promise/AsyncIterator support
-- render optional hydration metadata with `hydratable` directive
-- render web components with light or shadow DOM
-- default web component rendering with `innerHTML` support
-- customisable web component rendering with `ElementRenderer`
-- compatible with `lit-html/directives`
+- 6-7x _faster_ than **@lit-labs/ssr**
+- render _full_ HTML pages (not just `body`)
+- _stream_ responses in Node.js and ServiceWorker with first-class Promise/AsyncIterator support
+- render _optional_ hydration metadata with `hydratable` directive
+- render web components with _light_ or _shadow_ DOM
+- default web component rendering with _`innerHTML`_ support
+- _customisable_ web component rendering with `ElementRenderer`
+- _compatible_ with `lit-html/directives/*`
 
 ## Usage
 
@@ -152,41 +152,49 @@ declare class ElementRenderer {
    */
   static matchesClass(ceClass: typeof HTMLElement, tagName: string): boolean;
   /**
-   * The custom element instance.
+   * The custom element instance
    */
-  element: HTMLElement;
+  readonly element: HTMLElement;
   /**
-   * The custom element tag name.
+   * The custom element tag name
    */
-  tagName: string;
+  readonly tagName: string;
   /**
-   * Constructor.
+   * The element's observed attributes
+   */
+  readonly observedAttributes: Array<string>;
+  /**
+   * Constructor
    */
   constructor(tagName: string);
   /**
-   * Function called when element is to be rendered.
+   * Function called when element is to be rendered
    */
   connectedCallback(): void;
   /**
-   * Function called when observed element attribute value has changed.
+   * Function called when observed element attribute value has changed
    */
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void;
   /**
-   * Update element property value.
+   * Update element property value
    */
   setProperty(name: string, value: unknown): void;
   /**
-   * Update element attribute value.
+   * Update element attribute value
    */
   setAttribute(name: string, value: string): void;
   /**
-   * Render element attributes as string.
+   * Render element attributes as string
    */
   renderAttributes(): string;
   /**
-   * Render element content.
+   * Render element styles as string for applying to shadow DOM
    */
-  render(): TemplateResult | string | null;
+  renderStyles(): string;
+  /**
+   * Render element content
+   */
+  render(): TemplateResult | string | null | undefined;
 }
 ```
 
@@ -197,18 +205,18 @@ import { ElementRenderer, renderToNodeStream } from '@popeindustries/lit-html-se
 
 class MyElementRenderer extends ElementRenderer {
   static matchesClass(ceClass, tagName) {
-    return '__myCompIdentifier__' in ceClass;
+    return '__myElementIdentifier__' in ceClass;
   }
 
   render() {
-    return this.element.myCompRenderFn();
+    return this.element.myElementRenderFn();
   }
 }
 
 const stream = renderToNodeStream(Layout(data), { elementRenderers: [MyElementRenderer] });
 ```
 
-Note that the default `ElementRenderer` will render `innerHTML` strings or content returned by `this.element.render()`.
+> Note that the default `ElementRenderer` will render `innerHTML` strings or content returned by `this.element.render()`.
 
 ### Shadow DOM
 
@@ -222,19 +230,27 @@ If `attachShadow` has been called by an element during construction/connection, 
 <!--/lit-->
 ```
 
-### DOM polyfills
+### Disabling server render
 
-In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when **lit-html-server** is imported. See [`dom-shim.js`](/src/dom-shim.js) for details.
+For web components that will only be rendered on the client, add the `render:client` attribute to disable server rendering for that component:
+
+```js
+html`<my-el render:client><span slot="my-text">some text</span></my-el>`;
+```
 
 ### Lazy (partial/deferred) hydration
 
 When rendering web components, **lit-html-server** adds `hydrate:defer` attributes to each custom element. This provides a mechanism to control and defer hydration order of nested web components that may be dependant on data passed from a parent. See [`@popeindustries/lit-html/lazy-hydration-mixin.js`]() for more on lazy hydration.
 
+### DOM polyfills
+
+In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when **lit-html-server** is imported. See [`dom-shim.js`](/src/dom-shim.js) for details.
+
 ## Directives
 
 _Most_ of the built-in `lit-html/directives/*` already support server rendering, and work as expected in **lit-html-server**, the exception being those directives that are asynchronous. **lit-html-server** supports the rendering of Promises and AsyncInterators as first-class primitives, so special versions of `async-append.js`, `async-replace.js`, and `until.js` should be imported from `@popeindustries/lit-html-server/directives`.
 
-## API (Node.js)
+## API
 
 #### `RenderOptions`
 

@@ -3,8 +3,6 @@ import { Readable } from 'node:stream';
 import everything from './the-everything-bagel-template.js';
 import http from 'node:http';
 
-const html = String.raw;
-
 http
   .createServer((req, res) => {
     const data = {

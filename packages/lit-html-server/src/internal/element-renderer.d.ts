@@ -13,15 +13,18 @@ export class ElementRenderer {
   /**
    * The custom element instance
    */
-  element: HTMLElement;
+  readonly element: HTMLElement;
   /**
    * The custom element tag name
    */
-  tagName: string;
+  readonly tagName: string;
   /**
    * The element's observed attributes
    */
   readonly observedAttributes: Array<string>;
+  /**
+   * Constructor
+   */
   constructor(tagName: string);
   /**
    * Function called when element is to be rendered
