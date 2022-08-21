@@ -12,9 +12,9 @@ Efficiently render streaming [**lit-html**](https://github.com/lit/lit) template
 - 6-7x _faster_ than **@lit-labs/ssr**
 - render _full_ HTML pages (not just `body`)
 - _stream_ responses in Node.js and ServiceWorker with first-class Promise/AsyncIterator support
-- render _optional_ hydration metadata with `hydratable` directive
+- render _optional_ hydration metadata with `hydratable` directive, or `hydratableWebComponents` render option
 - render web components with _light_ or _shadow_ DOM
-- default web component rendering with _`innerHTML`_ support
+- default web component rendering with _`innerHTML`_ and `render()` support
 - _customisable_ web component rendering with `ElementRenderer`
 - _compatible_ with `lit-html/directives/*`
 
@@ -252,12 +252,52 @@ When rendering web components, **lit-html-server** adds `hydrate:defer` attribut
 
 In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when `@popeindustries/lit-html-server` is imported. See [`dom-shim.js`](/src/dom-shim.js) for details.
 
-> **warning**
+> **Warning**
 > Depending on the order of imports, the Node process may exit with a `ReferenceError: window is not defined` error. Avoid this error by moving the import from `@popeindustries/lit-html-server` to the top of your file, or import `@popeindustries/lit-html-server/dom-shim.js` directly before all others.
 
 ## Directives
 
 _Most_ of the built-in `lit-html/directives/*` already support server rendering, and work as expected in **lit-html-server**, the exception being those directives that are asynchronous. **lit-html-server** supports the rendering of Promises and AsyncInterators as first-class primitives, so special versions of `async-append.js`, `async-replace.js`, and `until.js` should be imported from `@popeindustries/lit-html-server/directives`.
+
+## Benchmarks
+
+Benchmarks for rendering a complex template in **lit-html-server** vs. [@lit-labs/ssr]():
+
+```bash
+# @popeindustries/lit-html-server
+
+┌─────────┬────────┬────────┬────────┬────────┬───────────┬──────────┬────────┐
+│ Stat    │ 2.5%   │ 50%    │ 97.5%  │ 99%    │ Avg       │ Stdev    │ Max    │
+├─────────┼────────┼────────┼────────┼────────┼───────────┼──────────┼────────┤
+│ Latency │ 315 ms │ 554 ms │ 571 ms │ 581 ms │ 495.66 ms │ 85.27 ms │ 700 ms │
+└─────────┴────────┴────────┴────────┴────────┴───────────┴──────────┴────────┘
+┌───────────┬────────┬────────┬────────┬────────┬────────┬────────┬────────┐
+│ Stat      │ 1%     │ 2.5%   │ 50%    │ 97.5%  │ Avg    │ Stdev  │ Min    │
+├───────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┤
+│ Req/Sec   │ 6451   │ 6451   │ 7171   │ 7251   │ 7101.2 │ 221.47 │ 6450   │
+├───────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┤
+│ Bytes/Sec │ 123 MB │ 123 MB │ 136 MB │ 137 MB │ 135 MB │ 4 MB   │ 123 MB │
+└───────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┘
+```
+
+```bash
+# @lit-labs/ssr
+
+┌─────────┬────────┬─────────┬─────────┬─────────┬────────────┬────────────┬─────────┐
+│ Stat    │ 2.5%   │ 50%     │ 97.5%   │ 99%     │ Avg        │ Stdev      │ Max     │
+├─────────┼────────┼─────────┼─────────┼─────────┼────────────┼────────────┼─────────┤
+│ Latency │ 652 ms │ 5096 ms │ 7557 ms │ 7878 ms │ 4523.54 ms │ 2041.71 ms │ 9116 ms │
+└─────────┴────────┴─────────┴─────────┴─────────┴────────────┴────────────┴─────────┘
+┌───────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
+│ Stat      │ 1%      │ 2.5%    │ 50%     │ 97.5%   │ Avg     │ Stdev   │ Min     │
+├───────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Req/Sec   │ 980     │ 980     │ 1299    │ 1593    │ 1300.5  │ 184.65  │ 980     │
+├───────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Bytes/Sec │ 20.1 MB │ 20.1 MB │ 27.4 MB │ 32.9 MB │ 27.3 MB │ 3.92 MB │ 20.1 MB │
+└───────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┘
+```
+
+(Results from local run on 2022 Macbook Air)
 
 ## API
 

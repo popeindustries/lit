@@ -6,10 +6,10 @@ Seamlessly and efficiently use [@popeindustries/lit-html-server]() rendered HTML
 
 ## Features
 
-- automatic _hydration_: first call to `render()` will hydrate if possible, with subsequent calls updating the existing DOM by forwarding to `lit-html.render()`.
+- seamless _hydration_: first call to `render()` will hydrate if possible, with subsequent calls updating the existing DOM by forwarding to `lit-html.render()`.
 - hydration errors will cause the server rendered markup to be cleared and _replaced_ with the result of `lit-html.render()`.
 - render _multiple_ sub-trees in the same container.
-- easily enable _lazy_ (partial/deferred) hydration with `lazy-hydration-mixin` and `hydrate:idle` or `hydrate:visible` attributes.
+- easily enable _lazy_ (partial/deferred) web component hydration with `lazy-hydration-mixin`, and `hydrate:idle` or `hydrate:visible` attributes.
 
 ## Usage
 

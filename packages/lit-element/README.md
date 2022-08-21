@@ -2,7 +2,7 @@
 
 # @popeindustries/lit-element
 
-Seamlessly and efficiently use [@popeindustries/lit-html-server]() rendered HTML to hydrate **lit-element** web components in the browser, including lazy hydration with `hydrate:idle` or `hydrate:visible` attributes.
+Seamlessly and efficiently use [**@popeindustries/lit-html-server**]() rendered HTML to hydrate **lit-element** web components in the browser, including lazy hydration with `hydrate:idle` or `hydrate:visible` attributes.
 
 ## Usage
 
