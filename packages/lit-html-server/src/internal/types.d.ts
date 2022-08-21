@@ -71,7 +71,8 @@ declare enum PartType {
   METADATA = 0,
   ATTRIBUTE = 1,
   CHILD = 2,
-  CUSTOMELEMENT = 3,
+  CUSTOMELEMENT_OPEN = 3,
+  CUSTOMELEMENT_CLOSE = 4,
 }
 interface AttributePartType {
   readonly length: number;
@@ -84,12 +85,16 @@ interface ChildPartType {
   readonly type: PartType.CHILD;
   resolveValue(value: unknown, options: InternalRenderOptions): unknown;
 }
-interface CustomElementPartType {
+interface CustomElementOpenPartType {
   readonly length: number;
-  readonly nodeIndex: number;
   readonly tagName: string;
-  readonly type: PartType.CUSTOMELEMENT;
+  readonly type: PartType.CUSTOMELEMENT_OPEN;
   resolveValue(values: Array<unknown>, options: InternalRenderOptions): unknown;
+}
+interface CustomElementClosePartType {
+  readonly tagName: string;
+  readonly type: PartType.CUSTOMELEMENT_CLOSE;
+  resolveValue(options: InternalRenderOptions): unknown;
 }
 interface MetadataPartType {
   readonly tagName: string;
@@ -97,7 +102,7 @@ interface MetadataPartType {
   readonly value: Buffer;
   resolveValue(options: InternalRenderOptions): unknown;
 }
-declare type Part = MetadataPartType | CustomElementPartType | ChildPartType | AttributePartType;
+declare type Part = MetadataPartType | CustomElementOpenPartType | ChildPartType | AttributePartType;
 
 type ElementRendererConstructor = {
   new (tagName: string): ElementRenderer;
@@ -115,8 +120,12 @@ declare type RenderOptions = {
 };
 
 type InternalRenderOptions = RenderOptions & {
+  /** The stack of nested custom elements in the tree to determine root elements */
+  customElementStack: Array<string>;
+  /** The flag to enable/disable metadata. Set when TemplateInstance.hydratable === true */
   includeHydrationMetadata?: boolean;
-  hydrationRoot?: number;
+  /** The TemplateInstance.id corresponding to hydratable root, used to disable metadata when complete */
+  hydrationMetadataRootId?: number;
 };
 
 type RegexTagGroups = {

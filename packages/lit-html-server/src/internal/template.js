@@ -65,14 +65,13 @@ class Template {
    * @param { TemplateStringsArray } strings
    */
   _parse(strings) {
-    /** @type { parts.AttributePart | parts.CustomElementPart | undefined } */
+    /** @type { parts.AttributePart | parts.CustomElementOpenPart | undefined } */
     let attributePart;
-    let isCustomElement = false;
+    let isOpeningCustomElement = false;
     /** @type { typeof ATTRIBUTE | typeof TEXT | typeof COMMENT } */
     let mode = TEXT;
     let n = strings.length;
     let nextString = strings[0];
-    let nodeIndex = -1;
     let regex = RE_TAG;
     let tagName = '';
 
@@ -109,17 +108,17 @@ class Template {
             const isDynamicTagName = groups.dynamicTagName !== undefined;
             const rawTagName = /** @type { string } */ (isDynamicTagName ? groups.dynamicTagName : groups.tagName);
             const isOpeningTag = rawTagName[0] !== '/';
+            const isClosingCustomElement = !isOpeningTag && isCustomElementTagName(rawTagName.slice(1));
 
-            isCustomElement = isCustomElementTagName(rawTagName);
+            isOpeningCustomElement = isCustomElementTagName(rawTagName);
             mode = ATTRIBUTE;
             regex = RE_ATTR;
 
             if (isOpeningTag) {
               tagName = rawTagName;
-              nodeIndex++;
 
-              if (isCustomElement) {
-                attributePart = new parts.CustomElementPart(tagName, nodeIndex);
+              if (isOpeningCustomElement) {
+                attributePart = new parts.CustomElementOpenPart(tagName);
               } else {
                 // If tag end ('>') is in the same string, we can skip attribute parsing
                 RE_TAG_END.lastIndex = lastIndex;
@@ -138,6 +137,11 @@ class Template {
                 lastIndex = 0;
                 this.parts.push(attributePart);
               }
+            } else if (isClosingCustomElement) {
+              this.strings.push(Buffer.from(string.slice(0, lastIndex)));
+              string = string.slice(lastIndex);
+              lastIndex = 0;
+              this.parts.push(new parts.CustomElementClosePart(tagName));
             }
 
             if (isDynamicTagName) {
@@ -152,7 +156,7 @@ class Template {
           // Tag end
           if (match[0] === '>') {
             // Only "true" for opening tag
-            if (isCustomElement) {
+            if (isOpeningCustomElement) {
               string = string.slice(lastIndex);
               lastIndex = 0;
             } else if (attributePart !== undefined) {

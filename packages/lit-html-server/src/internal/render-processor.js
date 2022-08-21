@@ -19,7 +19,7 @@ import { getTemplateInstance } from './template-instance.js';
  * @param { InternalRenderOptions } [options]
  * @returns { () => void }
  */
-export function getProcessor(renderer, stack, highWaterMark = 0, options = {}) {
+export function getProcessor(renderer, stack, highWaterMark = 0, options = { customElementStack: [] }) {
   /** @type { Array<Buffer> } */
   const buffer = [];
   let bufferLength = 0;
@@ -148,7 +148,7 @@ function getTemplateInstanceChunk(instance, stack, options) {
   // Enable hydration metadata for sub-tree
   if (instance.hydratable && !options.includeHydrationMetadata) {
     options.includeHydrationMetadata = true;
-    options.hydrationRoot = instance.id;
+    options.hydrationMetadataRootId = instance.id;
   }
 
   let chunk = instance.readChunk(options);
@@ -156,9 +156,9 @@ function getTemplateInstanceChunk(instance, stack, options) {
   // Finished reading, dispose
   if (chunk === null) {
     // Disable hydration metadata when finished with sub-tree
-    if (options.hydrationRoot === instance.id) {
+    if (options.hydrationMetadataRootId === instance.id) {
       options.includeHydrationMetadata = false;
-      options.hydrationRoot = undefined;
+      options.hydrationMetadataRootId = undefined;
     }
     stack.shift();
   } else if (isTemplateInstanceOrResult(chunk)) {

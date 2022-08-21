@@ -1,4 +1,10 @@
-import { isAttributePart, isChildPart, isCustomElementPart, isMetadataPart } from './parts.js';
+import {
+  isAttributePart,
+  isChildPart,
+  isCustomElementClosePart,
+  isCustomElementOpenPart,
+  isMetadataPart,
+} from './parts.js';
 import { META_CHILD_CLOSE, META_CLOSE, META_CLOSE_SHADOW } from './consts.js';
 import { Buffer } from '#buffer';
 import { getTemplate } from './template.js';
@@ -102,9 +108,8 @@ export class TemplateInstance {
     }
 
     const part = this.template.parts[index];
-    const isCustomElement = isCustomElementPart(part);
 
-    if (isAttributePart(part) || isCustomElement) {
+    if (isAttributePart(part) || isCustomElementOpenPart(part)) {
       const length = part.length;
       // AttributeParts can have multiple values, so slice based on length
       // (strings in-between values are already handled by the instance)
@@ -116,7 +121,7 @@ export class TemplateInstance {
       const value = part.resolveValue(this.values[this.valueIndex], options);
       this.valueIndex++;
       return value;
-    } else if (isMetadataPart(part)) {
+    } else if (isMetadataPart(part) || isCustomElementClosePart(part)) {
       return part.resolveValue(options);
     } else {
       this.valueIndex++;

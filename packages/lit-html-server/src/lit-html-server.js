@@ -17,7 +17,7 @@ export { getTemplateInstance as __internalGetTemplateInstance__ } from './intern
  * @returns { import('stream').Readable }
  */
 export function renderToNodeStream(result, options) {
-  return nodeStreamTemplateRenderer(getRootTemplateInstance(result), { ...options });
+  return nodeStreamTemplateRenderer(getRootTemplateInstance(result), { ...options, customElementStack: [] });
 }
 
 /**
@@ -27,7 +27,7 @@ export function renderToNodeStream(result, options) {
  * @returns { ReadableStream }
  */
 export function renderToWebStream(result, options) {
-  return webStreamTemplateRenderer(getRootTemplateInstance(result), { ...options });
+  return webStreamTemplateRenderer(getRootTemplateInstance(result), { ...options, customElementStack: [] });
 }
 
 /**
@@ -37,7 +37,7 @@ export function renderToWebStream(result, options) {
  * @returns { Promise<string> }
  */
 export function renderToString(result, options) {
-  return promiseTemplateRenderer(getRootTemplateInstance(result), false, { ...options });
+  return promiseTemplateRenderer(getRootTemplateInstance(result), false, { ...options, customElementStack: [] });
 }
 
 /**
@@ -47,7 +47,7 @@ export function renderToString(result, options) {
  * @returns { Promise<Buffer> }
  */
 export function renderToBuffer(result, options) {
-  return promiseTemplateRenderer(getRootTemplateInstance(result), true, { ...options });
+  return promiseTemplateRenderer(getRootTemplateInstance(result), true, { ...options, customElementStack: [] });
 }
 
 /**

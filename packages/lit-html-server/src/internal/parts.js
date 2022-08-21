@@ -20,7 +20,8 @@ export const partType = {
   METADATA: 0,
   ATTRIBUTE: 1,
   CHILD: 2,
-  CUSTOMELEMENT: 3,
+  CUSTOMELEMENT_OPEN: 3,
+  CUSTOMELEMENT_CLOSE: 4,
 };
 
 const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
@@ -53,12 +54,21 @@ export function isChildPart(part) {
 }
 
 /**
- * Determine if "part" is a CustomElementChildPart
+ * Determine if "part" is a CustomElementOpenPart
  * @param { Part } part
- * @returns { part is CustomElementPartType }
+ * @returns { part is CustomElementOpenPartType }
  */
-export function isCustomElementPart(part) {
-  return part.type === partType.CUSTOMELEMENT;
+export function isCustomElementOpenPart(part) {
+  return part.type === partType.CUSTOMELEMENT_OPEN;
+}
+
+/**
+ * Determine if "part" is a CustomElementClosePart
+ * @param { Part } part
+ * @returns { part is CustomElementClosePartType }
+ */
+export function isCustomElementClosePart(part) {
+  return part.type === partType.CUSTOMELEMENT_CLOSE;
 }
 
 /**
@@ -261,23 +271,21 @@ export class ChildPart {
 }
 
 /**
- * A template part for custom element content.
+ * A template part for opening custom element content.
  * Responsible for all attributes, metadata, and tag content
- * @implements CustomElementPartType
+ * @implements CustomElementOpenPartType
  */
-export class CustomElementPart extends AttributePart {
+export class CustomElementOpenPart extends AttributePart {
   /**
    * Constructor
    * @param { string } tagName
-   * @param { number } nodeIndex
    */
-  constructor(tagName, nodeIndex) {
+  constructor(tagName) {
     super(tagName);
     /** @type { typeof HTMLElement | undefined } */
     this.ceClass = customElements.get(tagName);
-    this.nodeIndex = nodeIndex;
     this.tagName = tagName;
-    this.type = partType.CUSTOMELEMENT;
+    this.type = partType.CUSTOMELEMENT_OPEN;
   }
 
   /**
@@ -287,8 +295,12 @@ export class CustomElementPart extends AttributePart {
    * @returns { unknown }
    */
   resolveValue(values, options) {
-    // Create renderer (and element instanace)
+    // Determine if this is root in tree of custom elements to only add `hydrate:defer` on nested elements
+    const isRoot = options.customElementStack.length === 0;
+    options.customElementStack.push(this.tagName);
+
     // TODO: recycle renderers since all operations here are synchronous
+    // Create renderer (and element instanace)
     const renderer = getElementRenderer(options, this.tagName, this.ceClass);
     renderer.connectedCallback();
 
@@ -345,7 +357,7 @@ export class CustomElementPart extends AttributePart {
 
     const shouldRender = !renderer.element.hasAttribute('render:client');
 
-    if (shouldRender) {
+    if (shouldRender && !isRoot) {
       renderer.setAttribute('hydrate:defer', '');
     }
 
@@ -377,6 +389,35 @@ export class CustomElementPart extends AttributePart {
     }
 
     return result;
+  }
+}
+
+/**
+ * A template part for closing custom element content.
+ * Responsible for book keeping of custom element stack
+ * @implements CustomElementClosePartType
+ */
+export class CustomElementClosePart {
+  /**
+   * Constructor
+   * @param { string } tagName
+   */
+  constructor(tagName) {
+    this.tagName = tagName;
+    this.type = partType.CUSTOMELEMENT_CLOSE;
+  }
+
+  /**
+   * Retrieve resolved value and manage active custom element stack
+   * @param { InternalRenderOptions } options
+   * @returns { unknown }
+   */
+  resolveValue(options) {
+    if (options.customElementStack[options.customElementStack.length - 1] === this.tagName) {
+      options.customElementStack.pop();
+    }
+
+    return EMPTY_STRING_BUFFER;
   }
 }
 

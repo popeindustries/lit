@@ -47,7 +47,9 @@ function partTypeToName(part) {
       return '[ATTR]';
     case partType.METADATA:
       return '[METADATA]';
-    case partType.CUSTOMELEMENT:
-      return '[CUSTOM-ELEMENT]';
+    case partType.CUSTOMELEMENT_OPEN:
+      return '[CUSTOM-ELEMENT-OPEN]';
+    case partType.CUSTOMELEMENT_CLOSE:
+      return '[CUSTOM-ELEMENT-CLOSE]';
   }
 }
