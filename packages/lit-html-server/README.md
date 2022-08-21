@@ -4,6 +4,7 @@
 
 Efficiently render streaming [**lit-html**](https://github.com/lit/lit) templates on the server (or in a ServiceWorker!).
 
+> **Note**
 > Although based on **lit-html** semantics, **lit-html-server** is a great general purpose HTML template streaming library. Tagged template literals are a native JavaScript feature, and the HTML rendered is 100% standard markup, with no special syntax or runtime required!
 
 ## Features
