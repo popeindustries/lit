@@ -11,6 +11,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.24.3",
     "@lit-labs/ssr": "^2.2.3",
+    "@popeindustries/lit": "workspace:*",
     "@popeindustries/lit-element": "workspace:*",
     "@popeindustries/lit-html": "workspace:*",
     "@popeindustries/lit-html-server": "workspace:*",

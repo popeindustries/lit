@@ -1,4 +1,4 @@
-import { css, html, LitElement } from '@popeindustries/lit-element';
+import { html } from '@popeindustries/lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 
@@ -74,15 +74,21 @@ function nestedTemplate(html, data) {
   `;
 }
 
-class MyEl extends LitElement {
-  static styles = css`
-    p {
-      color: green;
+/**
+ * @param { { new(): HTMLElement } } BaseClass
+ * @param { import('@popeindustries/lit-element').css } css
+ */
+export function registerMyEl(BaseClass, css) {
+  class MyEl extends BaseClass {
+    static styles = css`
+      p {
+        color: green;
+      }
+    `;
+    render() {
+      return html`<p>I am green!</p>`;
     }
-  `;
-  render() {
-    return html`<p>I am green!</p>`;
   }
-}
 
-customElements.define('my-el', MyEl);
+  customElements.define('my-el', MyEl);
+}

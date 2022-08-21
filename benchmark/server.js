@@ -1,8 +1,11 @@
-import { html, renderToNodeStream } from '@popeindustries/lit-html-server';
-import everything from './the-everything-bagel-template.js';
+import { renderToNodeStream } from '@popeindustries/lit/html-server.js';
+import { css, html, LitElement } from '@popeindustries/lit';
+import everything, { registerMyEl } from './the-everything-bagel-template.js';
 import http from 'node:http';
-import { hydratable } from '@popeindustries/lit-html-server/directives/hydratable.js';
-import { LitElementRenderer } from '@popeindustries/lit-element/lit-element-renderer.js';
+import { hydratable } from '@popeindustries/lit/directives/hydratable-server.js';
+import { LitElementRenderer } from '@popeindustries/lit/lit-element-renderer.js';
+
+registerMyEl(LitElement, css);
 
 /**
  * @param { { title: string, isTrue: boolean, number: number } } data
