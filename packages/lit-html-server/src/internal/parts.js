@@ -295,7 +295,12 @@ export class CustomElementOpenPart extends AttributePart {
    * @returns { unknown }
    */
   resolveValue(values, options) {
-    // Determine if this is root in tree of custom elements to only add `hydrate:defer` on nested elements
+    // Enable hydration metadata if not already enabled by `render-processor`
+    if (options.hydratableWebComponents && options.hydrationMetadataRootId === undefined) {
+      options.includeHydrationMetadata = true;
+    }
+
+    // Determine if this is root in tree of custom elements (only add `hydrate:defer` on nested elements)
     const isRoot = options.customElementStack.length === 0;
     options.customElementStack.push(this.tagName);
 
@@ -357,6 +362,7 @@ export class CustomElementOpenPart extends AttributePart {
 
     const shouldRender = !renderer.element.hasAttribute('render:client');
 
+    // Only add for nested custom elements
     if (shouldRender && !isRoot) {
       renderer.setAttribute('hydrate:defer', '');
     }
@@ -413,8 +419,20 @@ export class CustomElementClosePart {
    * @returns { unknown }
    */
   resolveValue(options) {
+    // Remove from custom elements stack
     if (options.customElementStack[options.customElementStack.length - 1] === this.tagName) {
       options.customElementStack.pop();
+    } else {
+      // TODO: unbalanced tag?
+    }
+
+    // Disable hydration metadata if this is root custom element and not already enabled by `render-processor`
+    if (
+      options.hydratableWebComponents &&
+      options.hydrationMetadataRootId === undefined &&
+      options.customElementStack.length === 0
+    ) {
+      options.includeHydrationMetadata = false;
     }
 
     return EMPTY_STRING_BUFFER;
