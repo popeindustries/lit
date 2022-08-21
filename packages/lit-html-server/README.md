@@ -28,7 +28,7 @@ $ npm install --save @popeindustries/lit-html-server
 ...write your **lit-html** template:
 
 ```js
-import { html } from 'lit-html'; // or from '@popeindustries/lit-html-server'
+import { html } from '@popeindustries/lit-html-server';
 // Most lit-html directives are compatible...
 import { classMap } from 'lit-html/directives/class-map.js';
 // ...except for the async ones ('async-append', 'async-replace', and 'until')
@@ -64,7 +64,7 @@ async function renderBody(api) {
 ...and render (plain HTTP server example, though similar for Express/Fastify/etc):
 
 ```js
-import http from 'http';
+import http from 'node:http';
 import { renderToNodeStream } from '@popeindustries/lit-html-server';
 
 http.createServer((request, response) => {
@@ -198,10 +198,11 @@ declare class ElementRenderer {
 }
 ```
 
-Custom `ElementRenderer` instances should subclass the default renderer, and be passed along to the render function:
+Custom `ElementRenderer` instances should subclass the default renderer, and be passed along to the render function. As an alternative to the `hydratable` directive, the `hydratableWebComponents: true` option can also be set here instead:
 
 ```js
-import { ElementRenderer, renderToNodeStream } from '@popeindustries/lit-html-server';
+import { renderToNodeStream } from '@popeindustries/lit-html-server';
+import { ElementRenderer } from '@popeindustries/lit-html-server/element-renderer.js';
 
 class MyElementRenderer extends ElementRenderer {
   static matchesClass(ceClass, tagName) {
@@ -213,10 +214,14 @@ class MyElementRenderer extends ElementRenderer {
   }
 }
 
-const stream = renderToNodeStream(Layout(data), { elementRenderers: [MyElementRenderer] });
+const stream = renderToNodeStream(Layout(data), {
+  elementRenderers: [MyElementRenderer],
+  hydratableWebComponents: true,
+});
 ```
 
-> Note that the default `ElementRenderer` will render `innerHTML` strings or content returned by `this.element.render()`.
+> **Note**
+> the default `ElementRenderer` will render `innerHTML` strings, or content returned by `this.element.render()`, in either light or shadow DOM.
 
 ### Shadow DOM
 
@@ -240,11 +245,14 @@ html`<my-el render:client><span slot="my-text">some text</span></my-el>`;
 
 ### Lazy (partial/deferred) hydration
 
-When rendering web components, **lit-html-server** adds `hydrate:defer` attributes to each custom element. This provides a mechanism to control and defer hydration order of nested web components that may be dependant on data passed from a parent. See [`@popeindustries/lit-html/lazy-hydration-mixin.js`]() for more on lazy hydration.
+When rendering web components, **lit-html-server** adds `hydrate:defer` attributes to nested custom elements. This provides a mechanism to control and defer the hydration order of nested web components that may be dependant on data passed from a parent. See [`@popeindustries/lit-html/lazy-hydration-mixin.js`]() for more on lazy hydration.
 
 ### DOM polyfills
 
-In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when **lit-html-server** is imported. See [`dom-shim.js`](/src/dom-shim.js) for details.
+In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when `@popeindustries/lit-html-server` is imported. See [`dom-shim.js`](/src/dom-shim.js) for details.
+
+> **warning**
+> Depending on the order of imports, the Node process may exit with a `ReferenceError: window is not defined` error. Avoid this error by moving the import from `@popeindustries/lit-html-server` to the top of your file, or import `@popeindustries/lit-html-server/dom-shim.js` directly before all others.
 
 ## Directives
 
@@ -256,7 +264,8 @@ _Most_ of the built-in `lit-html/directives/*` already support server rendering,
 
 The following render methods accept an `options` object with the following properties:
 
-- **`elementRenderers?: Array<ElementRendererConstructor>`** - ElementRenderer subclasses for rendering of custom elements
+- **`elementRenderers?: Array<ElementRendererConstructor>`** - ElementRenderer subclasses for rendering of custom elements.
+- **`hydratableWebComponents? boolean`** - Flag to enable hydration metadata for all web component sub-trees. Alternative to wrapping web components in `hydratable` directive.
 
 #### `renderToNodeStream(value: unknown, options?: RenderOptions): Readable`
 

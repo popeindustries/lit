@@ -2,15 +2,14 @@
 
 # @popeindustries/lit-html
 
-Hydrate your SSR'd **lit-html**: reuse HTML rendered on the server with [@popeindustries/lit-html-server]() to seamlessly and efficiently bootstrap templates in the browser.
+Seamlessly and efficiently use [@popeindustries/lit-html-server]() rendered HTML to hydrate **lit-html** templates in the browser.
 
 ## Features
 
-- automatically _hydrate_ templates with server rendered DOM on first call to `render()`.
-- subsequent calls to `render()` will _update_ the existing DOM by forwarding to `lit-html.render()`.
+- automatic _hydration_: first call to `render()` will hydrate if possible, with subsequent calls updating the existing DOM by forwarding to `lit-html.render()`.
 - hydration errors will cause the server rendered markup to be cleared and _replaced_ with the result of `lit-html.render()`.
 - render _multiple_ sub-trees in the same container.
-- easily enable _lazy_ (partial/deferred) hydration with `lazy-hydration-mixin`.
+- easily enable _lazy_ (partial/deferred) hydration with `lazy-hydration-mixin` and `hydrate:idle` or `hydrate:visible` attributes.
 
 ## Usage
 
@@ -47,6 +46,8 @@ Given the following server rendered HTML:
 ...import your **lit-html** templates used on the server:
 
 ```js
+import { html } from '@popeindustries/lit-html';
+
 function renderMenu(data) {
   const { negative, sections } = data;
   return html`<nav ?negative="${negative}">${sections.map((section) => html`<button>${section}</button>`)}</nav>`;
@@ -64,6 +65,9 @@ import { render } from '@popeindustries/lit-html';
 render(renderMenu(data), document.body, { renderBefore: document.querySelector('body > p') });
 render(renderPage(data), document.body, { renderBefore: document.querySelector('body > footer') });
 ```
+
+> **Note**
+> Due to how the `lit*` family of packages are minified and mangled for production, the `@popeindustries/lit-html` package is forced to _vendor_ the `lit-html` package. This shouldn't affect normal use as long as application code does not mix imports from `@popeindustries/lit-html` and `lit-html`.
 
 ## `lazy-hydration-mixin`
 
@@ -93,7 +97,7 @@ class MyEl extends partialHydrationMixin(MyBaseClass) {
 }
 ```
 
-This simple mechanism also enables additional forms of deferral, and the `lazy-hydration-mixin` includes two additional types:
+This simple mechanism also enables additional forms of deferral, and the `lazy-hydration-mixin` includes two additional strategies:
 
 #### `hydrate:idle`
 

@@ -21,6 +21,7 @@
       "node": "./lit-html-server.js",
       "default": "./lit-html-service-worker.js"
     },
+    "./dom-shim.js": "./dom-shim.js",
     "./element-renderer.js": "./element-renderer.js",
     "./directives/*": "./directives/*"
   },
