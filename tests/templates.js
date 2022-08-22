@@ -193,13 +193,13 @@ export const tests = [
     title: 'custom element with static attributes',
     template: () => h`<my-el a="text" b></my-el>`,
     metadata: true,
-    result: '<!--lit RFW6pSjk80E=--><my-el a="text" b><!--lit-attr 0--></my-el><!--/lit-->',
+    result: '<!--lit RFW6pSjk80E=--><my-el a="text" b hydrate:defer><!--lit-attr 0--></my-el><!--/lit-->',
   },
   {
     title: 'custom element with static and dynamic attributes',
     template: () => h`<my-el a="text" ?b=${true} .c=${{ c: true }}></my-el>`,
     metadata: true,
-    result: '<!--lit 5ElCYNqBmr4=--><my-el a="text" b><!--lit-attr 2--></my-el><!--/lit-->',
+    result: '<!--lit 5ElCYNqBmr4=--><my-el a="text" b hydrate:defer><!--lit-attr 2--></my-el><!--/lit-->',
   },
   {
     title: 'custom element with property reflection',
@@ -213,7 +213,7 @@ export const tests = [
       return h`<my-el1 .a=${'a'}></my-el1>`;
     },
     metadata: true,
-    result: '<!--lit u23TLub2CpA=--><my-el1 a="a"><!--lit-attr 1--></my-el1><!--/lit-->',
+    result: '<!--lit u23TLub2CpA=--><my-el1 a="a" hydrate:defer><!--lit-attr 1--></my-el1><!--/lit-->',
   },
   {
     title: 'custom element with attribute set during connectedCallback',
@@ -227,7 +227,7 @@ export const tests = [
       return h`<my-el2></my-el2>`;
     },
     metadata: true,
-    result: '<!--lit mcimSba/om0=--><my-el2 a="a"><!--lit-attr 0--></my-el2><!--/lit-->',
+    result: '<!--lit mcimSba/om0=--><my-el2 a="a" hydrate:defer><!--lit-attr 0--></my-el2><!--/lit-->',
   },
   {
     title: 'custom element with innerHTML set during construction',
@@ -243,7 +243,7 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit +I/NQre/om0=--><my-el3><!--lit-attr 0--><!--lit iW9ZALRtWQA=-->text<!--/lit--></my-el3><!--/lit-->',
+      '<!--lit +I/NQre/om0=--><my-el3 hydrate:defer><!--lit-attr 0--><!--lit iW9ZALRtWQA=-->text<!--/lit--></my-el3><!--/lit-->',
   },
   {
     title: 'custom element with innerHTML set during connectedCallback',
@@ -258,7 +258,7 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit 31Y0PLC/om0=--><my-el4><!--lit-attr 0--><!--lit iW9ZALRtWQA=-->text<!--/lit--></my-el4><!--/lit-->',
+      '<!--lit 31Y0PLC/om0=--><my-el4 hydrate:defer><!--lit-attr 0--><!--lit iW9ZALRtWQA=-->text<!--/lit--></my-el4><!--/lit-->',
   },
   {
     title: 'custom element with shadowDOM innerHTML set during construction',
@@ -275,7 +275,7 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit Ph5bNbG/om0=--><my-el5><!--lit-attr 0--><template shadowroot="open"><!--lit iW9ZALRtWQA=-->text<!--/lit--></template></my-el5><!--/lit-->',
+      '<!--lit Ph5bNbG/om0=--><my-el5 hydrate:defer><!--lit-attr 0--><template shadowroot="open"><!--lit iW9ZALRtWQA=-->text<!--/lit--></template></my-el5><!--/lit-->',
   },
   {
     title: 'custom element with "render:client" attribute',
@@ -314,11 +314,11 @@ export const tests = [
       }
       customElements.define('my-el8', MyEl8);
       customElements.define('my-el7', MyEl7);
-      return h`<h1>Title</h1><my-el7 ?a="${true}"></my-el7><div b="${'b'}">${'some more text'}</div><my-el8 .a="${false}"></my-el8>`;
+      return h`<h1>Title</h1><my-el7 ?a="${true}"></my-el7><div b="${'b'}">${'some more text'}</div>`;
     },
     metadata: true,
     result:
-      '<!--lit U79E3R1+yAM=--><h1>Title</h1><my-el7 a><!--lit-attr 1--><!--lit Zzpy/eJ8XLk=--><div a><!--lit-attr 1-->my <my-el8 hydrate:defer><!--lit-attr 1--><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></my-el8></div><!--/lit--></my-el7><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><my-el8><!--lit-attr 1--><!--lit kcY7myOR0f4=--><div>text <!--lit-child FZrIWLD7ugo=-->missing "a"<!--/lit-child--></div><!--/lit--></my-el8><!--/lit-->',
+      '<!--lit lJKtXaezMNE=--><h1>Title</h1><my-el7 a hydrate:defer><!--lit-attr 1--><!--lit Zzpy/eJ8XLk=--><div a><!--lit-attr 1-->my <my-el8 hydrate:defer><!--lit-attr 1--><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></my-el8></div><!--/lit--></my-el7><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
   },
   {
     title: 'nested custom elements with shadowDOM and lazy hydration',
@@ -351,7 +351,7 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit GpJxfqkCRnw=--><h1>Title</h1><my-el9 a><!--lit-attr 1--><template shadowroot="open"><!--lit /0wYmzo69CE=--><div a><!--lit-attr 1-->my <my-el10 hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></template></my-el10></div><!--/lit--></template></my-el9><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
+      '<!--lit GpJxfqkCRnw=--><h1>Title</h1><my-el9 a hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit /0wYmzo69CE=--><div a><!--lit-attr 1-->my <my-el10 hydrate:defer><!--lit-attr 1--><template shadowroot="open"><!--lit kcY7myOR0f4=--><div>text <!--lit-child XrJxfIU6hws=-->has "a"<!--/lit-child--></div><!--/lit--></template></my-el10></div><!--/lit--></template></my-el9><div b="b"><!--lit-attr 1--><!--lit-child-->some more text<!--/lit-child--></div><!--/lit-->',
   },
   {
     title: 'LitElement custom element',
@@ -371,7 +371,7 @@ export const tests = [
     },
     metadata: true,
     result:
-      '<!--lit dk2BC/krgh4=--><my-el11><!--lit-attr 0--><template shadowroot="open"><style>p{color:green;}</style><!--lit ymb4EFq7aMg=--><p>I am green!</p><!--/lit--></template></my-el11><!--/lit-->',
+      '<!--lit dk2BC/krgh4=--><my-el11 hydrate:defer><!--lit-attr 0--><template shadowroot="open"><style>p{color:green;}</style><!--lit ymb4EFq7aMg=--><p>I am green!</p><!--/lit--></template></my-el11><!--/lit-->',
   },
 ];
 

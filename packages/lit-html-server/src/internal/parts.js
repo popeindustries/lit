@@ -300,8 +300,9 @@ export class CustomElementOpenPart extends AttributePart {
       options.includeHydrationMetadata = true;
     }
 
-    // Determine if this is root in tree of custom elements (only add `hydrate:defer` on nested elements)
-    const isRoot = options.customElementStack.length === 0;
+    // Determine if this element should have `hydrate:defer` attribute.
+    // Includes all nested custom elements, and root elements if `hydratableWebComponents` not set.
+    const needsDeferAttribute = options.customElementStack.length !== 0 || !options.hydratableWebComponents;
     options.customElementStack.push(this.tagName);
 
     // TODO: recycle renderers since all operations here are synchronous
@@ -363,7 +364,7 @@ export class CustomElementOpenPart extends AttributePart {
     const shouldRender = !renderer.element.hasAttribute('render:client');
 
     // Only add for nested custom elements
-    if (shouldRender && !isRoot) {
+    if (shouldRender && needsDeferAttribute) {
       renderer.setAttribute('hydrate:defer', '');
     }
 
