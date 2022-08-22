@@ -73,6 +73,10 @@ for (const basename of fs.readdirSync(srcDir)) {
     const src = path.resolve(srcDir, basename);
     const dest = path.resolve(basename);
     fs.copyFileSync(src, dest);
-    fs.copyFileSync(src.replace('.js', '.d.ts'), dest.replace('.js', '.d.ts'));
+    try {
+      fs.copyFileSync(src.replace('.js', '.d.ts'), dest.replace('.js', '.d.ts'));
+    } catch (err) {
+      // Some files don't have types
+    }
   }
 }

@@ -55,6 +55,7 @@
       "types": "./lit-element-renderer.d.ts",
       "default": "./lit-element-renderer.js"
     },
+    "./server-dom-shim.js": "./server-dom-shim.js",
     "./static.js": {
       "types": "./static.d.ts",
       "default": "./static.js"
