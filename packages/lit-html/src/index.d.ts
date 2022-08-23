@@ -42,7 +42,7 @@ export type HydrationChildPartState =
       type: 'template-instance';
       part: ChildPart;
       result: TemplateResult;
-      instance: InstanceType<typeof import('lit-html')['_$LH']['_TemplateInstance']>;
+      instance: InstanceType<typeof import('./vendor/lit-html.js')['_$LH']['_TemplateInstance']>;
       templatePartIndex: number;
       instancePartIndex: number;
     };
