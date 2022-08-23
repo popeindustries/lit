@@ -2,14 +2,14 @@
 
 # @popeindustries/lit-html
 
-Seamlessly and efficiently use [@popeindustries/lit-html-server]() rendered HTML to hydrate **lit-html** templates in the browser.
+Seamlessly and efficiently use [@popeindustries/lit-html-server](https://github.com/popeindustries/lit/tree/main/packages/lit-html-server/) rendered HTML to hydrate **lit-html** templates in the browser.
 
 ## Features
 
-- seamless _hydration_: first call to `render()` will hydrate if possible, with subsequent calls updating the existing DOM by forwarding to `lit-html.render()`.
-- hydration errors will cause the server rendered markup to be cleared and _replaced_ with the result of `lit-html.render()`.
-- render _multiple_ sub-trees in the same container.
-- easily enable _lazy_ (partial/deferred) web component hydration with `lazy-hydration-mixin`, and `hydrate:idle` or `hydrate:visible` attributes.
+- seamless hydration: first call to `render()` will hydrate if possible, with subsequent calls updating the existing DOM by forwarding to `lit-html.render()`.
+- hydration errors will cause the server rendered markup to be cleared and replaced with the result of `lit-html.render()`.
+- render multiple sub-trees in the same container.
+- easily enable lazy (partial/deferred) web component hydration with `lazy-hydration-mixin` and `hydrate:idle` or `hydrate:visible` attributes.
 
 ## Usage
 

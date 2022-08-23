@@ -2,7 +2,7 @@
 
 # @popeindustries/lit-element
 
-Seamlessly and efficiently use [**@popeindustries/lit-html-server**]() rendered HTML to hydrate **lit-element** web components in the browser, including lazy hydration with `hydrate:idle` or `hydrate:visible` attributes.
+Seamlessly and efficiently use [@popeindustries/lit-html-server](https://github.com/popeindustries/lit/tree/main/packages/lit-html-server/) rendered HTML to hydrate **lit-element** web components in the browser, including lazy hydration with `hydrate:idle` or `hydrate:visible` attributes.
 
 ## Usage
 
@@ -31,7 +31,7 @@ class MyEl extends LitElement {
 customElements.define('my-el', MyEl);
 ```
 
-...render a page template on the server with [`@popeindustries/lit-html-server`]():
+...render a page template on the server with [`@popeindustries/lit-html-server`](https://github.com/popeindustries/lit/tree/main/packages/lit-html-server/):
 
 ```js
 import './my-el.js';

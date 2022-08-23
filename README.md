@@ -1,9 +1,9 @@
-This is a repo for the `@popeindustries/lit*` family of libraries, which enable fast server-rendering and client-hydration of [lit-html]() templates and web components:
+This is a repo for the `@popeindustries/lit*` family of libraries, which enable fast server-rendering and client-hydration of [lit-html](https://lit.dev/docs/libraries/standalone-templates/) templates and web components:
 
-- [`@popeindustries/lit`](): A convenient, all-in-one package for rendering and hydrating templates and web components.
-- [`@popeindustries/lit-html`](): Use server rendered HTML to hydrate templates and web components in the browser.
-- [`@popeindustries/lit-html-server`](): Render streaming templates on the server or in a ServiceWorker.
-- [`@popeindustries/lit-element`](): Use server rendered HTML to hydrate `LitElement` web components in the browser.
+- [`@popeindustries/lit`](https://github.com/popeindustries/lit/tree/main/packages/lit): A convenient, all-in-one package for rendering and hydrating templates and web components.
+- [`@popeindustries/lit-html`](https://github.com/popeindustries/lit/tree/main/packages/lit-html): Use server rendered HTML to hydrate templates and web components in the browser.
+- [`@popeindustries/lit-html-server`](https://github.com/popeindustries/lit/tree/main/packages/lit-html-server): Render streaming templates on the server or in a ServiceWorker.
+- [`@popeindustries/lit-element`](https://github.com/popeindustries/lit/tree/main/packages/lit-element): Use server rendered HTML to hydrate `LitElement` web components in the browser.
 
 ## Why does this exist?
 
@@ -11,7 +11,7 @@ In 2018, a year or so after Google announced [lit-html](https://www.youtube.com/
 
 Three years later, Google introduced their own answer to server-rendered lit-html in the form of [`@lit-labs/ssr`](https://github.com/lit/lit/tree/main/packages/labs/ssr). This experimental renderer for the new **lit** ecosystem turned out to be very different than `lit-html-server`, both architecturally and strategically. Basically, Google wanted a server solution to render templates and web components _exactly_ as they are rendered on the client: inside the `<body>`, without async expressions, and packaged in a shadow DOM (for web components). `lit-html-server`, on the other hand, has always embraced the lit-html syntax as a clean and simple language for renderering _all_ of HTML, with first-class async expression (Promises and AsyncIterators) support for in-order streaming.
 
-Although it was a dissapointment that `@lit-labs/ssr` wasn't going to be a feature-for-feature replacement for `lit-html-server`, it did supply an answer to the missing half of a complete server-rendering solution: client-side rehydration of server-rendered templates! The new `hydrate()` support made an efficient end-to-end solution possible, but on closer inspection, it appeared that it too had missing features.
+Although it was a dissapointment that `@lit-labs/ssr` wasn't going to be a feature-for-feature replacement for `lit-html-server`, it did supply an answer to the missing half of a complete solution: client-hydration of those server-rendered templates! The new `hydrate()` support made an efficient end-to-end solution possible, but on closer inspection, it appeared that it too had missing features.
 
 So, although it was always the plan to retire this project if/when official support for server-rendering landed, the limitations proved too numerous, and in the summer of 2022, work was started on an improved, and complete, server-rendering and client-hydration solution.
 

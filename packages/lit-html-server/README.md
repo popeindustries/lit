@@ -2,21 +2,18 @@
 
 # @popeindustries/lit-html-server
 
-Efficiently render streaming [**lit-html**](https://github.com/lit/lit) templates on the server (or in a ServiceWorker!).
-
-> **Note**
-> Although based on **lit-html** semantics, **lit-html-server** is a great general purpose HTML template streaming library. Tagged template literals are a native JavaScript feature, and the HTML rendered is 100% standard markup, with no special syntax or runtime required!
+Efficiently render streaming [lit-html](https://lit.dev/docs/libraries/standalone-templates/) templates on the server (or in a ServiceWorker!).
 
 ## Features
 
-- 6-7x _faster_ than **@lit-labs/ssr**
-- render _full_ HTML pages (not just `body`)
-- _stream_ responses in Node.js and ServiceWorker with first-class Promise/AsyncIterator support
-- render _optional_ hydration metadata with `hydratable` directive, or `hydratableWebComponents` render option
-- render web components with _light_ or _shadow_ DOM
-- default web component rendering with _`innerHTML`_ and `render()` support
-- _customisable_ web component rendering with `ElementRenderer`
-- _compatible_ with `lit-html/directives/*`
+- 6-7x faster than **@lit-labs/ssr**
+- render full HTML pages (not just `<body>`)
+- stream responses in Node.js and ServiceWorker with first-class Promise/AsyncIterator support
+- render optional hydration metadata with `hydratable` directive, or `hydratableWebComponents` render option
+- render web components with light or shadow DOM
+- default web component rendering with `innerHTML` and `render()` support
+- customisable web component rendering with `ElementRenderer`
+- compatible with `lit-html/directives/*`
 
 ## Usage
 
@@ -139,7 +136,7 @@ function Layout(data) {
 </html>
 ```
 
-In order to efficiently reuse templates on the client (`renderMenu` and `renderPage` in the example above), they should be hydrated and rendered with the help of [`@popeindustries/lit-html`]().
+In order to efficiently reuse templates on the client (`renderMenu` and `renderPage` in the example above), they should be hydrated and rendered with the help of [@popeindustries/lit-html](https://github.com/popeindustries/lit/tree/main/packages/lit-html).
 
 ## Web Components
 
@@ -224,14 +221,17 @@ const stream = renderToNodeStream(Layout(data), {
 > **Note**
 > the default `ElementRenderer` will render `innerHTML` strings, or content returned by `this.element.render()`, in either light or shadow DOM.
 
+See [@popeindustries/lit-element](https://github.com/popeindustries/lit/tree/main/packages/lit-element) for `LitElement` support.
+
 ### Shadow DOM
 
-If `attachShadow` has been called by an element during construction/connection, **lit-html-server** will render the custom element content in a [declarative Shadow DOM](https://web.dev/declarative-shadow-dom/):
+If `attachShadow()` has been called by an element during construction/connection, **lit-html-server** will render the custom element content in a [declarative Shadow DOM](https://web.dev/declarative-shadow-dom/):
 
 ```html
 <!--lit Ph5bNbG/om0=-->
 <my-el>
-  <!--lit-attr 0--><template shadowroot="open"><!--lit iW9ZALRtWQA=-->text<!--/lit--> </template>
+  <!--lit-attr 0-->
+  <template shadowroot="open"> <!--lit iW9ZALRtWQA=-->text<!--/lit--> </template>
 </my-el>
 <!--/lit-->
 ```
@@ -246,22 +246,22 @@ html`<my-el render:client><span slot="my-text">some text</span></my-el>`;
 
 ### Lazy (partial/deferred) hydration
 
-When rendering web components, **lit-html-server** adds `hydrate:defer` attributes to nested custom elements. This provides a mechanism to control and defer the hydration order of nested web components that may be dependant on data passed from a parent. See [`@popeindustries/lit-html/lazy-hydration-mixin.js`]() for more on lazy hydration.
+When rendering web components, **lit-html-server** adds `hydrate:defer` attributes to nested custom elements. This provides a mechanism to control and defer the hydration order of components that may be dependant on data passed from a parent. See [lazy-hydration-mixin](https://github.com/popeindustries/lit/tree/main/packages/lit-html#lazy-hydration-mixin) for more on lazy hydration.
 
 ### DOM polyfills
 
-In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when `@popeindustries/lit-html-server` is imported. See [`dom-shim.js`](/src/dom-shim.js) for details.
+In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when `@popeindustries/lit-html-server` is imported. See [dom-shim.js](/src/dom-shim.js) for details.
 
 > **Warning**
-> Depending on the order of imports, the Node process may exit with a `ReferenceError: window is not defined` error. Avoid this error by moving the import from `@popeindustries/lit-html-server` to the top of your file, or import `@popeindustries/lit-html-server/dom-shim.js` directly before all others.
+> Depending on the order of imports, the Node process may exit with a `ReferenceError: window is not defined` error. Avoid this error by moving the import of `@popeindustries/lit-html-server` to the top of your file, or import `@popeindustries/lit-html-server/dom-shim.js` directly before all others.
 
 ## Directives
 
-_Most_ of the built-in `lit-html/directives/*` already support server rendering, and work as expected in **lit-html-server**, the exception being those directives that are asynchronous. **lit-html-server** supports the rendering of Promises and AsyncInterators as first-class primitives, so special versions of `async-append.js`, `async-replace.js`, and `until.js` should be imported from `@popeindustries/lit-html-server/directives`.
+_Most_ of the built-in `lit-html/directives/*` already support server rendering, and work as expected in **lit-html-server**, the exception being those directives that are asynchronous. **lit-html-server** supports the rendering of `Promise` and `AsyncInterator` as first-class primitives, so versions of `async-append.js`, `async-replace.js`, and `until.js` should be imported from `@popeindustries/lit-html-server/directives`.
 
 ## Benchmarks
 
-Benchmarks for rendering a complex template in **lit-html-server** vs. [@lit-labs/ssr]():
+Benchmarks for rendering a complex template in **lit-html-server** vs. [@lit-labs/ssr](https://github.com/lit/lit/tree/main/packages/labs/ssr):
 
 ```bash
 # @popeindustries/lit-html-server
@@ -305,7 +305,7 @@ Benchmarks for rendering a complex template in **lit-html-server** vs. [@lit-lab
 
 The following render methods accept an `options` object with the following properties:
 
-- **`elementRenderers?: Array<ElementRendererConstructor>`** - ElementRenderer subclasses for rendering of custom elements.
+- **`elementRenderers?: Array<ElementRendererConstructor>`** - `ElementRenderer` subclasses for rendering of custom elements.
 - **`hydratableWebComponents? boolean`** - Flag to enable hydration metadata for all web component sub-trees. Alternative to wrapping web components in `hydratable` directive.
 
 #### `renderToNodeStream(value: unknown, options?: RenderOptions): Readable`
