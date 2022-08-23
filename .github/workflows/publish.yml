@@ -1,0 +1,71 @@
+name: lit
+
+on:
+  push:
+    branches:
+      - main
+  workflow_call:
+    secrets:
+      npm_token:
+        required: true
+
+env:
+  CI: true
+  PNPM_CACHE_FOLDER: .pnpm-store
+  HUSKY: 0 # Bypass husky commit hook for CI
+
+jobs:
+  publish:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: 'Cache pnpm modules'
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: 'Install pnpm 7'
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7.x
+
+      - name: 'Install Node.js 18'
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: 'Set up npm credentials'
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 'Configure pnpm'
+        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+
+      - name: 'Install dependencies'
+        run: pnpm --frozen-lockfile install
+
+      - name: 'Build'
+        run: pnpm run clean && pnpm run build
+
+      - name: 'Publish versions'
+        uses: changesets/action@v1
+        with:
+          # Creates/updates release PR if pending changesets
+          version: pnpm ci:version
+          commit: 'release'
+          title: 'release'
+          # Publish to npm if release PR merged to main
+          publish: pnpm ci:publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

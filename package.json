@@ -33,6 +33,8 @@
   },
   "scripts": {
     "build": "pnpm -r run build",
+    "ci:version": "changeset version && pnpm install --offline --frozen-lockfile",
+    "ci:publish": "git pull --tags --force && changeset tag && pnpm publish --recursive",
     "clean": "git clean -x -f",
     "format": "prettier --write 'packages/**/{src,test}/**/*.{js,json}'",
     "lint": "pnpm run lint:eslint && pnpm run lint:typescript",
@@ -40,7 +42,6 @@
     "lint:typescript": "tsc --noEmit --skipLibCheck",
     "postinstall": "pnpm run vendor",
     "postpublish": "pnpm run clean",
-    "prepublishOnly": "pnpm run clean && pnpm run build",
     "prepare": "husky install",
     "test:unit": "pnpm -r run test:unit",
     "vendor": "node ./scripts/vendor.js"
