@@ -77,7 +77,7 @@ http.createServer((request, response) => {
 
 Server rendered HTML may be converted to live **lit-html** templates with the help of inline metadata. This process of reusing static HTML to seamlessly bootstrap dynamic templates is referred to as _hydration_.
 
-**lit-html-server** does not output hydration metadata by default, but instead requires that a sub-tree is designated as _hydratable_ via the `rehydratable` directive:
+**lit-html-server** does not output hydration metadata by default, but instead requires that a sub-tree is designated as _hydratable_ via the `hydratable` directive:
 
 ```js
 import { hydratable } from '@popeindustries/lit-html-server/directives/hydratable.js';

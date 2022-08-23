@@ -77,7 +77,7 @@ The `lazy-hydration-mixin` is an easy way to add support for basic hydration def
 
 ```js
 import { html, render } from '@popeindustries/lit-html';
-import { partialHydrationMixin } from '@popeindustries/lit-html/lazy-hydration-mixin.js';
+import { lazyHydrationMixin } from '@popeindustries/lit-html/lazy-hydration-mixin.js';
 
 class MyBaseClass extends HTMLElement {
   // Called when `hydrate:defer` attribute is removed
@@ -86,7 +86,7 @@ class MyBaseClass extends HTMLElement {
   }
 }
 
-class MyEl extends partialHydrationMixin(MyBaseClass) {
+class MyEl extends lazyHydrationMixin(MyBaseClass) {
   // Called by browser when instance connected
   connectedCallback() {
     super.connectedCallback(); // `super` here is the mixin class
