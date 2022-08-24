@@ -51,16 +51,14 @@ importers:
   packages/lit:
     specifiers:
       '@lit/reactive-element': ^1.4.1
-      '@popeindustries/lit-element': workspace:*
-      '@popeindustries/lit-html': workspace:*
-      '@popeindustries/lit-html-server': workspace:*
-      lit-html: ^2.3.1
+      '@popeindustries/lit-element': workspace:^
+      '@popeindustries/lit-html': workspace:^
+      '@popeindustries/lit-html-server': workspace:^
     dependencies:
       '@lit/reactive-element': 1.4.1
       '@popeindustries/lit-element': link:../lit-element
       '@popeindustries/lit-html': link:../lit-html
       '@popeindustries/lit-html-server': link:../lit-html-server
-      lit-html: 2.3.1
 
   packages/lit-element:
     specifiers:

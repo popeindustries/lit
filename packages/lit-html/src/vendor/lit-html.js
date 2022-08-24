@@ -100,7 +100,7 @@ const markerMatch = '?' + marker;
 // Text used to insert a comment marker node. We use processing instruction
 // syntax because it's slightly smaller, but parses as a comment node.
 const nodeMarker = `<${markerMatch}>`;
-const d = NODE_MODE
+const d = NODE_MODE && global.document === undefined
     ? {
         createTreeWalker() {
             return {};
@@ -1470,7 +1470,7 @@ const polyfillSupport = DEV_MODE
 polyfillSupport === null || polyfillSupport === void 0 ? void 0 : polyfillSupport(Template, ChildPart);
 // IMPORTANT: do not change the property name or the assignment expression.
 // This line will be used in regexes to search for lit-html usage.
-((_d = global.litHtmlVersions) !== null && _d !== void 0 ? _d : (global.litHtmlVersions = [])).push('2.3.0');
+((_d = global.litHtmlVersions) !== null && _d !== void 0 ? _d : (global.litHtmlVersions = [])).push('2.3.1');
 if (DEV_MODE && global.litHtmlVersions.length > 1) {
     issueWarning('multiple-versions', `Multiple versions of Lit loaded. ` +
         `Loading multiple versions is not recommended.`);
