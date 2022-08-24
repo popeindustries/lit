@@ -1,14 +1,17 @@
-// @ts-nocheck
+import { common, server } from '../../../tests/templates.js';
 import { renderToNodeStream, renderToString } from '../src/lit-html-server.js';
 import assert from 'node:assert';
 import { LitElementRenderer } from '@popeindustries/lit-element/lit-element-renderer.js';
 import { streamAsPromise } from './utils.js';
-import { tests } from '../../../tests/templates.js';
+
+const tests = [...common, ...server];
 
 describe('Render', () => {
   const only = tests.filter(({ only }) => only);
 
-  for (let { title, template, metadata, result, skip } of only.length ? only : tests) {
+  for (const test of only.length ? only : tests) {
+    let { error, title, template, result, skip } = test;
+    const includeHydrationMetadata = !server.includes(test);
     const fullTitle = `${title}`;
 
     if (skip) {
@@ -16,68 +19,36 @@ describe('Render', () => {
     } else {
       it(fullTitle, async () => {
         customElements._registry.clear();
-        let t = template();
-        const string = await renderToString(t, {
-          includeHydrationMetadata: metadata,
-          elementRenderers: [LitElementRenderer],
-        });
+        let string, stream, t;
+        try {
+          t = template();
+          string = await renderToString(t, {
+            includeHydrationMetadata,
+            elementRenderers: [LitElementRenderer],
+          });
+          assert.equal(string, result);
+        } catch (err) {
+          if (error) {
+            assert.equal(error, err.message);
+          } else {
+            throw err;
+          }
+        }
         customElements._registry.clear();
-        t = template = template();
-        const stream = await streamAsPromise(
-          renderToNodeStream(t, { includeHydrationMetadata: metadata, elementRenderers: [LitElementRenderer] }),
-        );
-        assert.equal(string, stream);
-        assert.equal(string, result);
+        try {
+          t = template = template();
+          stream = await streamAsPromise(
+            renderToNodeStream(t, { includeHydrationMetadata, elementRenderers: [LitElementRenderer] }),
+          );
+          assert.equal(string, stream);
+        } catch (err) {
+          if (error) {
+            assert.equal(error, err.message);
+          } else {
+            throw err;
+          }
+        }
       });
     }
   }
-
-  /**describe.skip('text', () => {
-    it('should not render a template with Promise errors', async () => {
-      const result = () => h`${Promise.reject(Error('errored!'))}`;
-      try {
-        const html = await renderToString(result());
-        assert(html).to.not.exist;
-      } catch (err) {
-        assert(err).to.have.property('message', 'errored!');
-      }
-      try {
-        const html = await streamAsPromise(renderToStream(result()));
-        assert(html).to.not.exist;
-      } catch (err) {
-        assert(err).to.have.property('message', 'errored!');
-      }
-    });
-    it('should not render a template with Promises that throw errors', async () => {
-      const result = () =>
-        h`${new Promise(() => {
-          throw Error('errored!');
-        })}`;
-      try {
-        const html = await renderToString(result());
-        assert(html).to.not.exist;
-      } catch (err) {
-        assert(err).to.have.property('message', 'errored!');
-      }
-      try {
-        const html = await streamAsPromise(renderToStream(result()));
-        assert(html).to.not.exist;
-      } catch (err) {
-        assert(err).to.have.property('message', 'errored!');
-      }
-    });
-    it('should render a template with deeply nested sync/async templates', async () => {
-      const data = { title: 'title', body: 'this is body text' };
-      const nestedVeryDeep = async () => ['and ', "don't ", 'forget ', ['this']];
-      const nestedDeep = async () => h`<div>this too ${nestedVeryDeep()}</div>`;
-      const nested = async (body) => h`<div>${body} ${nestedDeep()}</div>`;
-      const result = () => h`<main><h1>${data.title}</h1>${nested(data.body)}</main>`;
-      const expected =
-        '<main><h1>title</h1><div>this is body text <div>this too and don&#x27;t forget this</div></div></main>';
-      assert((await renderToString(result())) === expected);
-      assert((await streamAsPromise(renderToStream(result()))) === expected);
-    });
-  });
-
-*/
 });

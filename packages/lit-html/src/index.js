@@ -200,7 +200,6 @@ function findEnclosingCommentNodes(startNode) {
   }
 
   if (openingComment === null || closingComment === null) {
-    console.trace(startNode);
     throw Error(`unable to find enclosing comment nodes in ${startNode.parentElement}`);
   }
 
