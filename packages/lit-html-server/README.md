@@ -8,7 +8,7 @@ Efficiently render streaming [lit-html](https://lit.dev/docs/libraries/standalon
 
 - 6-7x faster than **@lit-labs/ssr**
 - render full HTML pages (not just `<body>`)
-- stream responses in Node.js and `ServiceWorker` with first-class `Promise` and `AsyncIterator` support
+- stream responses in Node.js and `ServiceWorker`, with first-class `Promise` and `AsyncIterator` support
 - render optional hydration metadata with `hydratable` directive, or `hydratableWebComponents` render option
 - render web components with light or shadow DOM
 - default web component rendering with `element.innerHTML` and `element.render()` support

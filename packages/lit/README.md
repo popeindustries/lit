@@ -8,8 +8,8 @@ A convenient, all-in-one package for server-rendering and hydrating [**lit**](ht
 
 - fast, streaming, Node.js server or `ServiceWorker` rendering
 - seamless and efficient client-hydration via `render()`
-- compatible with all synchronous **lit-html** directives
-- proxies asynchronous directives for true server streaming
+- compatible with all synchronous directives
+- proxies asynchronous directives for server streaming
 - extensive web component features:
   - server render and hydrate light or shadow DOM
   - default support for `element.innerHTML` and `element.render()`
