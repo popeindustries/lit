@@ -51,9 +51,8 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "lit-html": "^2.3.0"
+    "lit-html": "^2.3.1"
   },
-  "devDependencies": {},
   "scripts": {
     "build": "node ./scripts/build.js",
     "clean": "git clean -x -f",
