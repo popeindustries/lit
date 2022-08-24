@@ -1,12 +1,6 @@
 name: lit
 
-on:
-  workflow_call:
-    secrets:
-      npm_token:
-        required: true
-
-permissions: read-all
+on: push
 
 env:
   CI: true
@@ -15,7 +9,7 @@ env:
 
 jobs:
   publish:
-    timeout-minutes: 15
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     strategy:
       matrix:

@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_call:
-    secrets:
-      npm_token:
-        required: true
 
 env:
   CI: true
@@ -16,7 +12,7 @@ env:
 
 jobs:
   publish:
-    timeout-minutes: 15
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
