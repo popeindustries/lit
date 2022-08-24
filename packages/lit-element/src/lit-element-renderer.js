@@ -7,6 +7,7 @@
 
 import { CSSResult, LitElement, ReactiveElement } from './vendor/lit-element.js';
 import { ElementRenderer } from '@popeindustries/lit-html-server/element-renderer.js';
+import { _$LE } from './private-ssr-support.js';
 
 export class LitElementRenderer extends ElementRenderer {
   /**
@@ -43,8 +44,7 @@ export class LitElementRenderer extends ElementRenderer {
    * @param { string | null } newValue
    */
   attributeChangedCallback(name, oldValue, newValue) {
-    // @ts-expect-error - protected
-    this.element._$attributeToProperty(this.element, name, newValue);
+    _$LE.attributeToProperty(this.element, name, newValue);
   }
 
   renderStyles() {

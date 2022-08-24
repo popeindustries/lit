@@ -15,16 +15,24 @@
  */
 
 import { isPrimitive, isSingleExpression, isTemplateResult } from './vendor/directive-helpers.js';
-import { noChange, render as litRender, _$LH } from './vendor/lit-html.js';
+import { noChange, render as litRender } from './vendor/lit-html.js';
 import { PartType } from './vendor/directive.js';
+import { _$LH } from './private-ssr-support.js';
 
 export { html, noChange, nothing, svg } from './vendor/lit-html.js';
 
 const {
-  _ChildPart: ChildPart,
-  _ElementPart: ElementPart,
-  _resolveDirective: resolveDirective,
-  _TemplateInstance: TemplateInstance,
+  ChildPart,
+  ElementPart,
+  resolveDirective,
+  TemplateInstance,
+  getPartCommittedValue,
+  setPartCommittedValue,
+  templateInstanceAddPart,
+  getTemplateInstanceTemplatePart,
+  setAttributePartValue,
+  setChildPartEndNode,
+  getChildPartTemplate,
 } = _$LH;
 
 const RE_CHILD_MARKER = /^lit |^lit-child/;
@@ -216,8 +224,7 @@ function openChildPart(value, marker, stack, options) {
 
     if (state.type === 'template-instance') {
       part = new ChildPart(marker, null, state.instance, options);
-      // @ts-expect-error - private
-      state.instance._parts.push(part);
+      templateInstanceAddPart(state.instance, part);
       value = state.result.values[state.instancePartIndex++];
       state.templatePartIndex++;
     } else if (state.type === 'iterable') {
@@ -231,8 +238,7 @@ function openChildPart(value, marker, stack, options) {
       } else {
         value = result.value;
       }
-      // @ts-expect-error - private
-      state.part._$committedValue.push(part);
+      /** @type { Array<ChildPart> } */ (getPartCommittedValue(state.part)).push(part);
     } else {
       // Primitive likely rendered on client when TemplateResult rendered on server.
       throw Error('unexpected primitive rendered to part');
@@ -244,7 +250,7 @@ function openChildPart(value, marker, stack, options) {
   if (value === noChange) {
     stack.push({ part, type: 'leaf' });
   } else if (isPrimitive(value)) {
-    part._$committedValue = value;
+    setPartCommittedValue(part, value);
     stack.push({ part, type: 'leaf' });
     // TODO: primitive instead of TemplateResult. Error?
   } else if (isTemplateResult(value)) {
@@ -252,11 +258,10 @@ function openChildPart(value, marker, stack, options) {
       throw Error('unexpected TemplateResult rendered to part');
     }
 
-    // @ts-expect-error - private
-    const template = ChildPart.prototype._$getTemplate(value);
+    const template = getChildPartTemplate(value);
     const instance = new TemplateInstance(template, part);
 
-    part._$committedValue = instance;
+    setPartCommittedValue(part, instance);
     stack.push({
       instance,
       instancePartIndex: 0,
@@ -266,7 +271,7 @@ function openChildPart(value, marker, stack, options) {
       type: 'template-instance',
     });
   } else if (isIterable(value)) {
-    part._$committedValue = [];
+    setPartCommittedValue(part, []);
     stack.push({
       done: false,
       iterator: value[Symbol.iterator](),
@@ -276,7 +281,7 @@ function openChildPart(value, marker, stack, options) {
     });
   } else {
     // Fallback for everything else (nothing, Objects, Functions, etc.)
-    part._$committedValue = value == null ? '' : value;
+    setPartCommittedValue(part, value == null ? '' : value);
     stack.push({ part: part, type: 'leaf' });
   }
 
@@ -307,8 +312,7 @@ function createAttributeParts(comment, stack, options) {
     const n = parseInt(RE_ATTR_LENGTH.exec(comment.data)?.[1] ?? '0');
 
     for (let i = 0; i < n; i++) {
-      // @ts-expect-error - private
-      const templatePart = instance._$template.parts[state.templatePartIndex];
+      const templatePart = getTemplateInstanceTemplatePart(instance, state.templatePartIndex);
 
       if (
         templatePart === undefined ||
@@ -318,6 +322,7 @@ function createAttributeParts(comment, stack, options) {
       }
 
       if (templatePart.type === PartType.ATTRIBUTE) {
+        // @ts-ignore
         const instancePart = new templatePart.ctor(
           node,
           templatePart.name,
@@ -331,18 +336,17 @@ function createAttributeParts(comment, stack, options) {
         // Avoid touching DOM for types other than event/property
         const noCommit = !(instancePart.type === PartType.EVENT || instancePart.type === PartType.PROPERTY);
 
-        instancePart._$setValue(value, instancePart, state.instancePartIndex, noCommit);
+        setAttributePartValue(instancePart, value, state.instancePartIndex, noCommit);
+        // @ts-ignore
         state.instancePartIndex += templatePart.strings.length - 1;
-        // @ts-expect-error - private
-        instance._parts.push(instancePart);
+        templateInstanceAddPart(instance, instancePart);
       }
       // Element binding
       else {
         const instancePart = new ElementPart(node, state.instance, options);
 
         resolveDirective(instancePart, state.result.values[state.instancePartIndex++]);
-        // @ts-expect-error - private
-        instance._parts.push(instancePart);
+        templateInstanceAddPart(instance, instancePart);
       }
 
       state.templatePartIndex++;
@@ -365,8 +369,7 @@ function closeChildPart(marker, part, stack) {
     throw Error('unbalanced part marker');
   }
 
-  // @ts-expect-error - private
-  part._$endNode = marker;
+  setChildPartEndNode(part, marker);
 
   const currentState = /** @type { HydrationChildPartState } */ (stack.pop());
 

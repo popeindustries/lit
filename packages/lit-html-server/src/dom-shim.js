@@ -36,9 +36,7 @@ if (typeof globalThis.window === 'undefined') {
     }
   }
 
-  class HTMLElement extends Element {
-    __templateInstance__ = null;
-  }
+  class HTMLElement extends Element {}
 
   class Document {
     get adoptedStyleSheets() {
