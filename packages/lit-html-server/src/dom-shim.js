@@ -88,13 +88,17 @@ if (typeof globalThis.window === 'undefined') {
     },
     CustomElementRegistry,
     customElements: new CustomElementRegistry(),
-    location: new URL('http://localhost'),
     MutationObserver: class MutationObserver {
       observe() {}
     },
     requestAnimationFrame() {},
     ShadowRoot: class ShadowRoot {},
   };
+
+  // `location` is defined in Workers, so only patch if missing
+  if (globalThis.location === undefined) {
+    window.location = new URL('http://localhost');
+  }
 
   window.window = window;
 
