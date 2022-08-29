@@ -37,6 +37,7 @@ const {
 
 const RE_CHILD_MARKER = /^lit |^lit-child/;
 const RE_ATTR_LENGTH = /^lit-attr (\d+)/;
+const NO_META_ERROR = 'NIL';
 
 /**
  * Hydrate or render existing server-rendered markup inside of a `container` element.
@@ -142,12 +143,13 @@ export function render(value, container, options = {}) {
     partOwnerNode['_$litPart$'] = rootPart;
     return rootPart;
   } catch (err) {
-    if (err) {
-      console.error(`hydration failed. Clearing nodes and performing clean render: ${err}`);
+    if (err && /** @type { Error } */ (err).message !== NO_META_ERROR) {
+      console.error(err);
     }
 
     // Clear all server rendered elements if we have found opening/closing comments
     if (openingComment !== null && closingComment !== null) {
+      console.error(`hydration failed. Clearing nodes and performing clean render`);
       /** @type { Node | null } */
       let node = closingComment;
 
@@ -200,7 +202,7 @@ function findEnclosingCommentNodes(startNode) {
   }
 
   if (openingComment === null || closingComment === null) {
-    throw Error(`unable to find enclosing comment nodes in ${startNode.parentElement}`);
+    throw Error(NO_META_ERROR);
   }
 
   return [openingComment, closingComment];
