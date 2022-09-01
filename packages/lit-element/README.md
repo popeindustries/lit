@@ -50,7 +50,7 @@ http.createServer(
           <title>LitElement example</title>
         </head>
         <body>
-          ${hydratable(html`<my-el></my-el`)}>
+          <my-el></my-el>
         </body>
       </html>`).pipe(response);
   },
@@ -65,6 +65,9 @@ http.createServer(
 
 ```js
 import './my-el.js';
+
+// Trigger hydration/initial update
+document.querySelector('body > my-el').removeAttribute('hydrate:defer');
 ```
 
 > **Note**
