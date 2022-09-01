@@ -295,14 +295,6 @@ export class CustomElementOpenPart extends AttributePart {
    * @returns { unknown }
    */
   resolveValue(values, options) {
-    // Enable hydration metadata if not already enabled by `render-processor`
-    if (options.hydratableWebComponents && options.hydrationMetadataRootId === undefined) {
-      options.includeHydrationMetadata = true;
-    }
-
-    // Determine if this element should have `hydrate:defer` attribute.
-    // Includes all nested custom elements, and root elements if `hydratableWebComponents` not set.
-    const needsDeferAttribute = options.customElementStack.length !== 0 || !options.hydratableWebComponents;
     options.customElementStack.push(this.tagName);
 
     // TODO: recycle renderers since all operations here are synchronous
@@ -363,8 +355,7 @@ export class CustomElementOpenPart extends AttributePart {
 
     const shouldRender = !renderer.element.hasAttribute('render:client');
 
-    // Only add for nested custom elements
-    if (shouldRender && needsDeferAttribute) {
+    if (shouldRender) {
       renderer.setAttribute('hydrate:defer', '');
     }
 
@@ -425,15 +416,6 @@ export class CustomElementClosePart {
       options.customElementStack.pop();
     } else {
       // TODO: unbalanced tag?
-    }
-
-    // Disable hydration metadata if this is root custom element and not already enabled by `render-processor`
-    if (
-      options.hydratableWebComponents &&
-      options.hydrationMetadataRootId === undefined &&
-      options.customElementStack.length === 0
-    ) {
-      options.includeHydrationMetadata = false;
     }
 
     return EMPTY_STRING_BUFFER;

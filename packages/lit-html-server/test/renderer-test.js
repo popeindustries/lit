@@ -52,40 +52,4 @@ describe('Render', () => {
       });
     }
   }
-
-  it('render custom element with options.hydratableWebComponents = true', async () => {
-    class MyEl12 extends HTMLElement {
-      render() {
-        return h`<p>text</p>`;
-      }
-    }
-    customElements.define('my-el12', MyEl12);
-    const template = h`<div><my-el12></my-el12></div>`;
-    const string = await renderToString(template, {
-      hydratableWebComponents: true,
-    });
-    const result = '<div><my-el12><!--lit-attr 0--><!--lit x7og6JXjJAs=--><p>text</p><!--/lit--></my-el12></div>';
-    assert.equal(string, result);
-  });
-  it('render LitElement with options.hydratableWebComponents = true', async () => {
-    class MyEl13 extends LitElement {
-      static styles = css`
-        p {
-          color: green;
-        }
-      `;
-      render() {
-        return h`<p>I am green!</p>`;
-      }
-    }
-    customElements.define('my-el13', MyEl13);
-    const template = h`<my-el13></my-el13>`;
-    const string = await renderToString(template, {
-      elementRenderers: [LitElementRenderer],
-      hydratableWebComponents: true,
-    });
-    const result =
-      '<my-el13><!--lit-attr 0--><template shadowroot="open"><style>p{color:green;}</style><!--lit ymb4EFq7aMg=--><p>I am green!</p><!--/lit--></template></my-el13>';
-    assert.equal(string, result);
-  });
 });

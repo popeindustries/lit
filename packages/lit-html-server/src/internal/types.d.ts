@@ -117,11 +117,6 @@ declare type RenderOptions = {
    * `ElementRenderer` subclasses for rendering of web components with custom base classes
    */
   elementRenderers?: Array<ElementRendererConstructor>;
-  /**
-   * Flag to enable hydration metadata for all web component sub-trees.
-   * Alternative to wrapping web components in `hydratable` directive.
-   */
-  hydratableWebComponents?: boolean;
 };
 
 type InternalRenderOptions = RenderOptions & {
