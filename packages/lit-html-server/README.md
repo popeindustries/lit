@@ -9,7 +9,7 @@ Efficiently render streaming [lit-html](https://lit.dev/docs/libraries/standalon
 - 6-7x faster than **@lit-labs/ssr**
 - render full HTML pages (not just `<body>`)
 - stream responses in Node.js and `ServiceWorker`, with first-class `Promise` and `AsyncIterator` support
-- render optional hydration metadata with `hydratable` directive, or `hydratableWebComponents` render option
+- render optional hydration metadata with `hydratable` directive
 - render web components with light or shadow DOM
 - default web component rendering with `element.innerHTML` and `element.render()` support
 - customisable web component rendering with `ElementRenderer`
@@ -196,7 +196,7 @@ declare class ElementRenderer {
 }
 ```
 
-Custom `ElementRenderer` instances should subclass the default renderer, and be passed along to the render function. As an alternative to the `hydratable` directive, the `hydratableWebComponents: true` option can also be set here instead:
+Custom `ElementRenderer` instances should subclass the default renderer, and be passed along to the render function:
 
 ```js
 import { renderToNodeStream } from '@popeindustries/lit-html-server';
@@ -214,7 +214,6 @@ class MyElementRenderer extends ElementRenderer {
 
 const stream = renderToNodeStream(Layout(data), {
   elementRenderers: [MyElementRenderer],
-  hydratableWebComponents: true,
 });
 ```
 
@@ -306,7 +305,6 @@ Benchmarks for rendering a complex template in **lit-html-server** vs. [@lit-lab
 The following render methods accept an `options` object with the following properties:
 
 - **`elementRenderers?: Array<ElementRendererConstructor>`** - `ElementRenderer` subclasses for rendering of custom elements.
-- **`hydratableWebComponents? boolean`** - Flag to enable hydration metadata for all web component sub-trees. Alternative to wrapping web components in `hydratable` directive.
 
 #### `renderToNodeStream(value: unknown, options?: RenderOptions): Readable`
 

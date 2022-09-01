@@ -36,6 +36,7 @@ customElements.define('my-el', MyEl);
 ```js
 import './my-el.js';
 import { html, renderToNodeStream } from '@popeindustries/lit-html-server';
+import { hydratable } from '@popeindustries/lit-html-server/directives/hydratable.js';
 import { LitElementRenderer } from '@popeindustries/lit-element/lit-element-renderer.js';
 import http from 'node:http';
 
@@ -49,15 +50,13 @@ http.createServer(
           <title>LitElement example</title>
         </head>
         <body>
-          <my-el></my-el>
+          ${hydratable(html`<my-el></my-el`)}>
         </body>
       </html>`).pipe(response);
   },
   {
     // Register a renderer for LitElement components
     renderers: [LitElementRenderer],
-    // Enable hydration metadata for all web component sub-trees
-    hydratableWebComponents: true,
   },
 );
 ```
