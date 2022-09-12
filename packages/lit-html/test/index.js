@@ -64,6 +64,16 @@ describe('hydrate', () => {
       throw Error(`event bindings not registered`);
     }
   });
+  it('empty child node expression correctly re-renders', () => {
+    attachResult(container, `<!--lit AEmR7W+R0Ak=--><div><!--lit-child--> <!--/lit-child--></div><!--/lit-->`);
+    const template = (val) => h`<div>${val}</div>`;
+    render(template(undefined), container);
+    render(template('a'), container);
+    const rendered = container.innerHTML;
+    if (rendered !== '<!--lit AEmR7W+R0Ak=--><div><!--lit-child-->a<!--/lit-child--></div><!--/lit-->') {
+      throw Error(`unexpected rendered output: ${rendered}`);
+    }
+  });
 });
 
 function attachResult(container, result) {

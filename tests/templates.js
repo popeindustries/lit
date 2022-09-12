@@ -26,12 +26,12 @@ export const common = [
   {
     title: 'null child',
     template: () => h`<div>${null}</div>`,
-    result: '<!--lit AEmR7W+R0Ak=--><div><!--lit-child--><!--/lit-child--></div><!--/lit-->',
+    result: '<!--lit AEmR7W+R0Ak=--><div><!--lit-child--> <!--/lit-child--></div><!--/lit-->',
   },
   {
     title: 'undefined child',
     template: () => h`<div>${undefined}</div>`,
-    result: '<!--lit AEmR7W+R0Ak=--><div><!--lit-child--><!--/lit-child--></div><!--/lit-->',
+    result: '<!--lit AEmR7W+R0Ak=--><div><!--lit-child--> <!--/lit-child--></div><!--/lit-->',
   },
   {
     title: 'array child',
