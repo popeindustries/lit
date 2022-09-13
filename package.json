@@ -16,12 +16,12 @@
     "@popeindustries/lit-html": "workspace:*",
     "@popeindustries/lit-html-server": "workspace:*",
     "@types/mocha": "^9.1.1",
-    "@types/node": "^18.7.14",
-    "@typescript-eslint/eslint-plugin": "^5.36.1",
-    "@typescript-eslint/parser": "^5.36.1",
+    "@types/node": "^18.7.16",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
     "autocannon": "^7.9.0",
-    "esbuild": "^0.15.6",
-    "eslint": "^8.23.0",
+    "esbuild": "^0.15.7",
+    "eslint": "^8.23.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.1",
@@ -29,7 +29,7 @@
     "lit": "^2.3.1",
     "mocha": "^10.0.0",
     "prettier": "^2.7.1",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.3"
   },
   "scripts": {
     "build": "pnpm -r run build",

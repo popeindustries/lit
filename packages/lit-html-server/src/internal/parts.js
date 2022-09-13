@@ -1,4 +1,4 @@
-import { EMPTY_STRING_BUFFER, META_CHILD_CLOSE, META_CHILD_OPEN } from './consts.js';
+import { EMPTY_STRING_BUFFER, META_CHILD_CLOSE, META_CHILD_OPEN, SPACE_STRING_BUFFER } from './consts.js';
 import {
   isArray,
   isAsyncIterator,
@@ -534,7 +534,10 @@ function resolveNodeValue(value, tagName, withMetadata) {
   }
 
   if (value === nothing || value == null) {
-    value = EMPTY_STRING_BUFFER;
+    // Insert empty text node to ensure that Part creation during hydration
+    // has an assigned node to update.
+    // Fixes https://github.com/popeindustries/lit/issues/7
+    value = SPACE_STRING_BUFFER;
   }
 
   if (isPrimitive(value)) {
