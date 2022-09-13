@@ -1,5 +1,11 @@
 # @popeindustries/lit-html-server
 
+## 5.0.3
+
+### Patch Changes
+
+- 1b29988: Fix re-render of empty child node
+
 ## 5.0.2
 
 ### Patch Changes
