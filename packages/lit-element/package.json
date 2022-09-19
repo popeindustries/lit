@@ -33,11 +33,17 @@
     "./decorators.js": {
       "types": "./decorators.d.ts",
       "development": "./src/vendor/decorators.js",
-      "default": "./vendor/decorators.js"
+      "default": "./decorators.js"
+    },
+    "./reactive-controller.js": {
+      "types": "./reactive-controller.d.ts",
+      "development": "./src/vendor/reactive-controller.js",
+      "default": "./reactive-controller.js"
     },
     "./decorators/*": {
+      "types": "./decorators/*",
       "development": "./src/vendor/decorators/*",
-      "default": "./vendor/decorators/*"
+      "default": "./decorators/*"
     }
   },
   "files": [
