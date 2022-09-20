@@ -14,11 +14,19 @@
     "template render"
   ],
   "type": "module",
-  "types": "index.d.ts",
   "exports": {
     ".": {
       "types": "./lit-html-server.d.ts",
       "node": "./lit-html-server.js",
+      "default": "./lit-html-service-worker.js"
+    },
+    "./lit-html-server.js": {
+      "types": "./lit-html-server.d.ts",
+      "node": "./lit-html-server.js",
+      "default": "./lit-html-service-worker.js"
+    },
+    "./lit-html-service-worker.js": {
+      "types": "./lit-html-server.d.ts",
       "default": "./lit-html-service-worker.js"
     },
     "./dom-shim.js": "./dom-shim.js",
