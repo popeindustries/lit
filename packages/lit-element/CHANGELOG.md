@@ -1,5 +1,13 @@
 # @popeindustries/lit-element
 
+## 3.0.5
+
+### Patch Changes
+
+- e3e91a4: Fix types for vendored packages
+- Updated dependencies [e3e91a4]
+  - @popeindustries/lit-html@5.0.3
+
 ## 3.0.4
 
 ### Patch Changes
