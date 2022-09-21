@@ -1,5 +1,11 @@
 # @popeindustries/lit-html
 
+## 5.0.3
+
+### Patch Changes
+
+- e3e91a4: Fix types for vendored packages
+
 ## 5.0.2
 
 ### Patch Changes
