@@ -27,17 +27,17 @@
     "./async-directive.js": {
       "types": "./async-directive.d.ts",
       "development": "./src/vendor/async-directive.js",
-      "default": "./vendor/async-directive.js"
+      "default": "./async-directive.js"
     },
     "./directive-helpers.js": {
       "types": "./directive-helpers.d.ts",
       "development": "./src/vendor/directive-helpers.js",
-      "default": "./vendor/directive-helpers.js"
+      "default": "./directive-helpers.js"
     },
     "./directive.js": {
       "types": "./directive.d.ts",
       "development": "./src/vendor/directive.js",
-      "default": "./vendor/directive.js"
+      "default": "./directive.js"
     },
     "./lazy-hydration-mixin.js": {
       "types": "./lazy-hydration-mixin.d.ts",
@@ -46,11 +46,12 @@
     "./static.js": {
       "types": "./static.d.ts",
       "development": "./src/vendor/static.js",
-      "default": "./vendor/static.js"
+      "default": "./static.js"
     },
     "./directives/*": {
+      "types": "./directives/*",
       "development": "./src/vendor/directives/*",
-      "default": "./vendor/directives/*"
+      "default": "./directives/*"
     }
   },
   "files": [
