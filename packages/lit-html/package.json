@@ -48,10 +48,105 @@
       "development": "./src/vendor/static.js",
       "default": "./static.js"
     },
-    "./directives/*": {
-      "types": "./directives/*",
-      "development": "./src/vendor/directives/*",
-      "default": "./directives/*"
+    "./directives/async-append.js": {
+      "types": "./directives/async-append.d.ts",
+      "development": "./src/vendor/directives/async-append.js",
+      "default": "./directives/async-append.js"
+    },
+    "./directives/async-replace.js": {
+      "types": "./directives/async-replace.d.ts",
+      "development": "./src/vendor/directives/async-replace.js",
+      "default": "./directives/async-replace.js"
+    },
+    "./directives/cache.js": {
+      "types": "./directives/cache.d.ts",
+      "development": "./src/vendor/directives/cache.js",
+      "default": "./directives/cache.js"
+    },
+    "./directives/choose.js": {
+      "types": "./directives/choose.d.ts",
+      "development": "./src/vendor/directives/choose.js",
+      "default": "./directives/choose.js"
+    },
+    "./directives/class-map.js": {
+      "types": "./directives/class-map.d.ts",
+      "development": "./src/vendor/directives/class-map.js",
+      "default": "./directives/class-map.js"
+    },
+    "./directives/guard.js": {
+      "types": "./directives/guard.d.ts",
+      "development": "./src/vendor/directives/guard.js",
+      "default": "./directives/guard.js"
+    },
+    "./directives/if-defined.js": {
+      "types": "./directives/if-defined.d.ts",
+      "development": "./src/vendor/directives/if-defined.js",
+      "default": "./directives/if-defined.js"
+    },
+    "./directives/join.js": {
+      "types": "./directives/join.d.ts",
+      "development": "./src/vendor/directives/join.js",
+      "default": "./directives/join.js"
+    },
+    "./directives/keyed.js": {
+      "types": "./directives/keyed.d.ts",
+      "development": "./src/vendor/directives/keyed.js",
+      "default": "./directives/keyed.js"
+    },
+    "./directives/live.js": {
+      "types": "./directives/live.d.ts",
+      "development": "./src/vendor/directives/live.js",
+      "default": "./directives/live.js"
+    },
+    "./directives/map.js": {
+      "types": "./directives/map.d.ts",
+      "development": "./src/vendor/directives/map.js",
+      "default": "./directives/map.js"
+    },
+    "./directives/range.js": {
+      "types": "./directives/range.d.ts",
+      "development": "./src/vendor/directives/range.js",
+      "default": "./directives/range.js"
+    },
+    "./directives/ref.js": {
+      "types": "./directives/ref.d.ts",
+      "development": "./src/vendor/directives/ref.js",
+      "default": "./directives/ref.js"
+    },
+    "./directives/repeat.js": {
+      "types": "./directives/repeat.d.ts",
+      "development": "./src/vendor/directives/repeat.js",
+      "default": "./directives/repeat.js"
+    },
+    "./directives/style-map.js": {
+      "types": "./directives/style-map.d.ts",
+      "development": "./src/vendor/directives/style-map.js",
+      "default": "./directives/style-map.js"
+    },
+    "./directives/template-content.js": {
+      "types": "./directives/template-content.d.ts",
+      "development": "./src/vendor/directives/template-content.js",
+      "default": "./directives/template-content.js"
+    },
+    "./directives/unsafe-html.js": {
+      "types": "./directives/unsafe-html.d.ts",
+      "development": "./src/vendor/directives/unsafe-html.js",
+      "default": "./directives/unsafe-html.js"
+    },
+    "./directives/unsafe-svg.js": {
+      "types": "./directives/unsafe-svg.d.ts",
+      "development": "./src/vendor/directives/unsafe-svg.js",
+      "default": "./directives/unsafe-svg.js"
+    },
+    "./directives/until.js": {
+      "types": "./directives/until.d.ts",
+      "development": "./src/vendor/directives/until.js",
+      "default": "./directives/until.js"
+    },
+    "./directives/when.js": {
+      "types": "./directives/when.d.ts",
+      "development": "./src/vendor/directives/when.js",
+      "default": "./directives/when.js"
     }
   },
   "files": [

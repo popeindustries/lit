@@ -40,10 +40,50 @@
       "development": "./src/vendor/reactive-controller.js",
       "default": "./reactive-controller.js"
     },
-    "./decorators/*": {
-      "types": "./decorators/*",
-      "development": "./src/vendor/decorators/*",
-      "default": "./decorators/*"
+    "./decorators/custom-element.js": {
+      "types": "./decorators/custom-element.d.ts",
+      "development": "./src/vendor/decorators/custom-element.js",
+      "default": "./decorators/custom-element.js"
+    },
+    "./decorators/event-options.js": {
+      "types": "./decorators/event-options.d.ts",
+      "development": "./src/vendor/decorators/event-options.js",
+      "default": "./decorators/event-options.js"
+    },
+    "./decorators/property.js": {
+      "types": "./decorators/property.d.ts",
+      "development": "./src/vendor/decorators/property.js",
+      "default": "./decorators/property.js"
+    },
+    "./decorators/query-all.js": {
+      "types": "./decorators/query-all.d.ts",
+      "development": "./src/vendor/decorators/query-all.js",
+      "default": "./decorators/query-all.js"
+    },
+    "./decorators/query-assigned-elements.js": {
+      "types": "./decorators/query-assigned-elements.d.ts",
+      "development": "./src/vendor/decorators/query-assigned-elements.js",
+      "default": "./decorators/query-assigned-elements.js"
+    },
+    "./decorators/query-assigned-nodes.js": {
+      "types": "./decorators/query-assigned-nodes.d.ts",
+      "development": "./src/vendor/decorators/query-assigned-nodes.js",
+      "default": "./decorators/query-assigned-nodes.js"
+    },
+    "./decorators/query-assync.js": {
+      "types": "./decorators/query-assync.d.ts",
+      "development": "./src/vendor/decorators/query-assync.js",
+      "default": "./decorators/query-assync.js"
+    },
+    "./decorators/query.js": {
+      "types": "./decorators/query.d.ts",
+      "development": "./src/vendor/decorators/query.js",
+      "default": "./decorators/query.js"
+    },
+    "./decorators/state.js": {
+      "types": "./decorators/state.d.ts",
+      "development": "./src/vendor/decorators/state.js",
+      "default": "./decorators/state.js"
     }
   },
   "files": [
