@@ -70,10 +70,10 @@
       "development": "./src/vendor/decorators/query-assigned-nodes.js",
       "default": "./decorators/query-assigned-nodes.js"
     },
-    "./decorators/query-assync.js": {
-      "types": "./decorators/query-assync.d.ts",
-      "development": "./src/vendor/decorators/query-assync.js",
-      "default": "./decorators/query-assync.js"
+    "./decorators/query-async.js": {
+      "types": "./decorators/query-async.d.ts",
+      "development": "./src/vendor/decorators/query-async.js",
+      "default": "./decorators/query-async.js"
     },
     "./decorators/query.js": {
       "types": "./decorators/query.d.ts",
