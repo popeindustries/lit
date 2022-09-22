@@ -60,7 +60,15 @@
       "types": "./static.d.ts",
       "default": "./static.js"
     },
-    "./decorators/*": "./decorators/*",
+    "./decorators/custom-element.js": "./decorators/custom-element.js",
+    "./decorators/event-options.js": "./decorators/event-options.js",
+    "./decorators/property.js": "./decorators/property.js",
+    "./decorators/query-all.js": "./decorators/query-all.js",
+    "./decorators/query-assigned-element.js": "./decorators/query-assigned-element.js",
+    "./decorators/query-assigned-nodes.js": "./decorators/query-assigned-nodes.js",
+    "./decorators/query-async.js": "./decorators/query-async.js",
+    "./decorators/query.js": "./decorators/query.js",
+    "./decorators/state.js": "./decorators/state.js",
     "./directives/async-append.js": {
       "types": "./directives/async-append.d.ts",
       "browser": "./directives/async-append.js",
@@ -71,16 +79,30 @@
       "browser": "./directives/async-replace.js",
       "default": "./directives/async-replace-server.js"
     },
-    "./directives/hydratable.js": {
-      "types": "./directives/hydratable-server.d.ts",
-      "default": "./directives/hydratable-server.js"
-    },
+    "./directives/cache.js": "./directives/cache.js",
+    "./directives/choose.js": "./directives/choose.js",
+    "./directives/class-map.js": "./directives/class-map.js",
+    "./directives/guard.js": "./directives/guard.js",
+    "./directives/hydratable.js": "./directives/hydratable.js",
+    "./directives/hydratable-server.js": "./directives/hydratable.js",
+    "./directives/if-defined.js": "./directives/if-defined.js",
+    "./directives/join.js": "./directives/join.js",
+    "./directives/keyed.js": "./directives/keyed.js",
+    "./directives/live.js": "./directives/live.js",
+    "./directives/map.js": "./directives/map.js",
+    "./directives/range.js": "./directives/range.js",
+    "./directives/ref.js": "./directives/ref.js",
+    "./directives/repeat.js": "./directives/repeat.js",
+    "./directives/style-map.js": "./directives/style-map.js",
+    "./directives/template-content.js": "./directives/template-content.js",
+    "./directives/unsafe-html.js": "./directives/unsafe-html.js",
+    "./directives/unsafe-svg.js": "./directives/unsafe-svg.js",
     "./directives/until.js": {
       "types": "./directives/until.d.ts",
       "browser": "./directives/until.js",
       "default": "./directives/until-server.js"
     },
-    "./directives/*": "./directives/*"
+    "./directives/when.js": "./directives/when.js"
   },
   "files": [
     "decorators",
