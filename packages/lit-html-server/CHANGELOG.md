@@ -1,5 +1,11 @@
 # @popeindustries/lit-html-server
 
+## 5.0.4
+
+### Patch Changes
+
+- 2f15655: Fix package.json exports to avoid wildcards
+
 ## 5.0.3
 
 ### Patch Changes

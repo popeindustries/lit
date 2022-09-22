@@ -1,6 +1,6 @@
 {
   "name": "@popeindustries/lit-html-server",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "description": "Efficiently render streaming lit-html templates on the server (or in a ServiceWorker!)",
   "author": "Alexander Pope <alex@pope.industries>",
   "keywords": [

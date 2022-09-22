@@ -1,5 +1,19 @@
 # @popeindustries/lit
 
+## 1.1.0
+
+### Minor Changes
+
+- 7a51ba7: Add `./directives/hydratable.js` in addition to `./directives/hydratable-server.js`
+
+### Patch Changes
+
+- 2f15655: Fix package.json exports to avoid wildcards
+- Updated dependencies [2f15655]
+  - @popeindustries/lit-element@3.0.6
+  - @popeindustries/lit-html@5.0.4
+  - @popeindustries/lit-html-server@5.0.4
+
 ## 1.0.5
 
 ### Patch Changes

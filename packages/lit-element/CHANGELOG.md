@@ -1,5 +1,14 @@
 # @popeindustries/lit-element
 
+## 3.0.6
+
+### Patch Changes
+
+- 2f15655: Fix package.json exports to avoid wildcards
+- Updated dependencies [2f15655]
+  - @popeindustries/lit-html@5.0.4
+  - @popeindustries/lit-html-server@5.0.4
+
 ## 3.0.5
 
 ### Patch Changes
