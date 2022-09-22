@@ -7,6 +7,7 @@ const serverDirectivesDir = path.resolve('../lit-html-server/directives');
 const srcDir = path.resolve('./src');
 const litHtmlFiles = ['vendor/async-directive', 'vendor/directive-helpers', 'vendor/directive', 'vendor/static'];
 const litElementFiles = ['vendor/decorators'];
+const directives = new Set();
 
 if (!fs.existsSync(path.resolve('decorators'))) {
   fs.mkdirSync(path.resolve('decorators'));
@@ -30,6 +31,7 @@ for (const basename of fs.readdirSync(decoratorsDir)) {
 for (const basename of fs.readdirSync(directivesDir)) {
   if (basename.endsWith('.js') || basename.endsWith('.d.ts')) {
     const moduleName = basename.replace(/\.js|\.d\.ts/, '.js');
+    directives.add(moduleName);
     fs.writeFileSync(
       path.resolve('directives', basename),
       `export * from '@popeindustries/lit-html/directives/${moduleName}';`,
@@ -42,9 +44,11 @@ for (const basename of fs.readdirSync(serverDirectivesDir)) {
   if (basename.endsWith('.js') || basename.endsWith('.d.ts')) {
     const ext = /(\.js|\.d\.ts)/.exec(basename)?.[1] ?? '';
     const name = basename.replace(ext, '');
+    const moduleName = basename.replace(/\.js|\.d\.ts/, '.js');
+    const resolvedName = directives.has(moduleName) ? `${name}-server${ext}` : `${name}${ext}`;
     fs.writeFileSync(
-      path.resolve('directives', `${name}-server${ext}`),
-      `export * from '@popeindustries/lit-html-server/directives/${name}.js';`,
+      path.resolve('directives', resolvedName),
+      `export * from '@popeindustries/lit-html-server/directives/${moduleName}';`,
     );
   }
 }

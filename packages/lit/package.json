@@ -83,6 +83,8 @@
     "./directives/choose.js": "./directives/choose.js",
     "./directives/class-map.js": "./directives/class-map.js",
     "./directives/guard.js": "./directives/guard.js",
+    "./directives/hydratable.js": "./directives/hydratable.js",
+    "./directives/hydratable-server.js": "./directives/hydratable.js",
     "./directives/if-defined.js": "./directives/if-defined.js",
     "./directives/join.js": "./directives/join.js",
     "./directives/keyed.js": "./directives/keyed.js",
