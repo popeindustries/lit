@@ -152,6 +152,7 @@
   "files": [
     "src",
     "vendor",
+    "directives",
     "*.d.ts",
     "*.js",
     "README.MD"
