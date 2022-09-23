@@ -1,5 +1,11 @@
 # @popeindustries/lit-html
 
+## 5.0.5
+
+### Patch Changes
+
+- c816b31: Add directives folder to package.json#file to include directives folder in package, but keep it ignored from git
+
 ## 5.0.4
 
 ### Patch Changes
