@@ -1,6 +1,6 @@
 {
   "name": "@popeindustries/lit-html",
-  "version": "5.0.5",
+  "version": "5.0.6",
   "description": "Seamlessly and efficiently use @popeindustries/lit-html-server rendered HTML to hydrate lit-html templates in the browser",
   "author": "Alexander Pope <alex@pope.industries>",
   "keywords": [

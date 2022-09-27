@@ -1,5 +1,16 @@
 # @popeindustries/lit-element
 
+## 3.0.8
+
+### Patch Changes
+
+- 018ee84: - Fix minification of vendored modules
+  - (lit-html-server) import from `@popeindustries/lit-html`
+  - upgrade dev dependencies
+- Updated dependencies [018ee84]
+  - @popeindustries/lit-html@5.0.6
+  - @popeindustries/lit-html-server@5.0.5
+
 ## 3.0.7
 
 ### Patch Changes
