@@ -43,6 +43,7 @@
     "postinstall": "pnpm run vendor",
     "postpublish": "pnpm run clean",
     "prepare": "husky install",
+    "test": "pnpm run build && pnpm run test:unit",
     "test:unit": "pnpm -r run test:unit",
     "vendor": "node ./scripts/vendor.js"
   },
