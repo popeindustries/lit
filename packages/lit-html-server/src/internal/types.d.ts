@@ -1,4 +1,4 @@
-declare type TemplateResult = import('lit-html').TemplateResult;
+declare type TemplateResult = import('@popeindustries/lit-html').TemplateResult;
 declare type ElementRenderer = import('./element-renderer.js').ElementRenderer;
 
 /**

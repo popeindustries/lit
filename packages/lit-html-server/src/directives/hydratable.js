@@ -1,11 +1,11 @@
-import { directive, Directive, PartType } from 'lit-html/directive.js';
+import { directive, Directive, PartType } from '@popeindustries/lit-html/directive.js';
 // @ts-ignore - private
 import { __internalGetTemplateInstance__ } from '@popeindustries/lit-html-server';
 
 class HydratableDirective extends Directive {
   /**
    * Constructor
-   * @param { import('lit-html/directive.js').PartInfo } partInfo
+   * @param { import('@popeindustries/lit-html/directive.js').PartInfo } partInfo
    */
   constructor(partInfo) {
     super(partInfo);

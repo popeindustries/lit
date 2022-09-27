@@ -62,7 +62,7 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "lit-html": "^2.3.1"
+    "@popeindustries/lit-html": "workspace:*"
   },
   "scripts": {
     "build": "node ./scripts/build.js",

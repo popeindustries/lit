@@ -1,4 +1,4 @@
-import { Directive, DirectiveResult } from 'lit-html/directive.js';
+import { Directive, DirectiveResult } from '@popeindustries/lit-html/directive.js';
 
 declare class HydratableDirective extends Directive {
   render(value: TemplateResult | Promise<TemplateResult>): TemplateResult | Promise<TemplateResult>;

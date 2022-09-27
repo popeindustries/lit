@@ -1,17 +1,17 @@
 // @ts-nocheck
-import { directive, Directive } from 'lit-html/directive.js';
+import { directive, Directive } from '@popeindustries/lit-html/directive.js';
 import { html as h, renderToString as render } from '../src/lit-html-server.js';
 import assert from 'assert';
 import { asyncAppend } from '../src/directives/async-append.js';
 import { asyncReplace } from '../src/directives/async-replace.js';
-import { cache } from 'lit-html/directives/cache.js';
-import { classMap } from 'lit-html/directives/class-map.js';
-import { guard } from 'lit-html/directives/guard.js';
-import { ifDefined } from 'lit-html/directives/if-defined.js';
+import { cache } from '@popeindustries/lit-html/directives/cache.js';
+import { classMap } from '@popeindustries/lit-html/directives/class-map.js';
+import { guard } from '@popeindustries/lit-html/directives/guard.js';
+import { ifDefined } from '@popeindustries/lit-html/directives/if-defined.js';
 import { hydratable } from '../src/directives/hydratable.js';
-import { repeat } from 'lit-html/directives/repeat.js';
-import { styleMap } from 'lit-html/directives/style-map.js';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+import { repeat } from '@popeindustries/lit-html/directives/repeat.js';
+import { styleMap } from '@popeindustries/lit-html/directives/style-map.js';
+import { unsafeHTML } from '@popeindustries/lit-html/directives/unsafe-html.js';
 import { until } from '../src/directives/until.js';
 
 describe('directives', () => {

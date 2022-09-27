@@ -1,5 +1,5 @@
-import { AsyncDirective } from 'lit-html/async-directive.js';
-import { DirectiveResult } from 'lit-html/directive.js';
+import { AsyncDirective } from '@popeindustries/lit-html/async-directive.js';
+import { DirectiveResult } from '@popeindustries/lit-html/directive.js';
 
 declare class AsyncReplaceDirective extends AsyncDirective {
   render<T>(value: AsyncIterable<T>, mapper?: (value: T, index?: number) => unknown): Promise<unknown>;

@@ -1,4 +1,4 @@
-export { html, noChange, nothing, svg } from 'lit-html';
+export { html, noChange, nothing, svg } from '@popeindustries/lit-html';
 
 /**
  * Renders a value, usually a `TemplateResult` returned from using the `html` tagged template literal, to a Buffer resolving Promise
