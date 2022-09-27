@@ -123,7 +123,6 @@
     "@popeindustries/lit-html-server": "workspace:^"
   },
   "scripts": {
-    "build": "node ./scripts/build.js",
-    "clean": "git clean -x -f"
+    "build": "node ./scripts/build.js"
   }
 }

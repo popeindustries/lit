@@ -1,12 +1,12 @@
 import './dom-shim.js'; // Needs to be bundled as "external" in order to shim before lit-html imports
 import { getTemplateInstance } from './internal/template-instance.js';
-import { html } from 'lit-html';
+import { html } from '@popeindustries/lit-html';
 import { isTemplateResult } from './internal/is.js';
 import { nodeStreamTemplateRenderer } from '#node-stream-template-renderer';
 import { promiseTemplateRenderer } from './internal/promise-template-renderer.js';
 import { webStreamTemplateRenderer } from './internal/web-stream-template-renderer.js';
 
-export { html, noChange, nothing, svg } from 'lit-html';
+export { html, noChange, nothing, svg } from '@popeindustries/lit-html';
 // Secret export for use by `hydratable` directive
 export { getTemplateInstance as __internalGetTemplateInstance__ } from './internal/template-instance.js';
 

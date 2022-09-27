@@ -1,7 +1,7 @@
 import { Buffer } from '#buffer';
 import { partType } from './parts.js';
 
-export { isDirectiveResult as isDirective } from 'lit-html/directive-helpers.js';
+export { isDirectiveResult as isDirective } from '@popeindustries/lit-html/directive-helpers.js';
 
 /**
  * Determine if "part" is an AttributePart

@@ -14,7 +14,7 @@ if (!fs.existsSync(path.resolve('directives'))) {
   fs.mkdirSync(path.resolve('directives'));
 }
 
-vendorBuild(vendorSrc, vendorDest, [path.resolve('./node_modules/lit-html')]);
+vendorBuild(vendorSrc, vendorDest);
 
 // Copy some root src files
 for (const basename of fs.readdirSync(srcDir)) {

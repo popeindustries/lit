@@ -9,7 +9,7 @@ import {
   isSyncIterator,
   isTemplateInstanceOrResult,
 } from './is.js';
-import { noChange, nothing } from 'lit-html';
+import { noChange, nothing } from '@popeindustries/lit-html';
 import { Buffer } from '#buffer';
 import { escape } from './escape.js';
 import { getElementRenderer } from './get-element-renderer.js';
@@ -607,7 +607,7 @@ async function* resolveAsyncIteratorValue(iterator, tagName, withMetadata) {
 
 /**
  * Resolve value of "directive"
- * @param { import('lit-html/directive.js').DirectiveResult } directiveResult
+ * @param { import('@popeindustries/lit-html/directive.js').DirectiveResult } directiveResult
  * @param { PartInfo } partInfo
  * @returns { unknown }
  */

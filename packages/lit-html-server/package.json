@@ -62,12 +62,10 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "lit-html": "^2.3.1"
+    "@popeindustries/lit-html": "workspace:*"
   },
   "scripts": {
     "build": "node ./scripts/build.js",
-    "clean": "git clean -x -f",
-    "test": "pnpm run build && pnpm run test:unit && pnpm run test:browser",
     "test:unit": "NODE_ENV=test mocha --require './src/dom-shim.js' --reporter spec --timeout 2000 --node-option conditions=development 'test/*-test.js'"
   }
 }
