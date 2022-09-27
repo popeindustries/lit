@@ -14,10 +14,7 @@ if (!fs.existsSync(path.resolve('decorators'))) {
   fs.mkdirSync(path.resolve('decorators'));
 }
 
-vendorBuild(vendorSrc, vendorDest, [
-  path.resolve('./node_modules/@lit/reactive-element'),
-  path.resolve('./node_modules/lit-element'),
-]);
+vendorBuild(vendorSrc, vendorDest);
 
 // Copy some root src files
 for (const basename of fs.readdirSync(srcDir)) {

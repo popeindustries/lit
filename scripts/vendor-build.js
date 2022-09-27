@@ -12,36 +12,34 @@ const define = {
 /**
  * @param { string } srcDir
  * @param { string } destDir
- * @param { Array<string> } pkgDirs
  */
-export async function vendorBuild(srcDir, destDir, pkgDirs) {
+export async function vendorBuild(srcDir, destDir) {
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir);
   }
 
-  const entryPoints = copyFiles(srcDir, destDir, pkgDirs);
+  const entryPoints = copyFiles(srcDir, destDir);
 
   await esbuild.build({
     bundle: false,
     define,
     entryPoints,
     format: 'esm',
-    target: 'es2020',
     minify: true,
-    platform: 'browser',
     outdir: destDir,
+    platform: 'browser',
     plugins: [replacePlugin()],
+    target: 'es2020',
   });
 }
 
 /**
  * @param { string } srcDir
  * @param { string } destDir
- * @param { Array<string> } pkgDirs
  * @param { string } [dir]
  * @param { Array<string> } [entryPoints]
  */
-function copyFiles(srcDir, destDir, pkgDirs, dir = '', entryPoints = []) {
+function copyFiles(srcDir, destDir, dir = '', entryPoints = []) {
   if (dir && !fs.existsSync(path.resolve(destDir, dir))) {
     fs.mkdirSync(path.resolve(destDir, dir));
   }
@@ -49,24 +47,12 @@ function copyFiles(srcDir, destDir, pkgDirs, dir = '', entryPoints = []) {
   for (const basename of fs.readdirSync(path.join(srcDir, dir))) {
     const filepath = path.join(srcDir, dir, basename);
     const ext = path.extname(basename);
-
     if (ext === '.ts') {
       fs.copyFileSync(filepath, path.join(destDir, dir, basename));
     } else if (ext === '.js') {
-      const code = fs.readFileSync(filepath, 'utf8');
-      if (/_\$LH|DEV_MODE|NODE_MODE/.test(code)) {
-        entryPoints.push(filepath);
-      } else {
-        pkg: for (const pkgDir of pkgDirs) {
-          const filepath = path.join(pkgDir, dir, basename);
-          if (fs.existsSync(filepath)) {
-            fs.copyFileSync(path.join(pkgDir, dir, basename), path.join(destDir, dir, basename));
-            break pkg;
-          }
-        }
-      }
+      entryPoints.push(filepath);
     } else if (ext === '') {
-      copyFiles(srcDir, destDir, pkgDirs, basename, entryPoints);
+      copyFiles(srcDir, destDir, basename, entryPoints);
     }
   }
 
