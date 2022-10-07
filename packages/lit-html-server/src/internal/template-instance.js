@@ -18,11 +18,12 @@ let id = 0;
  */
 export function getTemplateInstance(result) {
   const strings = result.strings;
-  let template = templateCache.get(strings);
+  const key = strings.toString();
+  let template = templateCache.get(key);
 
   if (template === undefined) {
     template = getTemplate(strings);
-    templateCache.set(strings, template);
+    templateCache.set(key, template);
   }
 
   return new TemplateInstance(template, result.values);
