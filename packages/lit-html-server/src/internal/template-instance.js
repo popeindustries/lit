@@ -20,10 +20,12 @@ export function getTemplateInstance(result) {
   const strings = result.strings;
   let template = templateCache.get(strings);
 
-  if (template === undefined) {
-    template = getTemplate(strings);
-    templateCache.set(strings, template);
-  }
+  // FIXME: We should either remove the cache here, or try to fix it another way.
+  //.       This results into memory leak in our application it just eats memory.
+  // if (template === undefined) {
+  //  template = getTemplate(strings);
+  //  templateCache.set(strings, template);
+  //}
 
   return new TemplateInstance(template, result.values);
 }
