@@ -1,6 +1,7 @@
 import { html } from '@popeindustries/lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 /**
  * @param { { title: string, isTrue: boolean, number: number } } data
@@ -51,6 +52,7 @@ export default function everything(data) {
       </button>
       <div .prop=${data.isTrue}><span>Div: Lorem ipsum</span></div>
       <my-el ?negative="${!data.isTrue}"></my-el>
+      <div>${unsafeHTML('<span>unsafe text</span>')}</div>
     </main>
   `;
 }
