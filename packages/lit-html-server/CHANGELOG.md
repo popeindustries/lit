@@ -1,5 +1,11 @@
 # @popeindustries/lit-html-server
 
+## 5.0.6
+
+### Patch Changes
+
+- a4e93d9: fix memory leak when handling unsafeHTML/unsafeSVG directives
+
 ## 5.0.5
 
 ### Patch Changes
