@@ -613,12 +613,19 @@ async function* resolveAsyncIteratorValue(iterator, tagName, withMetadata) {
  */
 function resolveDirectiveValue(directiveResult, partInfo) {
   // @ts-ignore
-  const directive = new directiveResult._$litDirective$(partInfo);
+  const Ctor = directiveResult._$litDirective$;
+  const { directiveName } = Ctor;
+  const directive = new Ctor(partInfo);
   // @ts-ignore
   const result = directive.render(...directiveResult.values);
 
   if (result === noChange) {
     return EMPTY_STRING_BUFFER;
+  }
+
+  if (directiveName === 'unsafeHTML' || directiveName === 'unsafeSVG') {
+    // Return Buffer to avoid string escaping
+    return Buffer.from(result.strings[0]);
   }
 
   return result;
