@@ -13,7 +13,6 @@ import { noChange, nothing } from '@popeindustries/lit-html';
 import { Buffer } from '#buffer';
 import { escape } from './escape.js';
 import { getElementRenderer } from './get-element-renderer.js';
-import { getFakeTemplateResult } from './template-result.js';
 import { getTemplateInstance } from './template-instance.js';
 
 export const partType = {
@@ -24,6 +23,8 @@ export const partType = {
   CUSTOMELEMENT_CLOSE: 4,
 };
 
+/** @type { Array<string> & { raw?: Array<string> }} */
+const EMPTY_STRINGS_ARRAY = ['', ''];
 const RE_RAW_TEXT_ELEMENT = /^(?:script|style|textarea|title)$/i;
 const SPACE_BUFFER = Buffer.from(' ');
 const TYPE_TO_LIT_PART_TYPE = {
@@ -373,7 +374,11 @@ export class CustomElementOpenPart extends AttributePart {
       if (renderedContent != null) {
         // Handle string from innerHTML (convert to fake TemplateResult to avoid escaping).
         if (typeof renderedContent === 'string') {
-          renderedContent = getFakeTemplateResult(renderedContent);
+          renderedContent = /** @type { TemplateResult } */ ({
+            _$litType$: 1,
+            strings: EMPTY_STRINGS_ARRAY,
+            values: [Buffer.from(renderedContent)],
+          });
         }
         const hasShadowDOM = renderer.element.shadowRoot !== null;
         const instance = getTemplateInstance(renderedContent);
