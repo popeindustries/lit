@@ -31,6 +31,7 @@
     },
     "./dom-shim.js": "./dom-shim.js",
     "./element-renderer.js": "./element-renderer.js",
+    "./is-server.js": "./is-server.js",
     "./directives/async-append.js": "./directives/async-append.js",
     "./directives/async-replace.js": "./directives/async-replace.js",
     "./directives/hydratable.js": "./directives/hydratable.js",

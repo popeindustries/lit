@@ -61,6 +61,8 @@ fs.writeFileSync(
 
 fs.copyFileSync(path.resolve('src/internal/element-renderer.d.ts'), path.resolve('element-renderer.d.ts'));
 fs.copyFileSync(path.resolve('src/dom-shim.js'), path.resolve('dom-shim.js'));
+fs.copyFileSync(path.resolve('src/is-server.js'), path.resolve('is-server.js'));
+fs.copyFileSync(path.resolve('src/is-server.d.ts'), path.resolve('is-server.d.ts'));
 
 if (!fs.existsSync(path.resolve('directives'))) {
   fs.mkdirSync(path.resolve('directives'));

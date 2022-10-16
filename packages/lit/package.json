@@ -104,6 +104,12 @@
     },
     "./directives/when.js": "./directives/when.js"
   },
+  "imports": {
+    "#is-server": {
+      "browser": "@popeindustries/lit-html/is-server.js",
+      "default": "@popeindustries/lit-html-server/is-server.js"
+    }
+  },
   "files": [
     "decorators",
     "directives",
