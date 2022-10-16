@@ -33,7 +33,7 @@ function vendorPkg(pkg, srcDir, destDir, clear) {
  */
 function vendor(srcDir, destDir, dir = '') {
   for (const basename of fs.readdirSync(path.join(srcDir, dir))) {
-    if (/index|hydrate|ssr|polyfill/.test(basename)) {
+    if (/index|hydrate|ssr|polyfill|is-server/.test(basename)) {
       continue;
     }
 

@@ -39,10 +39,8 @@
       "development": "./src/vendor/directive.js",
       "default": "./directive.js"
     },
-    "./lazy-hydration-mixin.js": {
-      "types": "./lazy-hydration-mixin.d.ts",
-      "default": "./lazy-hydration-mixin.js"
-    },
+    "./is-server.js": "./is-server.js",
+    "./lazy-hydration-mixin.js": "./lazy-hydration-mixin.js",
     "./static.js": {
       "types": "./static.d.ts",
       "development": "./src/vendor/static.js",
@@ -164,7 +162,7 @@
   },
   "devDependencies": {
     "@types/trusted-types": "^2.0.2",
-    "lit-html": "^2.3.1"
+    "lit-html": "^2.4.0"
   },
   "scripts": {
     "build": "node ./scripts/build.js"

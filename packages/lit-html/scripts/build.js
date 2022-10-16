@@ -4,7 +4,7 @@ import path from 'node:path';
 import { vendorBuild } from '../../../scripts/vendor-build.js';
 
 const RE_SKIP_SRC_COPY = /index\.js|private-ssr-support/;
-const RE_SKIP_VENDOR_COPY = /lit-html|private-async-helpers/;
+const RE_SKIP_VENDOR_COPY = /lit-html|private-async-helpers|is-server/;
 
 const srcDir = path.resolve('./src');
 const vendorDest = path.resolve('./vendor');
