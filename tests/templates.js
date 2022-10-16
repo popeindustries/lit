@@ -183,7 +183,7 @@ export const common = [
       return h`<my-el3></my-el3>`;
     },
     result:
-      '<!--lit +I/NQre/om0=--><my-el3 hydrate:defer><!--lit-attr 0--><!--lit iW9ZALRtWQA=-->text<!--/lit--></my-el3><!--/lit-->',
+      '<!--lit +I/NQre/om0=--><my-el3 hydrate:defer><!--lit-attr 0--><!--lit BRUAAAUVAAA=--><!--lit-child-->text<!--/lit-child--><!--/lit--></my-el3><!--/lit-->',
   },
   {
     title: 'custom element with innerHTML set during connectedCallback',
@@ -197,7 +197,7 @@ export const common = [
       return h`<my-el4></my-el4>`;
     },
     result:
-      '<!--lit 31Y0PLC/om0=--><my-el4 hydrate:defer><!--lit-attr 0--><!--lit iW9ZALRtWQA=-->text<!--/lit--></my-el4><!--/lit-->',
+      '<!--lit 31Y0PLC/om0=--><my-el4 hydrate:defer><!--lit-attr 0--><!--lit BRUAAAUVAAA=--><!--lit-child-->text<!--/lit-child--><!--/lit--></my-el4><!--/lit-->',
   },
   {
     title: 'custom element with shadowDOM innerHTML set during construction',
@@ -213,7 +213,7 @@ export const common = [
       return h`<my-el5></my-el5>`;
     },
     result:
-      '<!--lit Ph5bNbG/om0=--><my-el5 hydrate:defer><!--lit-attr 0--><template shadowroot="open"><!--lit iW9ZALRtWQA=-->text<!--/lit--></template></my-el5><!--/lit-->',
+      '<!--lit Ph5bNbG/om0=--><my-el5 hydrate:defer><!--lit-attr 0--><template shadowroot="open"><!--lit BRUAAAUVAAA=--><!--lit-child-->text<!--/lit-child--><!--/lit--></template></my-el5><!--/lit-->',
   },
   {
     title: 'custom element with "render:client" attribute',

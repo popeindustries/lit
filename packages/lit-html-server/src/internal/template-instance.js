@@ -9,6 +9,7 @@ import { META_CHILD_CLOSE, META_CLOSE, META_CLOSE_SHADOW } from './consts.js';
 import { Buffer } from '#buffer';
 import { getTemplate } from './template.js';
 
+/** @type { Map<TemplateStringsArray, Template> } */
 const templateCache = new Map();
 let id = 0;
 
