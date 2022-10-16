@@ -15,51 +15,19 @@
   ],
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./index.d.ts",
-      "default": "./index.js"
-    },
-    "./async-directive.js": {
-      "types": "./async-directive.d.ts",
-      "default": "./async-directive.js"
-    },
-    "./decorators.js": {
-      "types": "./decorators.d.ts",
-      "default": "./decorators.js"
-    },
-    "./directive-helpers.js": {
-      "types": "./directive-helpers.d.ts",
-      "default": "./directive-helpers.js"
-    },
-    "./directive.js": {
-      "types": "./directive.d.ts",
-      "default": "./directive.js"
-    },
-    "./element-renderer.js": {
-      "types": "./element-renderer.d.ts",
-      "default": "./element-renderer.js"
-    },
-    "./html-server.js": {
-      "types": "./html-server.d.ts",
-      "default": "./html-server.js"
-    },
-    "./html.js": {
-      "types": "./html.d.ts",
-      "default": "./html.js"
-    },
-    "./lazy-hydration-mixin.js": {
-      "types": "./lazy-hydration-mixin.d.ts",
-      "default": "./lazy-hydration-mixin.js"
-    },
-    "./lit-element-renderer.js": {
-      "types": "./lit-element-renderer.d.ts",
-      "default": "./lit-element-renderer.js"
-    },
+    ".": "./index.js",
+    "./async-directive.js": "./async-directive.js",
+    "./decorators.js": "./decorators.js",
+    "./directive-helpers.js": "./directive-helpers.js",
+    "./directive.js": "./directive.js",
+    "./element-renderer.js": "./element-renderer.js",
+    "./html-server.js": "./html-server.js",
+    "./html.js": "./html.js",
+    "./is-server.js": "./is-server.js",
+    "./lazy-hydration-mixin.js": "./lazy-hydration-mixin.js",
+    "./lit-element-renderer.js": "./lit-element-renderer.js",
     "./server-dom-shim.js": "./server-dom-shim.js",
-    "./static.js": {
-      "types": "./static.d.ts",
-      "default": "./static.js"
-    },
+    "./static.js": "./static.js",
     "./decorators/custom-element.js": "./decorators/custom-element.js",
     "./decorators/event-options.js": "./decorators/event-options.js",
     "./decorators/property.js": "./decorators/property.js",
