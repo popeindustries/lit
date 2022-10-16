@@ -1,5 +1,13 @@
 # @popeindustries/lit-html
 
+## 5.1.0
+
+### Minor Changes
+
+- 696d2be: Upgrade to `lit@2.4.0`
+  Add `isServer: boolean` utility
+  Upgrade dev dependencies
+
 ## 5.0.6
 
 ### Patch Changes
