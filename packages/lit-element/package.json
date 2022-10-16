@@ -1,6 +1,6 @@
 {
   "name": "@popeindustries/lit-element",
-  "version": "3.0.9",
+  "version": "3.0.10",
   "description": "Enable hydration of lit-element elements rendered on the server with @popeindustries/lit-html-server",
   "author": "Alexander Pope <alex@pope.industries>",
   "keywords": [
