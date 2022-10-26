@@ -100,6 +100,16 @@ describe('Parse', () => {
       template: '<my-el a="text"></my-el>',
       result: '<my-el[CUSTOM-ELEMENT-OPEN]</my-el[CUSTOM-ELEMENT-CLOSE]>',
     },
+    {
+      title: 'custom element tag-name two dashes',
+      template: '<my-el-tag a="text"></my-el-tag>',
+      result: '<my-el-tag[CUSTOM-ELEMENT-OPEN]</my-el-tag[CUSTOM-ELEMENT-CLOSE]>',
+    },
+    {
+      title: 'custom element tag-name multiple dashes',
+      template: '<my-el-tag-test a="text"></my-el-tag-test>',
+      result: '<my-el-tag-test[CUSTOM-ELEMENT-OPEN]</my-el-tag-test[CUSTOM-ELEMENT-CLOSE]>',
+    },
   ];
 
   const only = tests.filter(({ only }) => only);

@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-const RE_VALID_CE_NAME = /^[a-z][a-z0-9._-]*-[a-z0-9._-]*$/;
+const RE_VALID_CE_NAME = /^[a-z][a-z0-9._\p{Emoji_Presentation}-]*-[a-z0-9._\p{Emoji_Presentation}-]*$/u;
 
 if (typeof globalThis.window === 'undefined') {
   class Element {
