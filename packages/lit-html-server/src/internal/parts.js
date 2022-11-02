@@ -11,6 +11,7 @@ import {
 } from './is.js';
 import { noChange, nothing } from '@popeindustries/lit-html';
 import { Buffer } from '#buffer';
+import { digestForTemplateStrings } from './digest.js';
 import { escape } from './escape.js';
 import { getElementRenderer } from './get-element-renderer.js';
 import { getTemplateInstance } from './template-instance.js';
@@ -475,7 +476,7 @@ function resolveAttributeValue(value, tagName, data) {
       partInfo.strings = data.strings.map((string) => string.toString());
     }
 
-    value = resolveDirectiveValue(value, partInfo);
+    [, value] = resolveDirectiveValue(value, partInfo);
   }
 
   // Bail if "nothing"
@@ -514,7 +515,7 @@ function resolvePropertyValue(value, tagName, data) {
       partInfo.strings = data.strings.map((string) => string.toString());
     }
 
-    value = resolveDirectiveValue(value, partInfo);
+    [, value] = resolveDirectiveValue(value, partInfo);
   }
 
   return value;
@@ -532,10 +533,22 @@ function resolveNodeValue(value, tagName, withMetadata) {
 
   if (isDirective(value)) {
     valueIsDirective = true;
-    value = resolveDirectiveValue(value, {
+    const [directiveName, result] = resolveDirectiveValue(value, {
       type: TYPE_TO_LIT_PART_TYPE['child'],
       tagName,
     });
+
+    // Return Buffer directly to avoid string escaping
+    if (directiveName === 'unsafeHTML' || directiveName === 'unsafeSVG') {
+      const strings = /** @type { TemplateResult } */ (result).strings;
+      const buffer = Buffer.from(strings[0]);
+
+      return withMetadata
+        ? [Buffer.from(`<!--lit-child ${digestForTemplateStrings(strings)}-->`), buffer, META_CHILD_CLOSE]
+        : buffer;
+    } else {
+      value = result;
+    }
   }
 
   if (value === nothing || value == null) {
@@ -614,7 +627,7 @@ async function* resolveAsyncIteratorValue(iterator, tagName, withMetadata) {
  * Resolve value of "directive"
  * @param { import('@popeindustries/lit-html/directive.js').DirectiveResult } directiveResult
  * @param { PartInfo } partInfo
- * @returns { unknown }
+ * @returns { [directiveName: string, result: unknown] }
  */
 function resolveDirectiveValue(directiveResult, partInfo) {
   // @ts-ignore
@@ -622,18 +635,13 @@ function resolveDirectiveValue(directiveResult, partInfo) {
   const { directiveName } = Ctor;
   const directive = new Ctor(partInfo);
   // @ts-ignore
-  const result = directive.render(...directiveResult.values);
+  let result = directive.render(...directiveResult.values);
 
   if (result === noChange) {
-    return EMPTY_STRING_BUFFER;
+    result = EMPTY_STRING_BUFFER;
   }
 
-  if (directiveName === 'unsafeHTML' || directiveName === 'unsafeSVG') {
-    // Return Buffer to avoid string escaping
-    return Buffer.from(result.strings[0]);
-  }
-
-  return result;
+  return [directiveName, result];
 }
 
 /**

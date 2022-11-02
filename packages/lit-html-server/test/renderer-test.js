@@ -1,8 +1,7 @@
 import { common, server } from '../../../tests/templates.js';
-import { css, LitElement } from '@popeindustries/lit-element/lit-element.js';
-import { html as h, renderToNodeStream, renderToString } from '../src/lit-html-server.js';
 import assert from 'node:assert';
 import { LitElementRenderer } from '@popeindustries/lit-element/lit-element-renderer.js';
+import { renderToNodeStream, renderToString } from '../src/lit-html-server.js';
 import { streamAsPromise } from './utils.js';
 
 const tests = [...common, ...server];

@@ -1,6 +1,8 @@
 import { css, LitElement } from '@popeindustries/lit-element/lit-element.js';
 import { html as h, render } from '@popeindustries/lit-html';
 import { lazyHydrationMixin } from '@popeindustries/lit-html/lazy-hydration-mixin.js';
+import { unsafeHTML } from '@popeindustries/lit-html/directives/unsafe-html.js';
+import { unsafeSVG } from '@popeindustries/lit-html/directives/unsafe-svg.js';
 
 export const common = [
   {
@@ -133,6 +135,24 @@ export const common = [
     title: 'raw text',
     template: () => h`<script ?defer="${true}">var t = ${'true'};</script>`,
     result: '<!--lit QGlntsotObw=--><script defer>var t = true;</script><!--/lit-->',
+  },
+  {
+    title: 'unsafeHTML',
+    template: () =>
+      h`<div>${unsafeHTML(
+        '<svg viewBox="0 0 100 100"><path d="M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z" /></svg>',
+      )}</div>`,
+    result:
+      '<!--lit AEmR7W+R0Ak=--><div><!--lit-child ZznyNIfRlSo=--><svg viewBox="0 0 100 100"><path d="M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z" /></svg><!--/lit-child--></div><!--/lit-->',
+  },
+  {
+    title: 'unsafeSVG',
+    template: () =>
+      h`<div><svg viewBox="0 0 100 100">${unsafeSVG(
+        '<path d="M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z" />',
+      )}</svg></div>`,
+    result:
+      '<!--lit Fcvsu9AcvDY=--><div><svg viewBox="0 0 100 100"><!--lit-child skAwzViS45w=--><path d="M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z" /><!--/lit-child--></svg></div><!--/lit-->',
   },
   {
     title: 'custom element with static attributes',
