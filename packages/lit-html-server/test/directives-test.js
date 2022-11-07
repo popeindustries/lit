@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { directive, Directive } from '@popeindustries/lit-html/directive.js';
-import { html as h, renderToString as render } from '../src/lit-html-server.js';
+import { html as h, renderToString as render, svg as s } from '../src/lit-html-server.js';
 import assert from 'assert';
 import { asyncAppend } from '../src/directives/async-append.js';
 import { asyncReplace } from '../src/directives/async-replace.js';
@@ -12,6 +12,7 @@ import { hydratable } from '../src/directives/hydratable.js';
 import { repeat } from '@popeindustries/lit-html/directives/repeat.js';
 import { styleMap } from '@popeindustries/lit-html/directives/style-map.js';
 import { unsafeHTML } from '@popeindustries/lit-html/directives/unsafe-html.js';
+import { unsafeSVG } from '@popeindustries/lit-html/directives/unsafe-svg.js';
 import { until } from '../src/directives/until.js';
 
 describe('directives', () => {
@@ -164,6 +165,13 @@ describe('directives', () => {
     it('render unescaped value', async () => {
       const result = h`<p>${unsafeHTML("hey! it's dangerous! <script>boom!</script>")}</p>`;
       assert.equal(await render(result), "<p>hey! it's dangerous! <script>boom!</script></p>");
+    });
+  });
+
+  describe('unsafe-svg', () => {
+    it('render unescaped value', async () => {
+      const result = s`<svg>${unsafeSVG('<path fill="currentColor" d="M10 10"/>')}</svg>`;
+      assert.equal(await render(result), '<svg><path fill="currentColor" d="M10 10"/></svg>');
     });
   });
 
