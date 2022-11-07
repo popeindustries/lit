@@ -1,6 +1,6 @@
 {
   "name": "@popeindustries/lit",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Seamlessly render lit templates and elements on the server and in the browser",
   "author": "Alexander Pope <alex@pope.industries>",
   "keywords": [

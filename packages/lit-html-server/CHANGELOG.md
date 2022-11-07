@@ -1,5 +1,12 @@
 # @popeindustries/lit-html-server
 
+## 5.1.1
+
+### Patch Changes
+
+- 3fbb659: Fix hydration of `unsafeSVG` and `unsafeHTML` directives
+- ebe456a: Fix bug in RE_CUSTOM_ELEMENT only matching cd tag names with one dash, not multiple.
+
 ## 5.1.0
 
 ### Minor Changes
