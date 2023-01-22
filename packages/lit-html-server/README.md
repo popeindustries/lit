@@ -251,9 +251,6 @@ When rendering web components, **lit-html-server** adds `hydrate:defer` attribut
 
 In order to support importing and evaluating custom element code in Node, minimal DOM polyfills are attached to the Node `global` when `@popeindustries/lit-html-server` is imported. See [dom-shim.js](https://github.com/popeindustries/lit/blob/main/packages/lit-html-server/src/dom-shim.js) for details.
 
-> **Warning**
-> Depending on the order of imports, the Node process may exit with a `ReferenceError: window is not defined` error. Avoid this error by moving the import of `@popeindustries/lit-html-server` to the top of your file, or import `@popeindustries/lit-html-server/dom-shim.js` directly before all others.
-
 ## Directives
 
 _Most_ of the built-in `lit-html/directives/*` already support server-rendering, and work as expected in **lit-html-server**, the exception being those directives that are asynchronous. **lit-html-server** supports the rendering of `Promise` and `AsyncInterator` as first-class primitives, so versions of `async-append.js`, `async-replace.js`, and `until.js` should be imported from `@popeindustries/lit-html-server/directives`.
