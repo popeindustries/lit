@@ -103,7 +103,7 @@
     "@popeindustries/lit-html-server": "workspace:*"
   },
   "devDependencies": {
-    "@lit/reactive-element": "^1.4.1",
+    "@lit/reactive-element": "^1.6.1",
     "lit-element": "^3.2.2"
   },
   "scripts": {
