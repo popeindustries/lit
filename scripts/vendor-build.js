@@ -71,7 +71,8 @@ function replacePlugin() {
             .replace('const DEV_MODE = true;', '')
             .replace('const ENABLE_EXTRA_SECURITY_HOOKS = true;', '')
             .replace('const ENABLE_SHADYDOM_NOPATCH = true;', '')
-            .replace('const NODE_MODE = false;', ''),
+            .replace('const NODE_MODE = false;', '')
+            .replace('const global = NODE_MODE ? globalThis : window', 'const global = globalThis'),
           loader: 'js',
         };
       });

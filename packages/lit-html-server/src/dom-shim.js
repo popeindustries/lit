@@ -2,7 +2,7 @@
 
 const RE_VALID_CE_NAME = /^[a-z][a-z0-9._\p{Emoji_Presentation}-]*-[a-z0-9._\p{Emoji_Presentation}-]*$/u;
 
-if (typeof globalThis.window === 'undefined') {
+if (typeof globalThis.document === 'undefined') {
   class Element {
     __attributes__ = {};
     innerHTML = '';
@@ -100,8 +100,5 @@ if (typeof globalThis.window === 'undefined') {
     window.location = new URL('http://localhost');
   }
 
-  window.window = window;
-
-  globalThis.window = window;
   Object.assign(globalThis, window);
 }

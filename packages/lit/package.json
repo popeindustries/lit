@@ -91,7 +91,7 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "@lit/reactive-element": "^1.4.1",
+    "@lit/reactive-element": "^1.6.1",
     "@popeindustries/lit-element": "workspace:^",
     "@popeindustries/lit-html": "workspace:^",
     "@popeindustries/lit-html-server": "workspace:^"

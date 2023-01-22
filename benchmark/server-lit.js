@@ -1,10 +1,10 @@
-import { render } from '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
-import { css, LitElement } from 'lit';
+import { render } from '@lit-labs/ssr';
+import { css, html, LitElement } from 'lit';
 import everything, { registerMyEl } from './the-everything-bagel-template.js';
 import { Readable } from 'node:stream';
 import http from 'node:http';
 
-registerMyEl(LitElement, css);
+registerMyEl(LitElement, html, css);
 
 http
   .createServer((req, res) => {
@@ -33,6 +33,6 @@ function* template(data) {
         <title>${data.title}</title>
       </head>
       <body>`;
-  yield* render(everything(data));
+  yield* render(everything(data, html));
   yield `</body></html>`;
 }

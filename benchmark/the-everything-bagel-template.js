@@ -1,12 +1,12 @@
-import { html } from '@popeindustries/lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 /**
  * @param { { title: string, isTrue: boolean, number: number } } data
+ * @param { import('@popeindustries/lit-html').html } html
  */
-export default function everything(data) {
+export default function everything(data, html) {
   return html`
     <header><h1 class="${classMap({ negative: data.isTrue })}" ?negative="${data.isTrue}">${data.title}</h1></header>
     <main>
@@ -78,9 +78,10 @@ function nestedTemplate(html, data) {
 
 /**
  * @param { { new(): HTMLElement } } BaseClass
+ * @param { import('@popeindustries/lit-html').html } html
  * @param { import('@popeindustries/lit-element').css } css
  */
-export function registerMyEl(BaseClass, css) {
+export function registerMyEl(BaseClass, html, css) {
   class MyEl extends BaseClass {
     static styles = css`
       p {

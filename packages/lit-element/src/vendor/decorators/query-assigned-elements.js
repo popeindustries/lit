@@ -12,7 +12,7 @@ var _a;
  */
 import { decorateProperty } from './base.js';
 const NODE_MODE = false;
-const global = NODE_MODE ? globalThis : window;
+const global = NODE_MODE ? globalThis : globalThis;
 /**
  * A tiny module scoped polyfill for HTMLSlotElement.assignedElements.
  */

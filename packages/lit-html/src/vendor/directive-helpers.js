@@ -8,9 +8,9 @@ import { _$LH } from './lit-html.js';
 const { _ChildPart: ChildPart } = _$LH;
 const ENABLE_SHADYDOM_NOPATCH = true;
 const wrap = ENABLE_SHADYDOM_NOPATCH &&
-    ((_a = window.ShadyDOM) === null || _a === void 0 ? void 0 : _a.inUse) &&
-    ((_b = window.ShadyDOM) === null || _b === void 0 ? void 0 : _b.noPatch) === true
-    ? window.ShadyDOM.wrap
+    ((_a = globalThis.ShadyDOM) === null || _a === void 0 ? void 0 : _a.inUse) &&
+    ((_b = globalThis.ShadyDOM) === null || _b === void 0 ? void 0 : _b.noPatch) === true
+    ? globalThis.ShadyDOM.wrap
     : (node) => node;
 /**
  * Tests if a value is a primitive value.

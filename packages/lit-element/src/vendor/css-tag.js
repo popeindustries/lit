@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 const NODE_MODE = false;
-const global = NODE_MODE ? globalThis : window;
+const global = NODE_MODE ? globalThis : globalThis;
 /**
  * Whether the current browser supports `adoptedStyleSheets`.
  */
