@@ -8,8 +8,8 @@ const DEV_MODE = true;
 const ENABLE_EXTRA_SECURITY_HOOKS = true;
 const ENABLE_SHADYDOM_NOPATCH = true;
 const NODE_MODE = false;
-// Use window for browser builds because IE11 doesn't have globalThis.
-const global = NODE_MODE ? globalThis : window;
+// Use globalThis for browser builds because IE11 doesn't have globalThis.
+const global = NODE_MODE ? globalThis : globalThis;
 /**
  * Useful for visualizing and logging insights into what the Lit template system is doing.
  *

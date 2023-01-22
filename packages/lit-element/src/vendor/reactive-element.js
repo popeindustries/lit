@@ -15,7 +15,7 @@ import { getCompatibleStyle, adoptStyles, } from './css-tag.js';
 // import {HTMLElement, customElements} from '@lit-labs/ssr-dom-shim';
 export * from './css-tag.js';
 const NODE_MODE = false;
-const global = NODE_MODE ? globalThis : window;
+const global = NODE_MODE ? globalThis : globalThis;
 if (NODE_MODE) {
     (_a = global.customElements) !== null && _a !== void 0 ? _a : (global.customElements = customElements);
 }
@@ -720,7 +720,7 @@ export class ReactiveElement
             // Refire any previous errors async so they do not disrupt the update
             // cycle. Errors are refired so developers have a chance to observe
             // them, and this can be done by implementing
-            // `window.onunhandledrejection`.
+            // `globalThis.onunhandledrejection`.
             Promise.reject(e);
         }
         const result = this.scheduleUpdate();

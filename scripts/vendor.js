@@ -60,17 +60,25 @@ function copy(srcDir, destDir, dir, basename) {
     fs.mkdirSync(path.dirname(dest));
   }
 
+  const reGlobal = /(window)\.?/g;
   const reLitHtml = /\s?from\s?["'](lit-html)["'];/g;
   const reReactiveElement = /\s?from\s?["'](@lit\/reactive-element)["'];/g;
   let code = fs.readFileSync(src, 'utf8');
   let types = fs.readFileSync(src.replace('.js', '.d.ts'), 'utf8');
   let copy = true;
 
+  // window => globalThis
+  if (reGlobal.test(code)) {
+    copy = false;
+    code = code.replaceAll(reGlobal, (match, g) => match.replace(g, 'globalThis'));
+  }
+  // import from 'lit-html' => import from '@popeindustries/lit-html'
   if (reLitHtml.test(code)) {
     copy = false;
     code = code.replaceAll(reLitHtml, (match, g) => match.replace(g, '@popeindustries/lit-html'));
     types = types.replaceAll(reLitHtml, (match, g) => match.replace(g, '@popeindustries/lit-html'));
   }
+  // import from '@lit/reactive-element' => import from './reactive-element.js'
   if (reReactiveElement.test(code)) {
     copy = false;
     code = code.replaceAll(reReactiveElement, (match, g) => match.replace(g, './reactive-element.js'));
