@@ -5,7 +5,7 @@ import http from 'node:http';
 import { hydratable } from '@popeindustries/lit/directives/hydratable.js';
 import { LitElementRenderer } from '@popeindustries/lit/lit-element-renderer.js';
 
-registerMyEl(LitElement, css);
+registerMyEl(LitElement, html, css);
 
 /**
  * @param { { title: string, isTrue: boolean, number: number } } data
@@ -20,7 +20,7 @@ function template(data) {
         <title>${data.title}</title>
       </head>
       <body>
-        ${hydratable(everything(data))}
+        ${hydratable(everything(data, html))}
       </body>
     </html>
   `;
