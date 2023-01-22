@@ -1,5 +1,19 @@
 # @popeindustries/lit-element
 
+## 3.1.0
+
+### Minor Changes
+
+- b8fa4c0: [**Breaking** `@popeindustries/lit-html-server`] No longer shim `window` object in server environment.
+
+  Upgrade vendored `lit/*` packages to latest versions.
+
+### Patch Changes
+
+- Updated dependencies [b8fa4c0]
+  - @popeindustries/lit-html-server@6.0.0
+  - @popeindustries/lit-html@5.2.0
+
 ## 3.0.11
 
 ### Patch Changes
