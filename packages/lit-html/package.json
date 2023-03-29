@@ -164,6 +164,9 @@
     "@types/trusted-types": "^2.0.2",
     "lit-html": "^2.6.1"
   },
+  "peerDependencies": {
+    "@types/trusted-types": "^2.0.2"
+  },
   "scripts": {
     "build": "node ./scripts/build.js"
   }
