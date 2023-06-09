@@ -1,5 +1,11 @@
 # @popeindustries/lit-html
 
+## 5.2.1
+
+### Patch Changes
+
+- dbbde2d: feat: include @types/trusted-types as peer dependency
+
 ## 5.2.0
 
 ### Minor Changes

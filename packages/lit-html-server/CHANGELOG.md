@@ -1,5 +1,13 @@
 # @popeindustries/lit-html-server
 
+## 6.0.1
+
+### Patch Changes
+
+- d213c5b: Removing console.warn about a custom tag being an undefined custom element
+- Updated dependencies [dbbde2d]
+  - @popeindustries/lit-html@5.2.1
+
 ## 6.0.0
 
 ### Major Changes

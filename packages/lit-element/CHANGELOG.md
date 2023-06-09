@@ -1,5 +1,14 @@
 # @popeindustries/lit-element
 
+## 3.1.1
+
+### Patch Changes
+
+- Updated dependencies [d213c5b]
+- Updated dependencies [dbbde2d]
+  - @popeindustries/lit-html-server@6.0.1
+  - @popeindustries/lit-html@5.2.1
+
 ## 3.1.0
 
 ### Minor Changes
