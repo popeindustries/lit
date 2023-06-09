@@ -1,5 +1,16 @@
 # @popeindustries/lit
 
+## 1.3.1
+
+### Patch Changes
+
+- dbbde2d: feat: include @types/trusted-types as peer dependency
+- Updated dependencies [d213c5b]
+- Updated dependencies [dbbde2d]
+  - @popeindustries/lit-html-server@6.0.1
+  - @popeindustries/lit-html@5.2.1
+  - @popeindustries/lit-element@3.1.1
+
 ## 1.3.0
 
 ### Minor Changes
