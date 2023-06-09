@@ -28,10 +28,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - name: 'Install pnpm 7'
+      - name: 'Install pnpm 8'
         uses: pnpm/action-setup@v2.2.2
         with:
-          version: 7.x
+          version: 8.x
 
       - name: 'Install Node.js 18'
         uses: actions/setup-node@v3

@@ -10,9 +10,7 @@ import { ElementRenderer } from './element-renderer.js';
  * @param { typeof HTMLElement } [ceClass]
  */
 export function getElementRenderer({ elementRenderers = [] }, tagName, ceClass = customElements.get(tagName)) {
-  if (ceClass === undefined) {
-    console.warn(`Custom element "${tagName}" was not registered.`);
-  } else {
+  if (ceClass !== undefined) {
     for (const renderer of elementRenderers) {
       if (renderer.matchesClass(ceClass, tagName)) {
         return new renderer(tagName);
