@@ -1,5 +1,11 @@
 # @popeindustries/lit-html-server
 
+## 6.1.0
+
+### Minor Changes
+
+- b1ad2f2: Updates built lit-html-server.js to import from `@popeindustries/lit-html` rather than bundle itself.
+
 ## 6.0.1
 
 ### Patch Changes
