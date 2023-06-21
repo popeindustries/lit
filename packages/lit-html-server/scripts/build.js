@@ -5,7 +5,7 @@ import path from 'node:path';
 await esbuild.build({
   bundle: true,
   entryPoints: ['./src/lit-html-server.js'],
-  external: ['lit-html', 'lit-html/*', './dom-shim.js', './element-renderer.js'],
+  external: ['@popeindustries/lit-html', './dom-shim.js', './element-renderer.js'],
   format: 'esm',
   target: 'node16',
   platform: 'node',
@@ -24,7 +24,7 @@ await esbuild.build({
 await esbuild.build({
   bundle: true,
   entryPoints: ['./src/lit-html-server.js'],
-  external: ['lit-html', 'lit-html/*'],
+  external: ['@popeindustries/lit-html'],
   format: 'esm',
   target: 'es2020',
   platform: 'browser',
