@@ -54,4 +54,3 @@ export function queryAsync(selector) {
         }),
     });
 }
-//# sourceMappingURL=query-async.js.map

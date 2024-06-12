@@ -38,4 +38,3 @@ import { ClassElement } from './base.js';
  * @ExportDecoratedItems
  */
 export declare function property(options?: PropertyDeclaration): (protoOrDescriptor: Object | ClassElement, name?: PropertyKey) => any;
-//# sourceMappingURL=property.d.ts.map

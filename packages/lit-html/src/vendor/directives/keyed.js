@@ -36,4 +36,3 @@ class Keyed extends Directive {
  * animation techniques.
  */
 export const keyed = directive(Keyed);
-//# sourceMappingURL=keyed.js.map

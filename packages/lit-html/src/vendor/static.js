@@ -136,4 +136,3 @@ export const html = withStatic(coreHtml);
  * Includes static value support from `lit-html/static.js`.
  */
 export const svg = withStatic(coreSvg);
-//# sourceMappingURL=static.js.map

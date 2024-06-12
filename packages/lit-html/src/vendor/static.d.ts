@@ -79,4 +79,3 @@ export declare const html: (strings: TemplateStringsArray, ...values: unknown[])
  */
 export declare const svg: (strings: TemplateStringsArray, ...values: unknown[]) => TemplateResult;
 export {};
-//# sourceMappingURL=static.d.ts.map

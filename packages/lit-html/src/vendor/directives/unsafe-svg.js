@@ -21,4 +21,3 @@ UnsafeSVGDirective.resultType = SVG_RESULT;
  * vulnerabilities.
  */
 export const unsafeSVG = directive(UnsafeSVGDirective);
-//# sourceMappingURL=unsafe-svg.js.map

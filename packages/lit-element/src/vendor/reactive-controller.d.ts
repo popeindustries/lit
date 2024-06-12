@@ -74,4 +74,3 @@ export interface ReactiveController {
      */
     hostUpdated?(): void;
 }
-//# sourceMappingURL=reactive-controller.d.ts.map

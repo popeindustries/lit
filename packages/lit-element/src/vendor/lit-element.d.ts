@@ -180,4 +180,3 @@ export declare const _$LE: {
     _$attributeToProperty: (el: LitElement, name: string, value: string | null) => void;
     _$changedProperties: (el: LitElement) => any;
 };
-//# sourceMappingURL=lit-element.d.ts.map

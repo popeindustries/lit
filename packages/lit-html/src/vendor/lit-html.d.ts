@@ -544,4 +544,3 @@ export declare const render: {
     createSanitizer: SanitizerFactory;
     _testOnlyClearSanitizerFactoryDoNotCallOrElse: () => void;
 };
-//# sourceMappingURL=lit-html.d.ts.map

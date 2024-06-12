@@ -63,4 +63,3 @@ export declare const ref: (_ref: RefOrCallback) => import("../directive.js").Dir
  * directive's return type.
  */
 export type { RefDirective };
-//# sourceMappingURL=ref.d.ts.map

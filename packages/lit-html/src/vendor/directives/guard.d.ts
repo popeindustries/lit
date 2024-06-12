@@ -57,4 +57,3 @@ export declare const guard: (_value: unknown, f: () => unknown) => import("../di
  * directive's return type.
  */
 export type { GuardDirective };
-//# sourceMappingURL=guard.d.ts.map

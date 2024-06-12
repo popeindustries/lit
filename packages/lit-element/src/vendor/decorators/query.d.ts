@@ -30,4 +30,3 @@ import { ReactiveElement } from '../reactive-element.js';
  * @category Decorator
  */
 export declare function query(selector: string, cache?: boolean): (protoOrDescriptor: ReactiveElement | import("./base.js").ClassElement, name?: PropertyKey | undefined) => any;
-//# sourceMappingURL=query.d.ts.map

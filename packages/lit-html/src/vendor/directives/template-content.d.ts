@@ -23,4 +23,3 @@ export declare const templateContent: (template: HTMLTemplateElement) => import(
  * directive's return type.
  */
 export type { TemplateContentDirective };
-//# sourceMappingURL=template-content.d.ts.map

@@ -243,4 +243,3 @@ export class AsyncDirective extends Directive {
     disconnected() { }
     reconnected() { }
 }
-//# sourceMappingURL=async-directive.js.map

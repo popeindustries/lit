@@ -64,4 +64,3 @@ export declare const css: (strings: TemplateStringsArray, ...values: (CSSResultG
  */
 export declare const adoptStyles: (renderRoot: ShadowRoot, styles: Array<CSSResultOrNative>) => void;
 export declare const getCompatibleStyle: (s: CSSResultOrNative) => CSSResultOrNative;
-//# sourceMappingURL=css-tag.d.ts.map

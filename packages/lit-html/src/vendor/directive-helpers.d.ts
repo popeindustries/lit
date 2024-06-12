@@ -103,4 +103,3 @@ export declare const getCommittedValue: (part: import("./lit-html.js").ChildPart
 export declare const removePart: (part: import("./lit-html.js").ChildPart) => void;
 export declare const clearPart: (part: import("./lit-html.js").ChildPart) => void;
 export {};
-//# sourceMappingURL=directive-helpers.d.ts.map

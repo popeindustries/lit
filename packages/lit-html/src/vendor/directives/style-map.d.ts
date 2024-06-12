@@ -45,4 +45,3 @@ export declare const styleMap: (styleInfo: Readonly<StyleInfo>) => import("../di
  * directive's return type.
  */
 export type { StyleMapDirective };
-//# sourceMappingURL=style-map.d.ts.map

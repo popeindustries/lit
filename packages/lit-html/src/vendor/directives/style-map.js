@@ -98,4 +98,3 @@ class StyleMapDirective extends Directive {
  * @see {@link https://lit.dev/docs/templates/directives/#stylemap styleMap code samples on Lit.dev}
  */
 export const styleMap = directive(StyleMapDirective);
-//# sourceMappingURL=style-map.js.map

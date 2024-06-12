@@ -54,4 +54,3 @@ export function query(selector, cache) {
         },
     });
 }
-//# sourceMappingURL=query.js.map
