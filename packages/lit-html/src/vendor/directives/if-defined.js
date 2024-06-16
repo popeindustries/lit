@@ -11,4 +11,3 @@ import { nothing } from '../lit-html.js';
  * For other part types, this directive is a no-op.
  */
 export const ifDefined = (value) => value !== null && value !== void 0 ? value : nothing;
-//# sourceMappingURL=if-defined.js.map

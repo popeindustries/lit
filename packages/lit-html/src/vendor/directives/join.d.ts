@@ -18,4 +18,3 @@
  */
 export declare function join<I, J>(items: Iterable<I> | undefined, joiner: (index: number) => J): Iterable<I | J>;
 export declare function join<I, J>(items: Iterable<I> | undefined, joiner: J): Iterable<I | J>;
-//# sourceMappingURL=join.d.ts.map

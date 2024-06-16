@@ -24,4 +24,3 @@ export declare const unsafeSVG: (value: string | typeof import("../lit-html.js")
  * directive's return type.
  */
 export type { UnsafeSVGDirective };
-//# sourceMappingURL=unsafe-svg.d.ts.map

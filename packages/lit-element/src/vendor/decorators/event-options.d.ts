@@ -35,4 +35,3 @@ import { ReactiveElement } from '../reactive-element.js';
  * @category Decorator
  */
 export declare function eventOptions(options: AddEventListenerOptions): (protoOrDescriptor: ReactiveElement | import("./base.js").ClassElement, name?: PropertyKey | undefined) => any;
-//# sourceMappingURL=event-options.d.ts.map

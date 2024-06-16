@@ -27,4 +27,3 @@ export function* map(items, f) {
         }
     }
 }
-//# sourceMappingURL=map.js.map

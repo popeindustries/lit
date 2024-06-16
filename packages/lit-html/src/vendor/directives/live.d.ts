@@ -40,4 +40,3 @@ export declare const live: (value: unknown) => import("../directive.js").Directi
  * directive's return type.
  */
 export type { LiveDirective };
-//# sourceMappingURL=live.d.ts.map

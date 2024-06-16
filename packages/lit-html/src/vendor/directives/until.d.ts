@@ -41,4 +41,3 @@ export declare const until: (...values: unknown[]) => import("../directive.js").
  * The type of the class that powers this directive. Necessary for naming the
  * directive's return type.
  */
-//# sourceMappingURL=until.d.ts.map

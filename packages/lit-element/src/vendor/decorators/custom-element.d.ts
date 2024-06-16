@@ -24,4 +24,3 @@ declare type CustomElementClass = Omit<typeof HTMLElement, 'new'>;
  */
 export declare const customElement: (tagName: string) => (classOrDescriptor: CustomElementClass | ClassDescriptor) => any;
 export {};
-//# sourceMappingURL=custom-element.d.ts.map

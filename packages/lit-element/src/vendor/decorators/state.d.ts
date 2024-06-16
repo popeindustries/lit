@@ -22,4 +22,3 @@ export interface InternalPropertyDeclaration<Type = unknown> {
  * @category Decorator
  */
 export declare function state(options?: InternalPropertyDeclaration): (protoOrDescriptor: Object | import("./base.js").ClassElement, name?: PropertyKey | undefined) => any;
-//# sourceMappingURL=state.d.ts.map

@@ -41,4 +41,3 @@ const standardCustomElement = (tagName, descriptor) => {
 export const customElement = (tagName) => (classOrDescriptor) => typeof classOrDescriptor === 'function'
     ? legacyCustomElement(tagName, classOrDescriptor)
     : standardCustomElement(tagName, classOrDescriptor);
-//# sourceMappingURL=custom-element.js.map

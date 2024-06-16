@@ -44,4 +44,3 @@ export function queryAssignedNodes(slotOrOptions, flatten, selector) {
         }),
     });
 }
-//# sourceMappingURL=query-assigned-nodes.js.map

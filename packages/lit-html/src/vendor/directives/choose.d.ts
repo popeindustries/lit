@@ -29,4 +29,3 @@
  * ```
  */
 export declare const choose: <T, V>(value: T, cases: [T, () => V][], defaultCase?: (() => V) | undefined) => V | undefined;
-//# sourceMappingURL=choose.d.ts.map

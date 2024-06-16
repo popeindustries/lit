@@ -40,4 +40,3 @@ export function queryAll(selector) {
         }),
     });
 }
-//# sourceMappingURL=query-all.js.map

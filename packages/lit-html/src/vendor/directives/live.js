@@ -74,4 +74,3 @@ class LiveDirective extends Directive {
  * passed in, or the binding will update every render.
  */
 export const live = directive(LiveDirective);
-//# sourceMappingURL=live.js.map

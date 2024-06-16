@@ -50,4 +50,3 @@ class AsyncAppendDirective extends AsyncReplaceDirective {
  *     value. Useful for generating templates for each item in the iterable.
  */
 export const asyncAppend = directive(AsyncAppendDirective);
-//# sourceMappingURL=async-append.js.map

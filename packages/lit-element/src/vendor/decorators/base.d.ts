@@ -45,4 +45,3 @@ export declare const decorateProperty: ({ finisher, descriptor, }: {
     finisher?: ((ctor: typeof ReactiveElement, property: PropertyKey) => void) | null | undefined;
     descriptor?: ((property: PropertyKey) => PropertyDescriptor) | undefined;
 }) => (protoOrDescriptor: ReactiveElement | ClassElement, name?: PropertyKey) => void | any;
-//# sourceMappingURL=base.d.ts.map

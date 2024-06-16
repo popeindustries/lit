@@ -255,4 +255,3 @@ if (DEV_MODE && globalThis.litElementVersions.length > 1) {
     issueWarning('multiple-versions', `Multiple versions of Lit loaded. Loading multiple versions ` +
         `is not recommended.`);
 }
-//# sourceMappingURL=lit-element.js.map

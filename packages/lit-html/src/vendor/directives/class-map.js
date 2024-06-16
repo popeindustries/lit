@@ -87,4 +87,3 @@ class ClassMapDirective extends Directive {
  * @param classInfo
  */
 export const classMap = directive(ClassMapDirective);
-//# sourceMappingURL=class-map.js.map

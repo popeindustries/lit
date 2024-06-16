@@ -129,4 +129,3 @@ export const getCompatibleStyle = supportsAdoptingStyleSheets ||
     (NODE_MODE && global.CSSStyleSheet === undefined)
     ? (s) => s
     : (s) => s instanceof CSSStyleSheet ? cssResultFromStyleSheet(s) : s;
-//# sourceMappingURL=css-tag.js.map

@@ -43,4 +43,3 @@ export function eventOptions(options) {
         },
     });
 }
-//# sourceMappingURL=event-options.js.map

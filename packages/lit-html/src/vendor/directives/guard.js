@@ -77,4 +77,3 @@ class GuardDirective extends Directive {
  * @param f the template function
  */
 export const guard = directive(GuardDirective);
-//# sourceMappingURL=guard.js.map

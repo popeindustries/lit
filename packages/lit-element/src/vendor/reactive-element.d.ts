@@ -724,4 +724,3 @@ export declare abstract class ReactiveElement extends HTMLElement implements Rea
      */
     protected firstUpdated(_changedProperties: PropertyValues): void;
 }
-//# sourceMappingURL=reactive-element.d.ts.map

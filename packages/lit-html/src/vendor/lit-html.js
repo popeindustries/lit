@@ -1475,4 +1475,3 @@ if (ENABLE_EXTRA_SECURITY_HOOKS) {
             _testOnlyClearSanitizerFactoryDoNotCallOrElse;
     }
 }
-//# sourceMappingURL=lit-html.js.map

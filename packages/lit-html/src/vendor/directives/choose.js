@@ -38,4 +38,3 @@ export const choose = (value, cases, defaultCase) => {
     }
     return defaultCase === null || defaultCase === void 0 ? void 0 : defaultCase();
 };
-//# sourceMappingURL=choose.js.map
