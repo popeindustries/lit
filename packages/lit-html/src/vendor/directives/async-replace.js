@@ -97,4 +97,3 @@ export class AsyncReplaceDirective extends AsyncDirective {
  *     value. Useful for generating templates for each item in the iterable.
  */
 export const asyncReplace = directive(AsyncReplaceDirective);
-//# sourceMappingURL=async-replace.js.map

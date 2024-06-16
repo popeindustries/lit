@@ -6,4 +6,3 @@
 export function when(condition, trueCase, falseCase) {
     return condition ? trueCase() : falseCase === null || falseCase === void 0 ? void 0 : falseCase();
 }
-//# sourceMappingURL=when.js.map

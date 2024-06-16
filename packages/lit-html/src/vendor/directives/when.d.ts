@@ -23,4 +23,3 @@
 export declare function when<T, F>(condition: true, trueCase: () => T, falseCase?: () => F): T;
 export declare function when<T, F = undefined>(condition: false, trueCase: () => T, falseCase?: () => F): F;
 export declare function when<T, F = undefined>(condition: unknown, trueCase: () => T, falseCase?: () => F): T | F;
-//# sourceMappingURL=when.d.ts.map

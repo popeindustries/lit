@@ -61,4 +61,3 @@ export declare const repeat: RepeatDirectiveFn;
  * directive's return type.
  */
 export type { RepeatDirective };
-//# sourceMappingURL=repeat.d.ts.map

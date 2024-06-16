@@ -1045,4 +1045,3 @@ if (DEV_MODE && global.reactiveElementVersions.length > 1) {
     issueWarning('multiple-versions', `Multiple versions of Lit loaded. Loading multiple versions ` +
         `is not recommended.`);
 }
-//# sourceMappingURL=reactive-element.js.map

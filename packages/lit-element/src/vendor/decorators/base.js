@@ -62,4 +62,3 @@ export const decorateProperty = ({ finisher, descriptor, }) => (protoOrDescripto
         return info;
     }
 };
-//# sourceMappingURL=base.js.map

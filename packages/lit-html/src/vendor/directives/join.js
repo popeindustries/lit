@@ -16,4 +16,3 @@ export function* join(items, joiner) {
         }
     }
 }
-//# sourceMappingURL=join.js.map

@@ -10,4 +10,3 @@ export function* range(startOrEnd, end, step = 1) {
         yield i;
     }
 }
-//# sourceMappingURL=range.js.map

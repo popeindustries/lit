@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+const RE_SOURCE_MAP = /\/\/# sourceMappingURL=.+/;
+
 const cwd = process.cwd();
 
 vendorPkg('lit-html', './node_modules/lit-html/development', './src/vendor', true);
@@ -65,31 +67,26 @@ function copy(srcDir, destDir, dir, basename) {
   const reReactiveElement = /\s?from\s?["'](@lit\/reactive-element)["'];/g;
   let code = fs.readFileSync(src, 'utf8');
   let types = fs.readFileSync(src.replace('.js', '.d.ts'), 'utf8');
-  let copy = true;
+
+  // Remove source-map url
+  code = code.replace(RE_SOURCE_MAP, '');
+  types = types.replace(RE_SOURCE_MAP, '');
 
   // window => globalThis
   if (reGlobal.test(code)) {
-    copy = false;
     code = code.replaceAll(reGlobal, (match, g) => match.replace(g, 'globalThis'));
   }
   // import from 'lit-html' => import from '@popeindustries/lit-html'
   if (reLitHtml.test(code)) {
-    copy = false;
     code = code.replaceAll(reLitHtml, (match, g) => match.replace(g, '@popeindustries/lit-html'));
     types = types.replaceAll(reLitHtml, (match, g) => match.replace(g, '@popeindustries/lit-html'));
   }
   // import from '@lit/reactive-element' => import from './reactive-element.js'
   if (reReactiveElement.test(code)) {
-    copy = false;
     code = code.replaceAll(reReactiveElement, (match, g) => match.replace(g, './reactive-element.js'));
     types = types.replaceAll(reReactiveElement, (match, g) => match.replace(g, './reactive-element.js'));
   }
 
-  if (copy) {
-    fs.copyFileSync(src, dest);
-    fs.copyFileSync(src.replace('.js', '.d.ts'), dest.replace('.js', '.d.ts'));
-  } else {
-    fs.writeFileSync(dest, code);
-    fs.writeFileSync(dest.replace('.js', '.d.ts'), types);
-  }
+  fs.writeFileSync(dest, code);
+  fs.writeFileSync(dest.replace('.js', '.d.ts'), types);
 }

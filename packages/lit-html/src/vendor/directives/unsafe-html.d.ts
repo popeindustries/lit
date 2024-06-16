@@ -24,4 +24,3 @@ export declare class UnsafeHTMLDirective extends Directive {
  * vulnerabilities.
  */
 export declare const unsafeHTML: (value: string | typeof noChange | typeof nothing | null | undefined) => import("../directive.js").DirectiveResult<typeof UnsafeHTMLDirective>;
-//# sourceMappingURL=unsafe-html.d.ts.map

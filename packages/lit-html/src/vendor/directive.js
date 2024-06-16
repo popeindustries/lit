@@ -45,4 +45,3 @@ export class Directive {
         return this.render(...props);
     }
 }
-//# sourceMappingURL=directive.js.map

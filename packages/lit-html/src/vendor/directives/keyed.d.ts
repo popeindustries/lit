@@ -24,4 +24,3 @@ export declare const keyed: (k: unknown, v: unknown) => import("../directive.js"
  * directive's return type.
  */
 export type { Keyed };
-//# sourceMappingURL=keyed.d.ts.map

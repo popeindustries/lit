@@ -168,4 +168,3 @@ export declare abstract class AsyncDirective extends Directive {
     protected disconnected(): void;
     protected reconnected(): void;
 }
-//# sourceMappingURL=async-directive.d.ts.map

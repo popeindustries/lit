@@ -69,4 +69,3 @@ export function queryAssignedElements(options) {
         }),
     });
 }
-//# sourceMappingURL=query-assigned-elements.js.map

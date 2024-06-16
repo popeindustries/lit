@@ -89,4 +89,3 @@ export function property(options) {
         ? legacyProperty(options, protoOrDescriptor, name)
         : standardProperty(options, protoOrDescriptor);
 }
-//# sourceMappingURL=property.js.map

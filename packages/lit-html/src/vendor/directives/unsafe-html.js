@@ -58,4 +58,3 @@ UnsafeHTMLDirective.resultType = HTML_RESULT;
  * vulnerabilities.
  */
 export const unsafeHTML = directive(UnsafeHTMLDirective);
-//# sourceMappingURL=unsafe-html.js.map

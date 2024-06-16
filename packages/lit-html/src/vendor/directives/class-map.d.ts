@@ -42,4 +42,3 @@ export declare const classMap: (classInfo: ClassInfo) => import("../directive.js
  * directive's return type.
  */
 export type { ClassMapDirective };
-//# sourceMappingURL=class-map.d.ts.map

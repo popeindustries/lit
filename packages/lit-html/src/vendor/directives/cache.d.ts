@@ -32,4 +32,3 @@ export declare const cache: (v: unknown) => import("../directive.js").DirectiveR
  * directive's return type.
  */
 export type { CacheDirective };
-//# sourceMappingURL=cache.d.ts.map

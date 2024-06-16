@@ -11,4 +11,3 @@ import { nothing } from '../lit-html.js';
  * For other part types, this directive is a no-op.
  */
 export declare const ifDefined: <T>(value: T) => typeof nothing | NonNullable<T>;
-//# sourceMappingURL=if-defined.d.ts.map

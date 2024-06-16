@@ -120,4 +120,3 @@ class RefDirective extends AsyncDirective {
  * ```
  */
 export const ref = directive(RefDirective);
-//# sourceMappingURL=ref.js.map

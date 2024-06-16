@@ -77,4 +77,3 @@ export declare function queryAssignedNodes(options?: QueryAssignedNodesOptions):
  */
 export declare function queryAssignedNodes(slotName?: string, flatten?: boolean, selector?: string): TSDecoratorReturnType;
 export {};
-//# sourceMappingURL=query-assigned-nodes.d.ts.map

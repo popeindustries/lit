@@ -75,4 +75,3 @@ class CacheDirective extends Directive {
  * ```
  */
 export const cache = directive(CacheDirective);
-//# sourceMappingURL=cache.js.map

@@ -28,4 +28,3 @@ class TemplateContentDirective extends Directive {
  * could lead to cross-site-scripting vulnerabilities.
  */
 export const templateContent = directive(TemplateContentDirective);
-//# sourceMappingURL=template-content.js.map

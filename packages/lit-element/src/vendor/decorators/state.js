@@ -26,4 +26,3 @@ export function state(options) {
         state: true,
     });
 }
-//# sourceMappingURL=state.js.map
