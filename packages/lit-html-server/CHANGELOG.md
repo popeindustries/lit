@@ -1,5 +1,12 @@
 # @popeindustries/lit-html-server
 
+## 6.1.1
+
+### Patch Changes
+
+- Updated dependencies [e3e4d0c]
+  - @popeindustries/lit-html@5.2.2
+
 ## 6.1.0
 
 ### Minor Changes

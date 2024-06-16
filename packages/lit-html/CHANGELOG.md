@@ -1,5 +1,11 @@
 # @popeindustries/lit-html
 
+## 5.2.2
+
+### Patch Changes
+
+- e3e4d0c: remove unnecessary sourceMappingURL
+
 ## 5.2.1
 
 ### Patch Changes
