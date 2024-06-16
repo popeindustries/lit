@@ -1,5 +1,14 @@
 # @popeindustries/lit-element
 
+## 3.1.3
+
+### Patch Changes
+
+- e3e4d0c: remove unnecessary sourceMappingURL
+- Updated dependencies [e3e4d0c]
+  - @popeindustries/lit-html@5.2.2
+  - @popeindustries/lit-html-server@6.1.1
+
 ## 3.1.2
 
 ### Patch Changes
