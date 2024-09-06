@@ -438,6 +438,6 @@ function consoleUnexpectedTemplateResultError(value) {
       ...styles,
     );
   } catch (_e) {
-    console.error('Had trouble logging unexpected TemplateResult error');
+    console.error('Had trouble logging unexpected TemplateResult error message');
   }
 }
