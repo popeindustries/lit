@@ -149,9 +149,7 @@ export function render(value, container, options = {}) {
 
     // Clear all server rendered elements if we have found opening/closing comments
     if (openingComment !== null && closingComment !== null) {
-      console.error(
-        `Hydration failed at lit comment: "${openingComment.data}". Clearing nodes and performing clean render`,
-      );
+      console.error(`Hydration failed. Clearing nodes and performing clean render`);
       /** @type { Node | null } */
       let node = closingComment;
 
