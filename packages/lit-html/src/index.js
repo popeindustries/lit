@@ -256,6 +256,7 @@ function openChildPart(value, marker, stack, options) {
     // TODO: primitive instead of TemplateResult. Error?
   } else if (isTemplateResult(value)) {
     if (!marker.data.includes(digestForTemplateStrings(value.strings))) {
+      consoleUnexpectedTemplateResultError(value);
       throw Error('unexpected TemplateResult rendered to part');
     }
 
@@ -413,4 +414,30 @@ function isIterable(iterator) {
     iterator != null &&
     (Array.isArray(iterator) || typeof (/** @type { Iterable<unknown> } */ (iterator)[Symbol.iterator]) === 'function')
   );
+}
+
+/**
+ * Print a formatted error message that shows which HTML elements got
+ * unexpected TemplateResult rendered to part, and thus failed to hydrate.
+ * @param { unknown } value
+ */
+function consoleUnexpectedTemplateResultError(value) {
+  try {
+    const values = value.values;
+    const formattedElements = values
+      .map((elementStrings, index) => {
+        const elementString = elementStrings.strings[0].trim();
+        return `${index + 1}) %c${elementString}%c`;
+      })
+      .join('\n');
+
+    const styles = values.flatMap(() => ['color: red;', '']);
+
+    console.error(
+      'The following elements got unexpected TemplateResult rendered to part: \n' + formattedElements,
+      ...styles,
+    );
+  } catch (_e) {
+    console.error('Had trouble logging unexpected TemplateResult error');
+  }
 }
