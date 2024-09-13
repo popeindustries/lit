@@ -1,5 +1,11 @@
 # @popeindustries/lit-html
 
+## 5.2.3
+
+### Patch Changes
+
+- 679c575: Specifying which lit comment resulted in hydration error in hydration failed error message.
+
 ## 5.2.2
 
 ### Patch Changes
