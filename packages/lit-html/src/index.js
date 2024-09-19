@@ -242,6 +242,7 @@ function openChildPart(value, marker, stack, options) {
       /** @type { Array<ChildPart> } */ (getPartCommittedValue(state.part)).push(part);
     } else {
       // Primitive likely rendered on client when TemplateResult rendered on server.
+      consoleUnexpectedPrimitiveError(value, marker, options);
       throw Error('unexpected primitive rendered to part');
     }
   }
@@ -414,6 +415,28 @@ function isIterable(iterator) {
     iterator != null &&
     (Array.isArray(iterator) || typeof (/** @type { Iterable<unknown> } */ (iterator)[Symbol.iterator]) === 'function')
   );
+}
+
+/**
+ * Print an error message that shows what HTML element got
+ * unexpected primitive rendered to part, and thus failed to hydrate.
+ * @param { unknown } value
+ * @param { Comment } marker
+ * @param { RenderOptions } [options]
+ */
+function consoleUnexpectedPrimitiveError(value, marker, options) {
+  try {
+    console.error(
+      'The following element was an unexpected primitive rendered to part on the client:' + '\n\n' + 'Parent element:',
+      options?.host,
+      '\n\n' + 'Element rendered on server:',
+      marker.parentElement,
+      '\n\n' + 'Element rendered on client:',
+      value + '\n\n',
+    );
+  } catch (_e) {
+    console.error('Had trouble logging unexpected primitive error message');
+  }
 }
 
 /**
