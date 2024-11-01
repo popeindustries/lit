@@ -1,5 +1,11 @@
 # @popeindustries/lit-html
 
+## 5.2.4
+
+### Patch Changes
+
+- 0eebb50: Adding error message when hydration failed due to unexpected primitive rendered to part
+
 ## 5.2.3
 
 ### Patch Changes
